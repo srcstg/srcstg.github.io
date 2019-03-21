@@ -1,0 +1,16 @@
+		$( document ).ready(function() {
+
+			/*$('#li-carpeta').on('click',function(){
+				$("#dimScreen").show();		
+			});*/
+
+			$('#exampleModal').on('show.bs.modal');
+
+			$('#md5').click(function(){
+				var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+				var text = possible.charAt(Math.floor(Math.random() * possible.length));
+
+			    $('#output').append($.MD5(text)+"<br>");
+
+			  });
+		});

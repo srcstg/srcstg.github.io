@@ -1,0 +1,22 @@
+
+body {
+	background: #ccc;
+	font-family: arial;
+}
+
+.btn-primary { background:#1DA1F2;  }
+
+.avatar { width: 40px; border-radius: 50px; }
+.titular { background: #1DA1F2; padding: 10px 22px; margin: 0; color: #fff; }
+
+.radio { border-radius: 50px; }
+h5 { font-size: 1rem; font-weight: bold; }
+h6 { font-size: 0.9rem; font-weight: bold; }
+
+small, .small { font-size: 70%;  font-weight: 400; }
+p { font-size: 0.8rem; }
+
+#tendencias small { display: block; }
+
+.publicacion { border-bottom: 2px solid #ccc; }
+.publicacion .list-inline { margin:0; }
