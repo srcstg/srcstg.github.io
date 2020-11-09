@@ -5,6 +5,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | NOT SORRY</title>
   </head>
+  <body style="text-align: center">
+    <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #231F20"></canvas>
     <script src="Build/notsorry.loader.js"></script>
     <script>
       createUnityInstance(document.querySelector("#unity-canvas"), {
@@ -17,73 +19,6 @@
         productVersion: "0.0",
       });
     </script>
-    <script>
-          var gameInstance = UnityLoader.instantiate("gameContainer", "Build/WebGL.json");
-          function startup() {
-        window.onresize = function() {
-          resizeGame();
-        };
-        resizeGame();
-      }
-      function resizeGame() {
-      
-        //	Ensure that the game fits within the width of its containing
-        //	div, and is shallower than the height of the containing window.
-      
-        var containerDiv = document.getElementById('containerDiv');
-        var element = document.getElementById('gameContainer');      // the element
-        
-        var widthLimitedScale = Math.floor( containerDiv.offsetWidth ) / 1024.0;
-        var heightLimitedScale = (Math.floor( window.innerHeight ) - 50) / 768.0;
-        
-        var scale = widthLimitedScale;
-        if (heightLimitedScale < scale) scale = heightLimitedScale;
-        
-        element.style.width = Math.floor(1024 * scale) + 'px';
-        element.style.height = Math.floor(768 * scale) + 'px';
-        element.style.margin = "auto";
     
-      }
-        </script>
-       <style>
-            html {
-              background-color: #000;
-              color: #ccc;
-              margin: 0;
-              padding: 0;
-            }
-            body {
-              margin: auto;
-              padding-top: 1em;
-          padding-bottom:0em;
-              padding: 2em;
-              padding-top: 0em;
-              text-align: center;
-            }
-     
-        canvas {  
-         width: 100%;  
-         height: 100%;  
-        }
-        #gameContainer { margin: auto; }
-        #containerDiv {
-          object-fit: contain;
-          max-width: 100%;
-          max-height: 100%;
-          width: auto;
-          height: auto;
-          margin: 4em;
-          margin-top: 0em;
-          margin-bottom:.9em;
-           }
-       </style>
-      </head>
-      <body onload="startup();">
-        <div id="containerDiv">
-        <div class="webgl-content">
-          <div id="gameContainer"></div>
-        </div>
-      </div>
-
-      </body>
+  </body>
 </html>
