@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>notsorry beta</title>
+  </head>
+  <body style="text-align: center; background: #231F20;">
+    <canvas id="unity-canvas" style="width: 100%; height: 100vh; background: #231F20"></canvas>
+    <script src="Build/notsorrybeta.loader.js"></script>
+    <script>
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        dataUrl: "Build/notsorrybeta.data",
+        frameworkUrl: "Build/notsorrybeta.framework.js",
+        codeUrl: "Build/notsorrybeta.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "notsorry",
+        productVersion: "0.0.1",
+      });
+    </script>
+  </body>
+</html>
