@@ -437,19 +437,19 @@
           if (input) {
             if (input.type === 'radio') {
               if (input.checked && $$$1(this._element).hasClass(ClassName.ACTIVE)) {
-                triggerChangeEvent = false;
+; triggerChangeEvent = false;
               } else {
-                var activeElement = $$$1(rootElement).find(Selector.ACTIVE)[0];
+; var activeElement = $$$1(rootElement).find(Selector.ACTIVE)[0];
 
-                if (activeElement) {
-                  $$$1(activeElement).removeClass(ClassName.ACTIVE);
-                }
+; if (activeElement) {
+;   $$$1(activeElement).removeClass(ClassName.ACTIVE);
+; }
               }
             }
 
             if (triggerChangeEvent) {
               if (input.hasAttribute('disabled') || rootElement.hasAttribute('disabled') || input.classList.contains('disabled') || rootElement.classList.contains('disabled')) {
-                return;
+; return;
               }
 
               input.checked = !$$$1(this._element).hasClass(ClassName.ACTIVE);
@@ -765,11 +765,11 @@
               _this2.pause();
 
               if (_this2.touchTimeout) {
-                clearTimeout(_this2.touchTimeout);
+; clearTimeout(_this2.touchTimeout);
               }
 
               _this2.touchTimeout = setTimeout(function (event) {
-                return _this2.cycle(event);
+; return _this2.cycle(event);
               }, TOUCHEVENT_COMPAT_WAIT + _this2._config.interval);
             });
           }
@@ -1234,7 +1234,7 @@
               var $elem = $$$1(selector);
 
               if (!$elem.hasClass(ClassName.SHOW)) {
-                $$$1(trigger).addClass(ClassName.COLLAPSED).attr('aria-expanded', false);
+; $$$1(trigger).addClass(ClassName.COLLAPSED).attr('aria-expanded', false);
               }
             }
           }
@@ -5203,21 +5203,21 @@
             placement: attachment,
             modifiers: {
               offset: {
-                offset: this.config.offset
+; offset: this.config.offset
               },
               flip: {
-                behavior: this.config.fallbackPlacement
+; behavior: this.config.fallbackPlacement
               },
               arrow: {
-                element: Selector.ARROW
+; element: Selector.ARROW
               },
               preventOverflow: {
-                boundariesElement: this.config.boundary
+; boundariesElement: this.config.boundary
               }
             },
             onCreate: function onCreate(data) {
               if (data.originalPlacement !== data.placement) {
-                _this._handlePopperPlacementChange(data);
+; _this._handlePopperPlacementChange(data);
               }
             },
             onUpdate: function onUpdate(data) {
