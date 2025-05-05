@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="css/fixed.css">
 	<link rel="stylesheet" href="css/lightbox.css">
-	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -53,24 +53,24 @@
 			0%, 100% { transform: translateY(0); }
 			50% { transform: translateY(-10px); }
 		}
-		.button-3d {
+		.footer-contact {
 			position: fixed;
-			bottom: 20px;
-			left: 20px;
-			padding: min(15px, 4vw) min(30px, 8vw);
-			font-family: 'Press Start 2P', cursive;
-			font-size: clamp(12px, 2vw, 16px);
-			color: #fff;
-			background: linear-gradient(45deg, #fffb00, #66ffff);
-			border: none;
-			border-radius: 5px;
-			cursor: pointer;
-			transform: perspective(1000px) rotateX(10deg);
-			transition: all 0.3s ease;
-			text-decoration: none;
-			box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-			z-index: 1000;
-			user-select: none;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			background: rgba(0, 0, 0, 1);
+			color: #ffffff;
+			text-align: left;
+			font-family: 'Mulish';
+			font-size: clamp(10px, 1.5vw, 14px);
+			padding: 10px 20px;
+			z-index: 9999;
+			letter-spacing: 1px;
+		}
+		
+		.footer-contact a {
+		color: #ffffff !important;
+		text-decoration: none;
 		}
 		.button-3d:hover,
 		.button-3d:focus {
@@ -81,10 +81,9 @@
 			position: fixed;
 			bottom: 20px;
 			right: 20px;
-			font-family: 'Press Start 2P', cursive;
+			font-family: 'Mulish';
 			color: #fff;
 			font-size: clamp(10px, 1.5vw, 14px);
-			text-shadow: 0 0 10px #66ffff;
 			z-index: 1000;
 			user-select: none;
 		}
@@ -99,10 +98,13 @@
 	
 	<!-- Logo flotante -->
 	<div class="floating-logo">
-		<a href="mailto:david@d10.cl">
-			<img src="img/1x/d10w.png" alt="Logo D10">
-		</a></a>
+		<img src="img/1x/d10w.png" alt="Logo D10">
 	</div>
+
+	<!-- Footer con contacto -->
+	<footer class="footer-contact">
+		<p><a href="mailto:hello@d10.cl">hello@d10.cl</a></p>
+	</footer>
 
 	<script>
 		const scene = new THREE.Scene();
