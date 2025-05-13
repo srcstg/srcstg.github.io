@@ -104,6 +104,7 @@
 	<!-- Footer con contacto -->
 	<footer class="footer-contact">
 		<p><a href="mailto:hello@d10.cl">hello@d10.cl</a></p>
+		<iframe width="100%" height="100" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1801833760&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe><div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/g59" title="$UICIDEBOY$" target="_blank" style="color: #cccccc; text-decoration: none;">$UICIDEBOY$</a> · <a href="https://soundcloud.com/g59/lone-wolf-hysteria" title="Lone Wolf Hysteria" target="_blank" style="color: #cccccc; text-decoration: none;">Lone Wolf Hysteria</a></div>
 	</footer>
 
 	<script>
@@ -126,7 +127,7 @@
 		const simplex = new SimplexNoise();
 		const geometry = new THREE.PlaneGeometry(100, 100, 128, 128);
 		const material = new THREE.MeshStandardMaterial({
-			color: 0xff0000,
+			color: 0x00FF00,
 			emissive: 0x1a1a1a,
 			metalness: 0.9,
 			roughness: 0.1,
@@ -167,7 +168,7 @@
 		let animationFrameId;
 
 		const timeline = gsap.timeline({ repeat: -1, yoyo: true });
-		timeline.to(pointLight.color, { r: 10, g: 0, b: 1, duration: 100 })
+		timeline.to(pointLight.color, { r: 100, g: 0, b: 1, duration: 100 })
 				.to(pointLight.color, { r: 0, g: 1, b: 1, duration: 200 });
 
 		const timeline2 = gsap.timeline({ repeat: -1, yoyo: true });
@@ -209,5 +210,6 @@
 			else animate();
 		});
 	</script>
+
 </body>
 </html>
