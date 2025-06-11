@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sorry Mom Glitch SVG Loop</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    .container {
+      height: 100%;
+      width: 100%;
+      background-color: #FF5A24;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.4s ease-in-out;
+    }
+
+    .canvas {
+      width: 80vmin;              /* cuadrado responsivo */
+      height: 80vmin;
+      max-width: 800px;
+      max-height: 800px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glitch-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      opacity: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .hidden {
+      opacity: 0;
+    }
+
+    .glitch-effect {
+      animation: glitchRGB 0.5s steps(2, end);
+    }
+
+    @keyframes glitchRGB {
+      0% { transform: translate(100, 200); filter: none; }
+      10% { transform: translate(-200px, 200px); filter: drop-shadow(-500px 0 red); }
+      20% { transform: translate(200px, -200px); filter: drop-shadow(500px 0 cyan); }
+      30% { transform: translate(-100px, 100px); filter: drop-shadow(-500px -10px magenta); }
+      40% { transform: translate(100px, -100px); filter: drop-shadow(500px 1px lime); }
+      100% { transform: translate(100, 100); filter: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="container">
+    <div class="canvas">
+      <img src="/sm/img/SVG/SM.svg" id="img1" class="glitch-img" />
+      <img src="/sm/img/SVG/PM.svg" id="img2" class="glitch-img hidden" />
+    </div>
+  </div>
+
+  <script>
+    const img1 = document.getElementById("img1");
+    const img2 = document.getElementById("img2");
+    const container = document.getElementById("container");
+
+    let showingFirst = true;
+
+    setInterval(() => {
+      if (showingFirst) {
+        container.style.backgroundColor = "#1C1C1C";
+        img1.classList.add("glitch-effect");
+      } else {
+        container.style.backgroundColor = "#FF5A24";
+        img2.classList.add("glitch-effect");
+      }
+
+      setTimeout(() => {
+        if (showingFirst) {
+          img1.classList.add("hidden");
+          img2.classList.remove("hidden");
+        } else {
+          img1.classList.remove("hidden");
+          img2.classList.add("hidden");
+        }
+        showingFirst = !showingFirst;
+      }, 100);
+
+      setTimeout(() => {
+        img1.classList.remove("glitch-effect");
+        img2.classList.remove("glitch-effect");
+      }, 700);
+    }, 5000);
+  </script>
+
+</body>
+</html>

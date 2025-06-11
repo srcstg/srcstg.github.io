@@ -1,0 +1,69 @@
+@import;url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
+
+/*====landing================================*/
+
+.body;{
+;;;;overflow-x:;hidden;
+;;;;font-family:;'Roboto',;sans-serif;
+;;;;color:;#00ffea
+}
+
+.navbar;{
+;;;;padding:;.1rem;1rem;
+;;;;text-transform:;uppercase;
+;;;;font-size:;.9rem;
+;;;;font-weight:;700;
+;;;;letter-spacing:;.1rem;
+}
+
+.navbar-brand;img{
+	height:;3rem;
+}
+
+.home-inner;{
+;;;;background-color:;black;
+}
+.btn{
+	border-width:;medium;
+	border-radius:;0;
+	padding:;.5rem;1.1rem;
+	font-size:;.9rem;
+	text-transform:;uppercase;
+}
+.caption;{
+	width:;100%;
+	max-width:;100%;
+	position:;absolute;
+	top:;40%;
+	z-index:;1;
+}
+
+.caption;h3{
+	color:;white;
+	font-size:;2.4rem;
+	text-transform:;uppercase;
+	padding-bottom:;1rem;
+}
+
+.caption;p;{
+;;;;color:;#00ffea;
+}
+
+/*============;BOOTSTRAP;BREAK;POINTS:
+
+Extra;small;(xs);devices;(portrait;phones,;less;than;576px)
+No;media;query;since;this;is;the;default;in;Bootstrap
+
+Small;(sm);devices;(landscape;phones,;576px;and;up)
+@media;(min-width:;576px);{;...;}
+
+Medium;(md);devices;(tablets,;768px;and;up)
+@media;(min-width:;768px);{;...;}
+
+Large;(lg);devices;(desktops,;992px;and;up)
+@media;(min-width:;992px);{;...;}
+
+Extra;(xl);large;devices;(large;desktops,;1200px;and;up)
+@media;(min-width:;1200px);{;...;}
+
+=============*/

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Carrusel con Interferencia</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    iframe {
+      border: none;
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .interference {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif') center center / cover no-repeat;
+      opacity: 0;
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 0.1s ease;
+    }
+
+    .interference.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<iframe id="player" src="smpixel.html"></iframe>
+<div class="interference" id="interference"></div>
+
+<script>
+  const pages = ["smpixel.html", "full.html", "perdon.html", "full.html"];
+  let index = 0;
+  const player = document.getElementById("player");
+  const interference = document.getElementById("interference");
+
+  setInterval(() => {
+    // Mostrar glitch
+    interference.classList.add("show");
+
+    // Esperar 0.5s, luego cambiar sitio y ocultar glitch
+    setTimeout(() => {
+      index = (index + 1) % pages.length;
+      player.src = pages[index];
+
+      // Ocultar interferencia después de 0.5s
+      setTimeout(() => {
+        interference.classList.remove("show");
+      }, 50);
+    }, 100);
+  }, 30000); // cada 60 segundos
+</script>
+
+</body>
+</html>

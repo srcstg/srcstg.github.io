@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sorry Mom 3D</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      background-color: #FF5A24;
+    }
+
+    .pattern {
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url('/sm/img/SVG/smpx.svg'); /* Reemplaza con tu logo real */
+      background-repeat: repeat;
+      background-size: 200px auto;
+      animation: scrollUp 40s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes scrollUp {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: 0 -1000px;
+      }
+    }
+
+    .viewer-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+      pointer-events: none; /* Opcional: bloquea interacción */
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      object-fit: contain;
+      object-position: center;
+      pointer-events: auto; /* Habilita interacción si quieres cámara libre */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pattern"></div>
+
+  <div class="viewer-wrapper">
+    <model-viewer
+      src="/img/22.glb"
+      alt="3DKAT"
+      auto-rotate
+      auto-rotate-delay="0"
+      rotation-per-second="2"
+      interaction-prompt="none"
+      camera-controls
+      camera-target="0m 0m 0m"
+      camera-orbit="0deg 75deg 2.5m"
+      exposure="1"
+    ></model-viewer>
+  </div>
+
+</body>
+</html>

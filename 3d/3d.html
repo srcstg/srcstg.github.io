@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Visor GLB con model-viewer</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+  <model-viewer
+    src="/3d/head__d42.glb"
+    alt="Modelo 3D"
+    auto-rotate
+    camera-controls
+    ar
+    shadow-intensity="1"
+    environment-image="neutral"
+    exposure="1"
+  >
+  </model-viewer>
+
+</body>
+</html>
