@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sorry Mom — Inicio Colapsable</title>
+  <meta charset="UTF-8">
+  <title>Página Trampa con Hero</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background-color: #1C1C1C;
       font-family: sans-serif;
+      background-color: #FF5A24;
       overflow: hidden;
       height: 100vh;
       transition: background-color 1s ease-in-out;
@@ -21,64 +21,32 @@
     header {
       display: flex;
       align-items: center;
-      gap: 20px;
+      justify-content: space-between;
     }
 
-    .logo {
-      width: 100px;
-    }
-
-    .menu {
-      display: flex;
-      gap: 10px;
-      margin-left: auto;
-    }
-
-    .menu button {
-      border: none;
+    nav a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #333;
       font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-size: 14px;
-      cursor: pointer;
     }
 
-    .menu .proyectos { background-color: #FFD600; color: black; }
-    .menu .info { background-color: #FF00D0; color: white; }
-    .menu .contenidos { background-color: #00FFAA; color: black; }
+    .hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 40px 0;
+    }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+    .hero img {
+      max-width: 80vw;
+      max-height: 40vh;
+    }
+
+    main {
       margin-top: 40px;
     }
 
-    .card {
-      background-color: #2a2a2a;
-      border-radius: 20px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .card video,
-    .card img {
-      width: 100%;
-      display: block;
-    }
-
-    .card .label {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: #000;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    /* Caída */
     .fall {
       animation: fallOut 1s forwards;
     }
@@ -110,48 +78,65 @@
 
 <div class="page" id="page">
   <header>
-    <img src="/sm/img/SVG/SM.svg" class="logo" alt="SM Logo" />
-    <div class="menu">
-      <button class="proyectos">PROYECTOS</button>
-      <button class="info">INFO</button>
-      <button class="contenidos">CONTENIDOS DIGITALES</button>
-    </div>
+    <img src="/sm/img/SVG/SM.svg" alt="SM Logo" width="120" />
+    <nav>
+      <a href="#">Inicio</a>
+      <a href="#">Proyectos</a>
+      <a href="#">Nosotros</a>
+      <a href="#">Contacto</a>
+    </nav>
   </header>
 
-  <main class="grid">
-    <div class="card"><span class="label">LINX04 x CREAMFIELDS</span><video src="/videos/linx04.mp4" autoplay loop muted></video></div>
-    <div class="card"><span class="label">PUMA X DUA LIPA</span><img src="/img/puma_dua.png" alt="PUMA" /></div>
-    <div class="card"><span class="label">WOM - CUECARDIO</span><video src="/videos/wom_cuecardio.mp4" autoplay loop muted></video></div>
-    <div class="card"><span class="label">NETFLIX - BRIDGERTON</span><img src="/img/bridgerton.jpg" /></div>
+  <div class="hero">
+    <img src="/sm/img/SVG/smpx.svg" alt="Hero Banner" />
+  </div>
+
+  <main>
+    <h1 id="fall-3">Bienvenido a Sorry Mom</h1>
+    <p id="fall-2">Este es un proyecto de arte digital, donde combinamos branding, narrativa e interacción.</p>
+    <p id="fall-1">Explora nuestros proyectos y colabora con nosotros.</p>
   </main>
 </div>
-
-<img src="/sm/img/SVG/PM.svg" class="perdon-logo" id="perdon" />
+<img src="/sm/img/SVG/PM.svg" class="perdon-logo" id="perdon" style="width:800px;max-width:90vw;" />
 
 <script>
   setTimeout(() => {
     const page = document.getElementById("page");
     const perdon = document.getElementById("perdon");
-    const elements = [...page.querySelectorAll('*')];
 
-    // caída uno por uno con delay progresivo
-    elements.forEach((el, i) => {
+    // Secuencia personalizada
+    setTimeout(() => {
+      document.getElementById("fall-1").classList.add("fall");
+    }, 0);
+
+    setTimeout(() => {
+      document.getElementById("fall-2").classList.add("fall");
+    }, 200);
+
+    setTimeout(() => {
+      document.getElementById("fall-3").classList.add("fall");
+    }, 400);
+
+    const rest = [...page.querySelectorAll('*')].filter(el => !el.id.startsWith('fall-'));
+    rest.forEach((el, i) => {
       setTimeout(() => {
-        el.classList.add("fall");
-      }, i * 100);
+        el.classList.add('fall');
+      }, 600 + i * 100);
     });
 
-    // mostrar PM.svg cuando terminan de caer
-    const totalDelay = elements.length * 100 + 800;
+    const totalDelay = 600 + rest.length * 100 + 800;
 
     setTimeout(() => {
+      document.body.style.backgroundColor = "#1C1C1C";
       perdon.classList.add("show");
+
+      // ⏳ 30 segundos después: recargar la página
+      setTimeout(() => {
+        location.reload();
+      }, 30000);
+
     }, totalDelay);
 
-    // reiniciar ciclo después de 30 segundos
-    setTimeout(() => {
-      location.reload();
-    }, totalDelay + 30000);
   }, 5000);
 </script>
 
