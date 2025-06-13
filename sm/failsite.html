@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sorry Mom — Inicio Colapsable</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #1C1C1C;
+      font-family: sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      transition: background-color 1s ease-in-out;
+    }
+
+    .page {
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      width: 100px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .menu button {
+      border: none;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .menu .proyectos { background-color: #FFD600; color: black; }
+    .menu .info { background-color: #FF00D0; color: white; }
+    .menu .contenidos { background-color: #00FFAA; color: black; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .card {
+      background-color: #2a2a2a;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card video,
+    .card img {
+      width: 100%;
+      display: block;
+    }
+
+    .card .label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #000;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* Caída */
+    .fall {
+      animation: fallOut 1s forwards;
+    }
+
+    @keyframes fallOut {
+      to {
+        transform: translateY(150vh) rotate(30deg);
+        opacity: 0;
+      }
+    }
+
+    .perdon-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      z-index: 10;
+      transition: opacity 1s ease-in-out;
+      width: 200px;
+    }
+
+    .show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page" id="page">
+  <header>
+    <img src="/sm/img/SVG/SM.svg" class="logo" alt="SM Logo" />
+    <div class="menu">
+      <button class="proyectos">PROYECTOS</button>
+      <button class="info">INFO</button>
+      <button class="contenidos">CONTENIDOS DIGITALES</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <div class="card"><span class="label">LINX04 x CREAMFIELDS</span><video src="/videos/linx04.mp4" autoplay loop muted></video></div>
+    <div class="card"><span class="label">PUMA X DUA LIPA</span><img src="/img/puma_dua.png" alt="PUMA" /></div>
+    <div class="card"><span class="label">WOM - CUECARDIO</span><video src="/videos/wom_cuecardio.mp4" autoplay loop muted></video></div>
+    <div class="card"><span class="label">NETFLIX - BRIDGERTON</span><img src="/img/bridgerton.jpg" /></div>
+  </main>
+</div>
+
+<img src="/sm/img/SVG/PM.svg" class="perdon-logo" id="perdon" />
+
+<script>
+  setTimeout(() => {
+    const page = document.getElementById("page");
+    const perdon = document.getElementById("perdon");
+    const elements = [...page.querySelectorAll('*')];
+
+    // caída uno por uno con delay progresivo
+    elements.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add("fall");
+      }, i * 100);
+    });
+
+    // mostrar PM.svg cuando terminan de caer
+    const totalDelay = elements.length * 100 + 800;
+
+    setTimeout(() => {
+      perdon.classList.add("show");
+    }, totalDelay);
+
+    // reiniciar ciclo después de 30 segundos
+    setTimeout(() => {
+      location.reload();
+    }, totalDelay + 30000);
+  }, 5000);
+</script>
+
+</body>
+</html>
