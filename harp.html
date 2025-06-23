@@ -1,110 +1,21 @@
 <!DOCTYPE html>
-<html lang="en,es">
+<html lang="es">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>D10 SPACE</title>
-	<link rel="shortcut icon" href="img/favico.ico">
-	<link rel="stylesheet" href="bootstrap-4.1.0-dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="style.css">
-	<link rel="stylesheet" href="css/fixed.css">
-	<link rel="stylesheet" href="css/lightbox.css">
-	<link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-		html, body {
-			width: 100%;
-			height: 100%;
-			margin: 0;
-			padding: 0;
-			overflow: hidden;
-			background: #000;
-		}
-		canvas {
-			display: block;
-		}
-		.floating-logo {
-			position: fixed;
-			top: 20px;
-			left: 20px;
-			z-index: 9999;
-			pointer-events: none;
-		}
-		.floating-logo img {
-			max-width: 100px;
-			height: auto;
-			opacity: 0.9;
-			animation: floatLogo 6s ease-in-out infinite;
-		}
-		@keyframes floatLogo {
-			0%, 100% { transform: translateY(0); }
-			50% { transform: translateY(-10px); }
-		}
-		.footer-contact {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			width: 100%;
-			background: rgba(0, 0, 0, 1);
-			color: #ffffff;
-			text-align: left;
-			font-family: 'Mulish';
-			font-size: clamp(10px, 1.5vw, 14px);
-			padding: 10px 20px;
-			z-index: 9999;
-			letter-spacing: 1px;
-		}
-		
-		.footer-contact a {
-		color: #ffffff !important;
-		text-decoration: none;
-		}
-		.button-3d:hover,
-		.button-3d:focus {
-			transform: perspective(1000px) rotateX(0deg) scale(1.05);
-			outline: none;
-		}
-		.credits {
-			position: fixed;
-			bottom: 20px;
-			right: 20px;
-			font-family: 'Mulish';
-			color: #fff;
-			font-size: clamp(10px, 1.5vw, 14px);
-			z-index: 1000;
-			user-select: none;
-		}
-		@media (max-width: 768px) {
-			.button-3d { bottom: 10px; left: 10px; }
-			.credits { bottom: 10px; right: 10px; }
-			.floating-logo { top: 10px; left: 10px; }
-		}
-	</style>
+  <meta charset="UTF-8">
+  <title>Cuerdas al Viento</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
-<body style="background-color: black;">
-	
-	<!-- Logo flotante -->
-	<div class="floating-logo">
-		<img src="img/1x/d10w.png" alt="Logo D10">
-	</div>
-
-	<!-- Footer con contacto -->
-	<footer class="footer-contact">
-		<p><a href="mailto:hello@d10.cl">hello@d10.cl</a></p>
-	</footer>
+<body>
 <canvas id="canvas"></canvas>
 <script>
   const canvas = document.getElementById('canvas');
