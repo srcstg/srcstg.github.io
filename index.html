@@ -1,238 +1,244 @@
 <!DOCTYPE html>
 <html lang="en,es">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>D10 SPACE</title>
-	<link rel="shortcut icon" href="img/favico.ico">
-	<link rel="stylesheet" href="bootstrap-4.1.0-dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="style.css">
-	<link rel="stylesheet" href="css/fixed.css">
-	<link rel="stylesheet" href="css/lightbox.css">
-	<link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-	<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-		html, body {
-			width: 100%;
-			height: 100%;
-			margin: 0;
-			padding: 0;
-			overflow: hidden;
-			background: #000;
-		}
-		canvas {
-			display: block;
-		}
-		.floating-logo {
-			position: fixed;
-			top: 20px;
-			left: 20px;
-			z-index: 9999;
-			pointer-events: none;
-		}
-		.floating-logo img {
-			max-width: 100px;
-			height: auto;
-			opacity: 0.9;
-			animation: floatLogo 6s ease-in-out infinite;
-		}
-		@keyframes floatLogo {
-			0%, 100% { transform: translateY(0); }
-			50% { transform: translateY(-10px); }
-		}
-		.footer-contact {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			width: 100%;
-			background: rgba(0, 0, 0, 1);
-			color: #ffffff;
-			text-align: left;
-			font-family: 'Mulish';
-			font-size: clamp(10px, 1.5vw, 14px);
-			padding: 10px 20px;
-			z-index: 9999;
-			letter-spacing: 1px;
-		}
-		
-		.footer-contact a {
-		color: #ffffff !important;
-		text-decoration: none;
-		}
-		.button-3d:hover,
-		.button-3d:focus {
-			transform: perspective(1000px) rotateX(0deg) scale(1.05);
-			outline: none;
-		}
-		.credits {
-			position: fixed;
-			bottom: 20px;
-			right: 20px;
-			font-family: 'Mulish';
-			color: #fff;
-			font-size: clamp(10px, 1.5vw, 14px);
-			z-index: 1000;
-			user-select: none;
-		}
-		@media (max-width: 768px) {
-			.button-3d { bottom: 10px; left: 10px; }
-			.credits { bottom: 10px; right: 10px; }
-			.floating-logo { top: 10px; left: 10px; }
-		}
-	</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D10 SPACE</title>
+  <link rel="shortcut icon" href="img/favico.ico">
+  <link rel="stylesheet" href="bootstrap-4.1.0-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/fixed.css">
+  <link rel="stylesheet" href="css/lightbox.css">
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+    }
+    .floating-logo {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .floating-logo img {
+      max-width: 100px;
+      height: auto;
+      opacity: 0.9;
+      animation: floatLogo 6s ease-in-out infinite;
+    }
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .footer-contact {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 1);
+      color: #ffffff;
+      font-family: 'Mulish';
+      font-size: clamp(10px, 1.5vw, 14px);
+      padding: 10px 20px;
+      z-index: 9999;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-contact a {
+      color: #ffffff !important;
+      text-decoration: none;
+    }
+    .button-3d:hover,
+    .button-3d:focus {
+      transform: perspective(1000px) rotateX(0deg) scale(1.05);
+      outline: none;
+    }
+    .credits {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-family: 'Mulish';
+      color: #fff;
+      font-size: clamp(10px, 1.5vw, 14px);
+      z-index: 1000;
+      user-select: none;
+    }
+    @media (max-width: 768px) {
+      .button-3d { bottom: 10px; left: 10px; }
+      .credits { bottom: 10px; right: 10px; }
+      .floating-logo { top: 10px; left: 10px; }
+    }
+  </style>
 </head>
 <body style="background-color: black;">
-	
-	<!-- Logo flotante -->
-	<div class="floating-logo">
-		<img src="img/1x/d10w.png" alt="Logo D10">
-	</div>
+  <!-- Logo flotante -->
+  <div class="floating-logo">
+    <img src="img/1x/d10w.png" alt="Logo D10">
+  </div>
+  <!-- Footer con contacto -->
+  <footer class="footer-contact">
+    <div class="footer-left">
+      <a href="mailto:hello@d10.cl">hello@d10.cl</a>
+    </div>
+    <div class="footer-right">
+      © 2024 D10 SPACE v1.0
+    </div>
+  </footer>
+  <canvas id="canvas"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-	<!-- Footer con contacto -->
-	<footer class="footer-contact">
-		<p><a href="mailto:hello@d10.cl">hello@d10.cl</a> <p>© 2024 D10 SPACE v0.5</p></p>
-	</footer>
-<canvas id="canvas"></canvas>
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-
-  let width = window.innerWidth;
-  let height = window.innerHeight;
-  canvas.width = width;
-  canvas.height = height;
-
-  const lines = [];
-  const lineSpacing = 20;
-  const numLines = Math.floor(height / lineSpacing);
-  const mouse = { x: 0, y: 0, isDown: false };
-  let lastInteraction = Date.now();
-  let autoMotion = false;
-
-  class Line {
-    constructor(y) {
-      this.y = y;
-      this.points = [];
-      const spacing = 15;
-      for (let x = 0; x < width; x += spacing) {
-        this.points.push({
-          x,
-          y,
-          baseY: y,
-          velocity: 0
-        });
-      }
-    }
-
-    update() {
-      for (let point of this.points) {
-        if (!autoMotion) {
-          const dx = point.x - mouse.x;
-          const dy = point.y - mouse.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const force = Math.exp(-dist / 100) * (mouse.isDown ? 5 : 2);
-          const direction = dy > 0 ? 1 : -1;
-          point.velocity += force * direction;
-        } else {
-          if (Math.random() < 0.01) {
-            point.velocity += (Math.random() - 0.5) * 2;
-          }
-        }
-
-        point.y += point.velocity;
-        point.velocity *= 0.95;
-
-        const dyBase = point.baseY - point.y;
-        point.velocity += dyBase * 0.01;
-      }
-    }
-
-    draw() {
-      ctx.beginPath();
-      ctx.moveTo(this.points[0].x, this.points[0].y);
-      for (let i = 1; i < this.points.length - 1; i++) {
-        const p1 = this.points[i];
-        const p2 = this.points[i + 1];
-        const cx = (p1.x + p2.x) / 2;
-        const cy = (p1.y + p2.y) / 2;
-        ctx.quadraticCurveTo(p1.x, p1.y, cx, cy);
-      }
-
-      // Grosor variable como onda animada
-      const minWidth = 1;
-      const maxWidth = 5;
-      const waveFreq = 0.015;
-      const time = Date.now() * 0.002;
-      const wave = Math.sin(this.y * waveFreq + time);
-      const thickness = minWidth + (maxWidth - minWidth) * (0.5 + 0.5 * wave);
-
-      ctx.strokeStyle = 'red';
-      ctx.lineWidth = thickness;
-      ctx.stroke();
-    }
-  }
-
-  for (let i = 0; i < numLines; i++) {
-    lines.push(new Line(i * lineSpacing));
-  }
-
-  function animate() {
-    const now = Date.now();
-    autoMotion = now - lastInteraction > 50;
-
-    ctx.clearRect(0, 0, width, height);
-    for (let line of lines) {
-      line.update();
-      line.draw();
-    }
-    requestAnimationFrame(animate);
-  }
-
-  function resetInactivityTimer() {
-    lastInteraction = Date.now();
-  }
-
-  window.addEventListener('resize', () => {
-    width = window.innerWidth;
-    height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
     canvas.width = width;
     canvas.height = height;
-  });
 
-['mousemove', 'mousedown', 'mouseup'].forEach(event => {
-  canvas.addEventListener(event, (e) => {
-    resetInactivityTimer();
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+    const lines = [];
+    const lineSpacing = 20;
+    const numLines = Math.floor(height / lineSpacing);
+    const mouse = { x: 0, y: 0, isDown: false };
+    let lastInteraction = Date.now();
+    let autoMotion = false;
 
-    if (event === 'mousedown') mouse.isDown = true;
-    if (event === 'mouseup') mouse.isDown = false;
-  });
-});
+    class Line {
+      constructor(y) {
+        this.y = y;
+        this.points = [];
+        const spacing = 15;
+        for (let x = 0; x < width; x += spacing) {
+          this.points.push({
+            x,
+            y,
+            baseY: y,
+            velocity: 0
+          });
+        }
+      }
 
-['touchmove', 'touchstart'].forEach(event => {
-  canvas.addEventListener(event, (e) => {
-    resetInactivityTimer();
-    if (e.touches && e.touches.length > 0) {
-      mouse.x = e.touches[0].clientX;
-      mouse.y = e.touches[0].clientY;
+      update() {
+        for (let point of this.points) {
+          if (!autoMotion) {
+            const dx = point.x - mouse.x;
+            const dy = point.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const force = Math.exp(-dist / 100) * (mouse.isDown ? 5 : 2);
+            const direction = dy > 0 ? 1 : -1;
+            point.velocity += force * direction;
+          } else {
+            if (Math.random() < 0.01) {
+              point.velocity += (Math.random() - 0.5) * 2;
+            }
+          }
+
+          point.y += point.velocity;
+          point.velocity *= 0.95;
+
+          const dyBase = point.baseY - point.y;
+          point.velocity += dyBase * 0.01;
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.moveTo(this.points[0].x, this.points[0].y);
+        for (let i = 1; i < this.points.length - 1; i++) {
+          const p1 = this.points[i];
+          const p2 = this.points[i + 1];
+          const cx = (p1.x + p2.x) / 2;
+          const cy = (p1.y + p2.y) / 2;
+          ctx.quadraticCurveTo(p1.x, p1.y, cx, cy);
+        }
+        const last = this.points[this.points.length - 1];
+        ctx.lineTo(last.x, last.y);
+        ctx.lineTo(width, last.y); // fuerza al borde derecho exacto
+
+        const minWidth = 1;
+        const maxWidth = 5;
+        const waveFreq = 0.015;
+        const time = Date.now() * 0.002;
+        const wave = Math.sin(this.y * waveFreq + time);
+        const thickness = minWidth + (maxWidth - minWidth) * (0.5 + 0.5 * wave);
+
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = thickness;
+        ctx.stroke();
+      }
     }
-  }, { passive: true });
-});
-  animate();
-</script>
+
+    for (let i = 0; i < numLines; i++) {
+      lines.push(new Line(i * lineSpacing));
+    }
+
+    function animate() {
+      const now = Date.now();
+      autoMotion = now - lastInteraction > 50;
+
+      ctx.clearRect(0, 0, width, height);
+      for (let line of lines) {
+        line.update();
+        line.draw();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function resetInactivityTimer() {
+      lastInteraction = Date.now();
+    }
+
+    window.addEventListener('resize', () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    });
+
+    ['mousemove', 'mousedown', 'mouseup'].forEach(event => {
+      canvas.addEventListener(event, (e) => {
+        resetInactivityTimer();
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        if (event === 'mousedown') mouse.isDown = true;
+        if (event === 'mouseup') mouse.isDown = false;
+      });
+    });
+
+    ['touchmove', 'touchstart'].forEach(event => {
+      canvas.addEventListener(event, (e) => {
+        resetInactivityTimer();
+        if (e.touches && e.touches.length > 0) {
+          mouse.x = e.touches[0].clientX;
+          mouse.y = e.touches[0].clientY;
+        }
+      }, { passive: true });
+    });
+    animate();
+  </script>
 </body>
 </html>
