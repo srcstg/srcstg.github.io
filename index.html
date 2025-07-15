@@ -191,7 +191,7 @@
 
   function animate() {
     const now = Date.now();
-    autoMotion = now - lastInteraction > 3000;
+    autoMotion = now - lastInteraction > 5;
 
     ctx.clearRect(0, 0, width, height);
     for (let line of lines) {
