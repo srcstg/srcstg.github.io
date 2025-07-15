@@ -191,7 +191,7 @@
 
   function animate() {
     const now = Date.now();
-    autoMotion = now - lastInteraction > 5;
+    autoMotion = now - lastInteraction > 50;
 
     ctx.clearRect(0, 0, width, height);
     for (let line of lines) {
@@ -212,22 +212,26 @@
     canvas.height = height;
   });
 
-  ['mousemove', 'mousedown', 'mouseup', 'touchmove', 'touchstart', 'touchend'].forEach(event => {
-    canvas.addEventListener(event, (e) => {
-      resetInactivityTimer();
-      if (e.touches && e.touches.length > 0) {
-        mouse.x = e.touches[0].clientX;
-        mouse.y = e.touches[0].clientY;
-      } else {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-      }
+['mousemove', 'mousedown', 'mouseup'].forEach(event => {
+  canvas.addEventListener(event, (e) => {
+    resetInactivityTimer();
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
 
-      if (event === 'mousedown' || event === 'touchstart') mouse.isDown = true;
-      if (event === 'mouseup' || event === 'touchend') mouse.isDown = false;
-    }, { passive: false });
+    if (event === 'mousedown') mouse.isDown = true;
+    if (event === 'mouseup') mouse.isDown = false;
   });
+});
 
+['touchmove', 'touchstart'].forEach(event => {
+  canvas.addEventListener(event, (e) => {
+    resetInactivityTimer();
+    if (e.touches && e.touches.length > 0) {
+      mouse.x = e.touches[0].clientX;
+      mouse.y = e.touches[0].clientY;
+    }
+  }, { passive: true });
+});
   animate();
 </script>
 </body>
