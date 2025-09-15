@@ -38,9 +38,10 @@ const ctx = canvas.getContext('2d');
 
 // --- Sprites PNG ---
 // Coloca tus archivos en /assets o ajusta rutas según tu proyecto
-const IMAGES = { player: new Image(), drop: new Image() };
-IMAGES.player.src = './img/otakin_8bit.png'; // PNG de la cesta/personaje
-IMAGES.drop.src   = './img/choripan_8bit.png';   // PNG del objeto que cae
+const IMAGES = { player: new Image(), drop: new Image(), logo: new Image() };
+IMAGES.player.src = './img/otakin_8bit.png';
+IMAGES.drop.src   = './img/choripan_8bit.png';
+IMAGES.logo.src   = './img/womganiza.png'; // <-- Nombre de tu logo actualizado
 
 const controls = {
   left: document.getElementById('left'),
@@ -279,15 +280,34 @@ function drawTitle() {
   ctx.save();
   ctx.textAlign = 'center';
   ctx.fillStyle = '#fff';
+
+  // --- DIBUJAR EL LOGO (Versión segura) ---
+  // Revisa si la imagen del logo se ha cargado y tiene un tamaño válido
+  if (IMAGES.logo.complete && IMAGES.logo.naturalWidth > 0) {
+    const logoWidth = 240;
+    // Se añade una comprobación para evitar dividir por cero
+    if (IMAGES.logo.naturalWidth > 0) {
+      const scale = logoWidth / IMAGES.logo.naturalWidth;
+      const logoHeight = IMAGES.logo.naturalHeight * scale;
+      
+      const logoX = (GAME.width - logoWidth) / 2;
+      const logoY = GAME.height * 0.20;
+
+      ctx.drawImage(IMAGES.logo, logoX, logoY, logoWidth, logoHeight);
+    }
+  }
+
+  // --- DIBUJAR EL TEXTO ---
   ctx.font = '600 28px Inter, system-ui, sans-serif';
-  ctx.fillText('Atrapa Choripanes', GAME.width/2, GAME.height*0.38);
+  ctx.fillText('Atrapa Choripanes', GAME.width / 2, GAME.height * 0.45);
+  
   ctx.font = '400 16px Inter, system-ui, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.75)';
-  ctx.fillText('Mueve a Otakin para atraparlos', GAME.width/2, GAME.height*0.42);
-  ctx.fillText('Toca Jugar para comenzar (30s)', GAME.width/2, GAME.height*0.47);
+  ctx.fillText('Mueve a Otakin para atraparlos', GAME.width / 2, GAME.height * 0.50);
+  ctx.fillText('Toca Jugar para comenzar (30s)', GAME.width / 2, GAME.height * 0.55);
+  
   ctx.restore();
 }
-
 function drawPlayer() {
   const totalAnimDuration = 0.2;
   let scale = 1.0;
