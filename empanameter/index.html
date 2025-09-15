@@ -37,11 +37,10 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 // --- Sprites PNG ---
-// Coloca tus archivos en /assets o ajusta rutas según tu proyecto
 const IMAGES = { player: new Image(), drop: new Image(), logo: new Image() };
-IMAGES.player.src = './img/otakin_8bit.png';
+IMAGES.player.src = './img/otakin_animate.png';
 IMAGES.drop.src   = './img/choripan_8bit.png';
-IMAGES.logo.src   = './img/womganiza.png'; // <-- Nombre de tu logo actualizado
+IMAGES.logo.src   = './img/womganiza.png';
 
 const controls = {
   left: document.getElementById('left'),
@@ -63,20 +62,25 @@ const GAME = {
   time: 30,
   score: 0,
   lastTime: 0,
-  accumulator: 0,
-  spawnEvery: 500,  // ms entre spawns (más frecuente)
+  spawnEvery: 500,
   lastSpawn: 0,
 };
 
 // Entidades
 const player = {
-  w: 96, h: 96,          // ancho/alto del sprite del jugador
-  x: 180 - 48, y: 640 - 160,
-  speed: 520,             // px/s (más rápido)
+  w: 85,          // <-- El ancho REAL de UN fotograma (170 / 2)
+  h: 98,          // <-- El alto se mantiene
+  displayW: 85,   // <-- Para mostrarlo al 100%
+  displayH: 98,   // <-- Para mostrarlo al 100%
+  
+  x: 180 - 48, 
+  y: 640 - 220,
+  speed: 520,
   vx: 0,
-  catchAnimTime: 0, // Para la animación de recolección
+  animFrame: 0,
+  eatingTimer: 0,
+  frameTimer: 0,
 };
-
 const drops = []; // {x, y, r, vy}
 
 // --- Redimensionamiento responsivo + DPR ---
@@ -90,8 +94,8 @@ function resize() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   GAME.width = vw;
   GAME.height = vh;
-  player.y = GAME.height - 220; // Jugador más arriba
-  player.x = clamp(player.x, 0, GAME.width - player.w);
+  player.y = GAME.height - 220;
+  player.x = clamp(player.x, 0, GAME.width - player.displayW); // Usar displayW para colisión con bordes
 }
 window.addEventListener('resize', resize);
 resize();
@@ -104,23 +108,24 @@ function aabb(rect, circle) {
   const nearestY = clamp(circle.y, rect.y, rect.y + rect.h);
   const dx = circle.x - nearestX;
   const dy = circle.y - nearestY;
-  return (dx*dx + dy*dy) <= (circle.r * circle.r);
+  return (dx * dx + dy * dy) <= (circle.r * circle.r);
 }
 
 // --- Entrada táctil / arrastre ---
 let dragging = false; let dragOffsetX = 0;
 canvas.addEventListener('pointerdown', (e) => {
   dragging = true; canvas.setPointerCapture(e.pointerId);
-  const x = e.clientX; dragOffsetX = x - player.x - player.w/2;
+  const x = e.clientX; dragOffsetX = x - player.x - player.displayW / 2;
 });
 canvas.addEventListener('pointermove', (e) => {
   if (!dragging) return;
   const x = e.clientX - dragOffsetX;
-  player.x = clamp(x - player.w/2, 0, GAME.width - player.w);
+  player.x = clamp(x - player.displayW / 2, 0, GAME.width - player.displayW); // Usar displayW
 });
 canvas.addEventListener('pointerup', (e) => { dragging = false; });
 canvas.addEventListener('pointercancel', () => dragging = false);
 
+// ... (El resto de los listeners de botones y teclado permanecen igual) ...
 // Botones izquierda / derecha (presión continua)
 let leftHeld = false, rightHeld = false;
 controls.left.addEventListener('pointerdown', () => leftHeld = true);
@@ -159,6 +164,7 @@ window.addEventListener('deviceorientation', (e) => {
   player.vx = clamp(tilt * 18, -720, 720); // mayor sensibilidad
 });
 
+
 // --- Lógica de juego ---
 function startGame() {
   GAME.state = 'playing';
@@ -194,14 +200,22 @@ function spawnDrop() {
     x: rnd(r, GAME.width - r),
     y: -r - 10,
     r,
-    vy: rnd(260, 420), // más rápido que antes
+    vy: rnd(260, 420),
   });
 }
 
 function update(dt, now) {
-  // Actualiza el temporizador de la animación
-  if (player.catchAnimTime > 0) {
-    player.catchAnimTime -= dt;
+  // --- Lógica para la animación de comer (masticar) ---
+  if (player.eatingTimer > 0) {
+    player.eatingTimer -= dt;
+    player.frameTimer -= dt;
+    if (player.frameTimer <= 0) {
+      player.frameTimer = 0.1;
+      player.animFrame = 1 - player.animFrame;
+    }
+    if (player.eatingTimer <= 0) {
+      player.animFrame = 0;
+    }
   }
 
   if (GAME.state === 'menu' || GAME.state === 'gameover' || GAME.state === 'paused') return;
@@ -211,9 +225,9 @@ function update(dt, now) {
   if (leftHeld) vx -= player.speed;
   if (rightHeld) vx += player.speed;
   vx = vx || player.vx || 0;
-  player.x = clamp(player.x + vx * dt, 0, GAME.width - player.w);
+  player.x = clamp(player.x + vx * dt, 0, GAME.width - player.displayW); // Usar displayW
 
-  // spawns (aceleran levemente con el puntaje)
+  // spawns
   GAME.lastSpawn += dt * 1000;
   const dynamicSpawnMs = Math.max(260, GAME.spawnEvery - GAME.score * 8);
   if (GAME.lastSpawn >= dynamicSpawnMs) {
@@ -221,14 +235,16 @@ function update(dt, now) {
     GAME.lastSpawn = 0;
   }
 
-  // actualizar drops
+  // actualizar drops y colisiones
   for (let i = drops.length - 1; i >= 0; i--) {
     const d = drops[i];
     d.y += d.vy * dt;
-    if (aabb({x: player.x, y: player.y, w: player.w, h: player.h}, d)) {
+    // La colisión debe usar el tamaño de visualización del jugador
+    const playerHitbox = { x: player.x, y: player.y, w: player.displayW, h: player.displayH };
+    if (aabb(playerHitbox, d)) {
       drops.splice(i, 1);
       GAME.score += 1;
-      player.catchAnimTime = 0.2; // Activa la animación
+      player.eatingTimer = 0.5; // Activa la animación de comer
       continue;
     }
     if (d.y - d.r > GAME.height + 40) drops.splice(i, 1);
@@ -237,7 +253,8 @@ function update(dt, now) {
   // temporizador
   GAME.time -= dt;
   if (GAME.time <= 0) {
-    GAME.time = 0; endGame();
+    GAME.time = 0;
+    endGame();
   }
 }
 
@@ -249,18 +266,18 @@ function draw() {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, GAME.width, GAME.height);
 
-  if (GAME.state === 'menu') { drawTitle(); return; }
+  if (GAME.state === 'menu') {
+    drawTitle();
+    return;
+  }
 
-  // jugador (PNG)
   drawPlayer();
 
-  // drops (PNG)
   for (const d of drops) {
     if (IMAGES.drop.complete && IMAGES.drop.naturalWidth > 0) {
       const size = d.r * 2;
       ctx.drawImage(IMAGES.drop, d.x - d.r, d.y - d.r, size, size);
     } else {
-      // fallback simple si el PNG aún no carga
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
       ctx.closePath();
@@ -269,7 +286,6 @@ function draw() {
     }
   }
 
-  // HUD
   drawHUD();
 
   if (GAME.state === 'gameover') drawGameOver();
@@ -281,62 +297,49 @@ function drawTitle() {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#fff';
 
-  // --- DIBUJAR EL LOGO (Versión segura) ---
-  // Revisa si la imagen del logo se ha cargado y tiene un tamaño válido
   if (IMAGES.logo.complete && IMAGES.logo.naturalWidth > 0) {
     const logoWidth = 240;
-    // Se añade una comprobación para evitar dividir por cero
     if (IMAGES.logo.naturalWidth > 0) {
       const scale = logoWidth / IMAGES.logo.naturalWidth;
       const logoHeight = IMAGES.logo.naturalHeight * scale;
-      
       const logoX = (GAME.width - logoWidth) / 2;
       const logoY = GAME.height * 0.20;
-
       ctx.drawImage(IMAGES.logo, logoX, logoY, logoWidth, logoHeight);
     }
   }
 
-  // --- DIBUJAR EL TEXTO ---
   ctx.font = '600 28px Inter, system-ui, sans-serif';
   ctx.fillText('Atrapa Choripanes', GAME.width / 2, GAME.height * 0.45);
-  
   ctx.font = '400 16px Inter, system-ui, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.75)';
   ctx.fillText('Mueve a Otakin para atraparlos', GAME.width / 2, GAME.height * 0.50);
   ctx.fillText('Toca Jugar para comenzar (30s)', GAME.width / 2, GAME.height * 0.55);
-  
   ctx.restore();
 }
+
 function drawPlayer() {
-  const totalAnimDuration = 0.2;
-  let scale = 1.0;
-
-  // Si la animación está activa, calcula la escala
-  if (player.catchAnimTime > 0) {
-    // Usamos una función seno para crear un "salto" suave (escala de 1 a 1.25 y de vuelta a 1)
-    const progress = (totalAnimDuration - player.catchAnimTime) / totalAnimDuration;
-    scale = 1 + Math.sin(progress * Math.PI) * 0.25;
-  }
-
-  const displayW = player.w * scale;
-  const displayH = player.h * scale;
-  // Se ajusta la posición para que la imagen crezca desde el centro
-  const displayX = player.x - (displayW - player.w) / 2;
-  const displayY = player.y - (displayH - player.h) / 2;
+  const sourceX = player.animFrame * player.w;
+  const sourceY = 0;
 
   if (IMAGES.player.complete && IMAGES.player.naturalWidth > 0) {
-    ctx.drawImage(IMAGES.player, displayX, displayY, displayW, displayH);
+    ctx.drawImage(
+      IMAGES.player,
+      sourceX,
+      sourceY,
+      player.w,
+      player.h,
+      player.x,
+      player.y,
+      player.displayW,
+      player.displayH
+    );
   } else {
-    // Fallback con la animación de escala
     ctx.fillStyle = 'rgba(255,255,255,.18)';
-    ctx.fillRect(displayX, displayY, displayW, displayH);
-    ctx.strokeStyle = 'rgba(255,255,255,.36)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(displayX, displayY, displayW, displayH);
+    ctx.fillRect(player.x, player.y, player.displayW, player.displayH);
   }
 }
 
+// ... (El resto de funciones de dibujo y calidad de vida permanecen igual) ...
 function drawHUD() {
   ctx.save();
   ctx.fillStyle = 'rgba(255,255,255,.9)';
@@ -375,7 +378,6 @@ function drawPause() {
   ctx.restore();
 }
 
-// --- Bucle principal ---
 function loop(now) {
   if (!GAME.lastTime) GAME.lastTime = now;
   const dt = Math.min(0.033, (now - GAME.lastTime) / 1000);
@@ -386,7 +388,6 @@ function loop(now) {
 }
 requestAnimationFrame(loop);
 
-// --- Calidad de vida ---
 function showToast(msg, ms = 2000) {
   toast.textContent = msg;
   toast.classList.add('show');
@@ -400,14 +401,12 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// Mostrar controles
 function updateControlsVisibility() {
   const visible = true;
   document.getElementById('controls').style.display = visible ? 'flex' : 'none';
 }
 updateControlsVisibility();
 
-// Estado inicial
 GAME.state = 'menu';
 showToast('Consejo: también puedes inclinar el teléfono');
 updateStartButtonLabel();
