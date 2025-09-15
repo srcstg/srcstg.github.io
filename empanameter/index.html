@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Womganiza v.1.5.6 (outline)</title>
+  <title>Womganiza v.1.5.7 (flechas SVG)</title>
   <style>
     html, body { height: 100%; margin: 0; background:#0e0f13; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
     #wrap { position: fixed; inset: 0; display: grid; place-items: center; }
@@ -20,29 +20,30 @@
       font-size: 1.25rem;
       border-radius: 14px;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
+      /* bloqueo de selección/callout en móviles */
+      user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+      -webkit-touch-callout: none;
       font-weight: 800;
       cursor: pointer;
       transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
-      /* —— borde negro para texto HTML —— */
-      -webkit-text-stroke: 2px #000; /* Chrome/Safari */
-      text-stroke: 2px #000;
-      paint-order: stroke fill;
-      /* fallback (Firefox) */
+      /* contorno para texto HTML (aplica a "Jugar") */
+      -webkit-text-stroke: 2px #000; text-stroke: 2px #000; paint-order: stroke fill;
       text-shadow:
         2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000,
         2px 2px #000, -2px 2px #000, 2px -2px #000, -2px -2px #000;
     }
     .btn:active { transform: translateY(1px) scale(.98); }
 
-    /* Izquierda / Derecha: fondo blanco, icono negro */
+    /* Izquierda / Derecha: fondo blanco, icono negro (SVG) */
     #left, #right {
       background: #fff;
-      color: #111;
+      color: #111; /* por si hay fallback */
       border-color: rgba(0,0,0,.12);
       box-shadow: 0 6px 18px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.04);
     }
     #left:hover, #right:hover { filter: brightness(0.98); }
+    /* tamaño de los SVG dentro de los botones */
+    .btn svg { width: 28px; height: 28px; display:block; }
 
     /* Jugar: verde con “flow” interno */
     #start {
@@ -83,17 +84,14 @@
       100% { background-position: 200% 0; }
     }
 
-    .toast {
-      position: fixed; top: .75rem; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.12);
-      padding: .5rem .75rem; border-radius: 10px; font-size: .95rem; font-weight: 800;
-      opacity: 0; transition: opacity .25s ease;
-      -webkit-text-stroke: 1.5px #000; text-stroke: 1.5px #000; paint-order: stroke fill;
-      text-shadow:
-        2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000,
-        2px 2px #000, -2px 2px #000, 2px -2px #000, -2px -2px #000;
-    }
+    .toast { position: fixed; top: .75rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.12); padding: .5rem .75rem; border-radius: 10px; font-size: .85rem; opacity: 0; transition: opacity .25s ease; }
     .toast.show { opacity: 1; }
+
+    /* accesibilidad: texto solo para lectores de pantalla */
+    .sr-only {
+      position:absolute !important; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
   </style>
 </head>
 <body>
@@ -101,14 +99,27 @@
   <canvas id="game"></canvas>
 </div>
 <div class="controls" id="controls" aria-hidden="true">
-  <div class="btn" id="left">◀︎</div>
+  <!-- Flecha izquierda como SVG -->
+  <div class="btn" id="left" aria-label="Mover a la izquierda">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M15 6 L9 12 L15 18" fill="none" stroke="#111" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="sr-only">Izquierda</span>
+  </div>
+  <!-- Botón jugar (texto) -->
   <div class="btn" id="start">Jugar</div>
-  <div class="btn" id="right">▶︎</div>
+  <!-- Flecha derecha como SVG -->
+  <div class="btn" id="right" aria-label="Mover a la derecha">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9 6 L15 12 L9 18" fill="none" stroke="#111" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="sr-only">Derecha</span>
+  </div>
 </div>
 <div class="toast" id="toast">Consejo: también puedes arrastrar para mover la cesta</div>
 
 <script type="module">
-// ===== Fondo mosaico (mismo que ya tenías) =====
+// ===== Fondo mosaico =====
 let BG_PATTERN = null;
 const CELL = 24;  // tamaño cuadrito
 const GAP  = 2;   // grosor rejilla
@@ -133,7 +144,6 @@ function buildBackgroundPattern(ctx) {
   }
   BG_PATTERN = ctx.createPattern(off,'repeat');
 }
-// ================================================
 
 // --- Configuración básica ---
 const DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -180,16 +190,15 @@ const player = {
 };
 const drops = []; // {x, y, r, vy}
 
-// --- Util: texto con contorno negro grueso (canvas) ---
+// --- Util: texto con contorno negro (canvas) ---
 function drawTextOutlined(text, x, y, {
   font, color='#fff', align='center', baseline='alphabetic',
-  outlineColor='#000', weight=0.28  // grosor relativo al tamaño de fuente
+  outlineColor='#000', weight=0.28
 } = {}) {
   ctx.save();
   if (font) ctx.font = font;
   ctx.textAlign = align;
   ctx.textBaseline = baseline;
-  // grosor según tamaño en px de la fuente actual
   const m = ctx.font.match(/(\d+(?:\.\d+)?)px/);
   const size = m ? parseFloat(m[1]) : 16;
   const lw = Math.max(2, size * weight);
@@ -284,7 +293,7 @@ window.addEventListener('deviceorientation', (e) => {
   player.vx = clamp(tilt * 18, -720, 720);
 });
 
-// --- Lógica de juego (sin cambios) ---
+// --- Lógica del juego (igual que tenías) ---
 function startGame() {
   GAME.state = 'playing';
   GAME.score = 0;
@@ -392,19 +401,14 @@ function drawTitle() {
     const logoY = GAME.height * 0.20;
     ctx.drawImage(IMAGES.logo, logoX, logoY, logoWidth, logoHeight);
   }
-
   drawTextOutlined('Atrapa Choripanes', GAME.width/2, GAME.height * 0.45, {
-    font: '700 28px Inter, system-ui, sans-serif',
-    color: '#ffd54f', // un poco más cálido
-    align: 'center'
+    font: '900 28px Inter, system-ui, sans-serif', color: '#ffd54f'
   });
   drawTextOutlined('Mueve a Otakin para atraparlos', GAME.width/2, GAME.height * 0.50, {
-    font: '700 16px Inter, system-ui, sans-serif',
-    color: '#3dd5ff'
+    font: '800 16px Inter, system-ui, sans-serif', color: '#3dd5ff'
   });
   drawTextOutlined('Toca Jugar para comenzar (30s)', GAME.width/2, GAME.height * 0.55, {
-    font: '700 16px Inter, system-ui, sans-serif',
-    color: '#ffffff'
+    font: '800 16px Inter, system-ui, sans-serif', color: '#ffffff'
   });
   ctx.restore();
 }
@@ -425,27 +429,22 @@ function drawPlayer() {
 
 function drawHUD() {
   drawTextOutlined('Puntos: ' + GAME.score, 16, 30, {
-    font: '800 18px Inter, system-ui, sans-serif',
-    color: '#ffffff', align: 'left', baseline: 'alphabetic'
+    font: '900 18px Inter, system-ui, sans-serif', color: '#fff', align: 'left'
   });
   drawTextOutlined('Tiempo: ' + Math.ceil(GAME.time), GAME.width - 16, 30, {
-    font: '800 18px Inter, system-ui, sans-serif',
-    color: '#ffffff', align: 'right', baseline: 'alphabetic'
+    font: '900 18px Inter, system-ui, sans-serif', color: '#fff', align: 'right'
   });
 }
 
 function drawGameOver() {
   drawTextOutlined('¡Tiempo!', GAME.width/2, GAME.height*0.42, {
-    font: '900 28px Inter, system-ui, sans-serif',
-    color: '#fff'
+    font: '900 28px Inter, system-ui, sans-serif', color: '#fff'
   });
   drawTextOutlined(`Puntaje: ${GAME.score}`, GAME.width/2, GAME.height*0.47, {
-    font: '800 18px Inter, system-ui, sans-serif',
-    color: '#fff'
+    font: '900 18px Inter, system-ui, sans-serif', color: '#fff'
   });
   drawTextOutlined('Toca Jugar para intentar de nuevo', GAME.width/2, GAME.height*0.52, {
-    font: '800 16px Inter, system-ui, sans-serif',
-    color: '#fff'
+    font: '900 16px Inter, system-ui, sans-serif', color: '#fff'
   });
 }
 
@@ -454,14 +453,11 @@ function drawPause() {
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.fillRect(0,0,GAME.width,GAME.height);
   ctx.restore();
-
   drawTextOutlined('Pausa', GAME.width/2, GAME.height*0.42, {
-    font: '900 24px Inter, system-ui, sans-serif',
-    color: '#fff'
+    font: '900 24px Inter, system-ui, sans-serif', color: '#fff'
   });
   drawTextOutlined('Toca Reanudar para continuar', GAME.width/2, GAME.height*0.47, {
-    font: '800 16px Inter, system-ui, sans-serif',
-    color: '#fff'
+    font: '900 16px Inter, system-ui, sans-serif', color: '#fff'
   });
 }
 
