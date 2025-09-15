@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Catch Game — Mobile HTML5</title>
+  <style>
+    html, body { height: 100%; margin: 0; background:#0e0f13; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    #wrap { position: fixed; inset: 0; display: grid; place-items: center; }
+    canvas { width: 100vw; height: 100vh; touch-action: none; display:block; }
+
+    .controls { position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); display: flex; gap: 1.5rem; justify-content: center; pointer-events: none; width: auto; }
+    .btn { pointer-events: auto; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); padding: 1.4rem 1.8rem; /* más grandes para dedos */
+    font-size: 1.25rem; /* texto/iconos más grandes */
+    border-radius: 14px; backdrop-filter: blur(6px); -webkit-tap-highlight-color: transparent; user-select: none; font-weight: 600; }
+    .btn:active { transform: scale(.98); }
+
+    .toast { position: fixed; top: .75rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.12); padding: .5rem .75rem; border-radius: 10px; font-size: .85rem; opacity: 0; transition: opacity .25s ease; }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+</div>
+<div class="controls" id="controls" aria-hidden="true">
+  <div class="btn" id="left">◀︎</div>
+  <div class="btn" id="start">Jugar</div>
+  <div class="btn" id="right">▶︎</div>
+</div>
+<div class="toast" id="toast">Consejo: también puedes arrastrar para mover la cesta</div>
+
+<script type="module">
+// --- Configuración básica ---
+const DPR = Math.min(2, window.devicePixelRatio || 1);
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// --- Sprites PNG ---
+// Coloca tus archivos en /assets o ajusta rutas según tu proyecto
+const IMAGES = { player: new Image(), drop: new Image() };
+IMAGES.player.src = './img/otakin_8bit.png'; // PNG de la cesta/personaje
+IMAGES.drop.src   = './img/choripan_8bit.png';   // PNG del objeto que cae
+
+const controls = {
+  left: document.getElementById('left'),
+  right: document.getElementById('right'),
+  start: document.getElementById('start'),
+};
+const toast = document.getElementById('toast');
+
+function updateStartButtonLabel() {
+  if (GAME.state === 'menu' || GAME.state === 'gameover') controls.start.textContent = 'Jugar';
+  else if (GAME.state === 'playing') controls.start.textContent = 'Pausa';
+  else if (GAME.state === 'paused') controls.start.textContent = 'Reanudar';
+}
+
+const GAME = {
+  width: 360,
+  height: 640,
+  state: 'menu',
+  time: 30,
+  score: 0,
+  lastTime: 0,
+  accumulator: 0,
+  spawnEvery: 500,  // ms entre spawns (más frecuente)
+  lastSpawn: 0,
+};
+
+// Entidades
+const player = {
+  w: 96, h: 96,          // ancho/alto del sprite del jugador
+  x: 180 - 48, y: 640 - 160,
+  speed: 520,             // px/s (más rápido)
+  vx: 0,
+  catchAnimTime: 0, // Para la animación de recolección
+};
+
+const drops = []; // {x, y, r, vy}
+
+// --- Redimensionamiento responsivo + DPR ---
+function resize() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  canvas.style.width = vw + 'px';
+  canvas.style.height = vh + 'px';
+  canvas.width = Math.floor(vw * DPR);
+  canvas.height = Math.floor(vh * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  GAME.width = vw;
+  GAME.height = vh;
+  player.y = GAME.height - 220; // Jugador más arriba
+  player.x = clamp(player.x, 0, GAME.width - player.w);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- Utilidades ---
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function aabb(rect, circle) {
+  const nearestX = clamp(circle.x, rect.x, rect.x + rect.w);
+  const nearestY = clamp(circle.y, rect.y, rect.y + rect.h);
+  const dx = circle.x - nearestX;
+  const dy = circle.y - nearestY;
+  return (dx*dx + dy*dy) <= (circle.r * circle.r);
+}
+
+// --- Entrada táctil / arrastre ---
+let dragging = false; let dragOffsetX = 0;
+canvas.addEventListener('pointerdown', (e) => {
+  dragging = true; canvas.setPointerCapture(e.pointerId);
+  const x = e.clientX; dragOffsetX = x - player.x - player.w/2;
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const x = e.clientX - dragOffsetX;
+  player.x = clamp(x - player.w/2, 0, GAME.width - player.w);
+});
+canvas.addEventListener('pointerup', (e) => { dragging = false; });
+canvas.addEventListener('pointercancel', () => dragging = false);
+
+// Botones izquierda / derecha (presión continua)
+let leftHeld = false, rightHeld = false;
+controls.left.addEventListener('pointerdown', () => leftHeld = true);
+controls.left.addEventListener('pointerup', () => leftHeld = false);
+controls.left.addEventListener('pointerleave', () => leftHeld = false);
+controls.right.addEventListener('pointerdown', () => rightHeld = true);
+controls.right.addEventListener('pointerup', () => rightHeld = false);
+controls.right.addEventListener('pointerleave', () => rightHeld = false);
+
+// Botón Jugar
+controls.start.addEventListener('click', () => {
+  if (GAME.state === 'menu' || GAME.state === 'gameover') {
+    startGame();
+  } else if (GAME.state === 'playing') {
+    pauseGame();
+  } else if (GAME.state === 'paused') {
+    resumeGame();
+  }
+});
+
+// Teclas (debug desktop)
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') leftHeld = true;
+  if (e.key === 'ArrowRight') rightHeld = true;
+  if (e.key.toLowerCase() === ' ') startGame();
+});
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft') leftHeld = false;
+  if (e.key === 'ArrowRight') rightHeld = false;
+});
+
+// Orientación (opcional): inclinar para mover
+window.addEventListener('deviceorientation', (e) => {
+  if (GAME.state !== 'playing') return;
+  const tilt = (e.gamma || 0); // -90..90 (izq/dcha)
+  player.vx = clamp(tilt * 18, -720, 720); // mayor sensibilidad
+});
+
+// --- Lógica de juego ---
+function startGame() {
+  GAME.state = 'playing';
+  GAME.score = 0;
+  GAME.time = 30;
+  GAME.lastSpawn = 0;
+  drops.length = 0;
+  showToast('¡Atrapa todos los choripanes!');
+  updateStartButtonLabel();
+}
+
+function endGame() {
+  GAME.state = 'gameover';
+  showToast(`Fin del juego. Puntos: ${GAME.score}`);
+  updateStartButtonLabel();
+}
+
+function pauseGame() {
+  GAME.state = 'paused';
+  showToast('Juego en pausa');
+  updateStartButtonLabel();
+}
+
+function resumeGame() {
+  GAME.state = 'playing';
+  showToast('Juego reanudado');
+  updateStartButtonLabel();
+}
+
+function spawnDrop() {
+  const r = rnd(16, 28);
+  drops.push({
+    x: rnd(r, GAME.width - r),
+    y: -r - 10,
+    r,
+    vy: rnd(260, 420), // más rápido que antes
+  });
+}
+
+function update(dt, now) {
+  // Actualiza el temporizador de la animación
+  if (player.catchAnimTime > 0) {
+    player.catchAnimTime -= dt;
+  }
+
+  if (GAME.state === 'menu' || GAME.state === 'gameover' || GAME.state === 'paused') return;
+
+  // movimiento del jugador
+  let vx = 0;
+  if (leftHeld) vx -= player.speed;
+  if (rightHeld) vx += player.speed;
+  vx = vx || player.vx || 0;
+  player.x = clamp(player.x + vx * dt, 0, GAME.width - player.w);
+
+  // spawns (aceleran levemente con el puntaje)
+  GAME.lastSpawn += dt * 1000;
+  const dynamicSpawnMs = Math.max(260, GAME.spawnEvery - GAME.score * 8);
+  if (GAME.lastSpawn >= dynamicSpawnMs) {
+    spawnDrop();
+    GAME.lastSpawn = 0;
+  }
+
+  // actualizar drops
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const d = drops[i];
+    d.y += d.vy * dt;
+    if (aabb({x: player.x, y: player.y, w: player.w, h: player.h}, d)) {
+      drops.splice(i, 1);
+      GAME.score += 1;
+      player.catchAnimTime = 0.2; // Activa la animación
+      continue;
+    }
+    if (d.y - d.r > GAME.height + 40) drops.splice(i, 1);
+  }
+
+  // temporizador
+  GAME.time -= dt;
+  if (GAME.time <= 0) {
+    GAME.time = 0; endGame();
+  }
+}
+
+function draw() {
+  // fondo
+  const g = ctx.createLinearGradient(0, 0, 0, GAME.height);
+  g.addColorStop(0, '#0e0f13');
+  g.addColorStop(1, '#11131b');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, GAME.width, GAME.height);
+
+  if (GAME.state === 'menu') { drawTitle(); return; }
+
+  // jugador (PNG)
+  drawPlayer();
+
+  // drops (PNG)
+  for (const d of drops) {
+    if (IMAGES.drop.complete && IMAGES.drop.naturalWidth > 0) {
+      const size = d.r * 2;
+      ctx.drawImage(IMAGES.drop, d.x - d.r, d.y - d.r, size, size);
+    } else {
+      // fallback simple si el PNG aún no carga
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fillStyle = '#45caff';
+      ctx.fill();
+    }
+  }
+
+  // HUD
+  drawHUD();
+
+  if (GAME.state === 'gameover') drawGameOver();
+  if (GAME.state === 'paused') drawPause();
+}
+
+function drawTitle() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 28px Inter, system-ui, sans-serif';
+  ctx.fillText('Atrapa Choripanes', GAME.width/2, GAME.height*0.38);
+  ctx.font = '400 16px Inter, system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.75)';
+  ctx.fillText('Mueve a Otakin para atraparlos', GAME.width/2, GAME.height*0.42);
+  ctx.fillText('Toca Jugar para comenzar (30s)', GAME.width/2, GAME.height*0.47);
+  ctx.restore();
+}
+
+function drawPlayer() {
+  const totalAnimDuration = 0.2;
+  let scale = 1.0;
+
+  // Si la animación está activa, calcula la escala
+  if (player.catchAnimTime > 0) {
+    // Usamos una función seno para crear un "salto" suave (escala de 1 a 1.25 y de vuelta a 1)
+    const progress = (totalAnimDuration - player.catchAnimTime) / totalAnimDuration;
+    scale = 1 + Math.sin(progress * Math.PI) * 0.25;
+  }
+
+  const displayW = player.w * scale;
+  const displayH = player.h * scale;
+  // Se ajusta la posición para que la imagen crezca desde el centro
+  const displayX = player.x - (displayW - player.w) / 2;
+  const displayY = player.y - (displayH - player.h) / 2;
+
+  if (IMAGES.player.complete && IMAGES.player.naturalWidth > 0) {
+    ctx.drawImage(IMAGES.player, displayX, displayY, displayW, displayH);
+  } else {
+    // Fallback con la animación de escala
+    ctx.fillStyle = 'rgba(255,255,255,.18)';
+    ctx.fillRect(displayX, displayY, displayW, displayH);
+    ctx.strokeStyle = 'rgba(255,255,255,.36)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(displayX, displayY, displayW, displayH);
+  }
+}
+
+function drawHUD() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,.9)';
+  ctx.font = '700 18px Inter, system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Puntos: ' + GAME.score, 16, 30);
+  ctx.textAlign = 'right';
+  ctx.fillText('Tiempo: ' + Math.ceil(GAME.time), GAME.width - 16, 30);
+  ctx.restore();
+}
+
+function drawGameOver() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 28px Inter, system-ui, sans-serif';
+  ctx.fillText('¡Tiempo!', GAME.width/2, GAME.height*0.42);
+  ctx.font = '500 18px Inter, system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.8)';
+  ctx.fillText(`Puntaje: ${GAME.score}`, GAME.width/2, GAME.height*0.47);
+  ctx.fillText('Toca Jugar para intentar de nuevo', GAME.width/2, GAME.height*0.52);
+  ctx.restore();
+}
+
+function drawPause() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(0,0,GAME.width,GAME.height);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 24px Inter, system-ui, sans-serif';
+  ctx.fillText('Pausa', GAME.width/2, GAME.height*0.42);
+  ctx.font = '500 16px Inter, system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  ctx.fillText('Toca Reanudar para continuar', GAME.width/2, GAME.height*0.47);
+  ctx.restore();
+}
+
+// --- Bucle principal ---
+function loop(now) {
+  if (!GAME.lastTime) GAME.lastTime = now;
+  const dt = Math.min(0.033, (now - GAME.lastTime) / 1000);
+  GAME.lastTime = now;
+  update(dt, now);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// --- Calidad de vida ---
+function showToast(msg, ms = 2000) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), ms);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && GAME.state === 'playing') {
+    GAME.lastTime = performance.now();
+  }
+});
+
+// Mostrar controles
+function updateControlsVisibility() {
+  const visible = true;
+  document.getElementById('controls').style.display = visible ? 'flex' : 'none';
+}
+updateControlsVisibility();
+
+// Estado inicial
+GAME.state = 'menu';
+showToast('Consejo: también puedes inclinar el teléfono');
+updateStartButtonLabel();
+
+</script>
+</body>
+</html>
