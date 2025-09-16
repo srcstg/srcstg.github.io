@@ -504,7 +504,7 @@ function drawTitle() {
     const scale = logoWidth / IMAGES.logo.naturalWidth;
     const logoHeight = IMAGES.logo.naturalHeight * scale;
     const logoX = (GAME.width - logoWidth) / 2;
-    const logoY = GAME.height * 0.02;
+    const logoY = GAME.height * 0.00;
     ctx.drawImage(IMAGES.logo, logoX, logoY, logoWidth, logoHeight);
   }
   
@@ -550,7 +550,7 @@ if (IMAGES.longa.complete && IMAGES.longa.naturalWidth > 0) {
 
   // posición base centrada + offsets de animación
   const baseX = (GAME.width - w) / 2;
-  const baseY = GAME.height * .65;
+  const baseY = GAME.height * .62;
   const x = baseX + TITLE_ANIM.offX;
   const y = baseY + TITLE_ANIM.offY;
 
@@ -570,11 +570,11 @@ if (IMAGES.longa.complete && IMAGES.longa.naturalWidth > 0) {
 
 
   
-  drawTextOutlined('MUEVE A OTAKIN PARA ATRAPARLOS', GAME.width/2, GAME.height * 0.38, {
-    font: '400 25px Pixel, Inter, system-ui, sans-serif', color: '#fff'
+  drawTextOutlined('MUEVE A OTAKIN PARA ATRAPARLOS', GAME.width/2, GAME.height * 0.36, {
+    font: '400 22px Pixel, Inter, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined('TOCA "JUGAR" PARA COMENZAR (30s)', GAME.width/2, GAME.height * 0.41, {
-    font: '400 16px Pixel, Inter, system-ui, sans-serif', color: '#ffffff'
+  drawTextOutlined('TOCA "JUGAR" PARA COMENZAR (30s)', GAME.width/2, GAME.height * 0.39, {
+    font: '400 17px Pixel, Inter, system-ui, sans-serif', color: '#ffffff'
   });
   ctx.restore();
 }
@@ -594,22 +594,22 @@ function drawPlayer() {
 }
 
 function drawHUD() {
-  drawTextOutlined('PUNTOS: ' + GAME.score, 16, 30, {
-    font: '400 38px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'left'
+  drawTextOutlined('CHORIPANES: ' + GAME.score, 16, 30, {
+    font: '100 25px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'left'
   });
   drawTextOutlined('TIEMPO: ' + Math.ceil(GAME.time), GAME.width - 16, 30, {
-    font: '400 38px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'right'
+    font: '100 25px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'right'
   });
 }
 
 function drawGameOver() {
-  drawTextOutlined('¡Tiempo!', GAME.width/2, GAME.height*0.40, {
+  drawTextOutlined('COMISTE:', GAME.width/2, GAME.height*0.40, {
     font: '100 26px Pixel, Inter, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined(`PUNTAJE: ${GAME.score}`, GAME.width/2, GAME.height*0.47, {
-    font: '100 55px Pixel, system-ui, sans-serif', color: '#fff'
+  drawTextOutlined(`${GAME.score} CHORIPANES`, GAME.width/2, GAME.height*0.47, {
+    font: '100 50px Pixel, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined('O00', GAME.width/2, GAME.height*0.51, {
+  drawTextOutlined('Felicitaciones', GAME.width/2, GAME.height*0.51, {
     font: '100 16px Pixel, system-ui, sans-serif', color: '#fff'
   });
 }
