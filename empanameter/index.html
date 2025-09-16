@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Womganiza v.1.5.8</title>
   <style>
-    html, body { height: 100%; margin: 0; background:#0e0f13; color:#fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    html, body { height: 100%; margin: 0; background:#0e0f13; color:#fff;   font-family: "Pixel", sans-serif;
+  font-optical-sizing: auto; }
     #wrap { position: fixed; inset: 0; display: grid; place-items: center; }
     canvas { width: 100vw; height: 100vh; touch-action: none; display:block; image-rendering: pixelated; }
 
@@ -13,6 +14,14 @@
       position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
       display: flex; gap: 1.5rem; justify-content: center; pointer-events: none; width: auto;
     }
+	
+	 @font-face{
+    font-family: "Pixel";
+    src: url("./font/PixelifySans-Medium.ttf") format("truetype");
+    font-display: swap;
+  }
+
+	
     .btn {
       pointer-events: auto;
       border: 1px solid rgba(255,255,255,.15);
@@ -121,8 +130,8 @@
 <script type="module">
 // ===== Fondo mosaico =====
 let BG_PATTERN = null;
-const CELL = 24;  // tamaño cuadrito
-const GAP  = 2;   // grosor rejilla
+const CELL = 154;  // tamaño cuadrito
+const GAP  = 1;   // grosor rejilla
 function buildBackgroundPattern(ctx) {
   const N = 6;
   const off = document.createElement('canvas');
@@ -132,7 +141,7 @@ function buildBackgroundPattern(ctx) {
   c.imageSmoothingEnabled = false;
   c.fillStyle = '#000';
   c.fillRect(0,0,off.width,off.height);
-  const RED='#e8001b', BLUE='#1138b8', WHITE='#fff';
+  const RED='#1c1c1c', BLUE='#000', WHITE='#fff';
   for (let j=0;j<N;j++){
     for (let i=0;i<N;i++){
       let k=(i-j)%N; if(k<0) k+=N;
@@ -151,12 +160,21 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-// --- Sprites PNG ---
-const IMAGES = { player: new Image(), drop: new Image(), logo: new Image() };
+// --- Sprites/Imágenes ---
+const IMAGES = { player: new Image(), drop: new Image(), logo: new Image(), title: new Image(), bg: new Image() };
 IMAGES.player.src = './img/otakin_animate.png';
 IMAGES.drop.src   = './img/choripan_8bit.png';
 IMAGES.logo.src   = './img/womganiza.png';
+IMAGES.title.src  = './img/title.png';   // NUEVO (pantalla inicial)
+IMAGES.bg.src     = './img/portada.png';      // NUEVO (tile de fondo)
 
+
+
+// Fuente pixel (opcional pero recomendado)
+const PIXEL_FONT = new FontFace('Pixel', 'url(./font/PixelifySans-Medium.ttf)');
+PIXEL_FONT.load().then(ff => {
+  document.fonts.add(ff);
+}).catch(()=>{ /* si falla, usa fallback */ });
 const controls = {
   left: document.getElementById('left'),
   right: document.getElementById('right'),
@@ -180,6 +198,18 @@ const GAME = {
   spawnEvery: 500,
   lastSpawn: 0,
 };
+
+// --- Título: animación bob/side ---
+const TITLE_ANIM = {
+  t: 0,
+  offX: 0,
+  offY: 0,
+  // si luego usas sprite sheet de boca, pon frames:2
+  frames: 2,      // 1 = una imagen; 2 = sprite (cerrada/abierta)
+  mouthFrame: 0,
+  mouthTimer: 0
+};
+
 
 // Entidades
 const player = {
@@ -398,17 +428,57 @@ function drawTitle() {
     const scale = logoWidth / IMAGES.logo.naturalWidth;
     const logoHeight = IMAGES.logo.naturalHeight * scale;
     const logoX = (GAME.width - logoWidth) / 2;
-    const logoY = GAME.height * 0.20;
+    const logoY = GAME.height * 0.06;
     ctx.drawImage(IMAGES.logo, logoX, logoY, logoWidth, logoHeight);
   }
-  drawTextOutlined('Atrapa Choripanes', GAME.width/2, GAME.height * 0.45, {
-    font: '900 28px Inter, system-ui, sans-serif', color: '#ffd54f'
+  
+  
+   // IMAGEN DE TÍTULO COOL
+  if (IMAGES.title.complete && IMAGES.title.naturalWidth > 0) {
+    const maxW = Math.min(GAME.width * 1, 430);
+    const s = Math.min(maxW / IMAGES.title.naturalWidth, 1);
+    const w = IMAGES.title.naturalWidth * s;
+    const h = IMAGES.title.naturalHeight * s;
+    const x = (GAME.width - w) / 2;
+    const y = GAME.height * 0;
+    // pequeño glow
+       ctx.drawImage(IMAGES.title, x, y, w, h);
+  }
+
+
+// IMAGEN DE OTKIN EN LA PORTADA (con bob + side)
+// Soporta 1 imagen o sprite sheet de 2 frames (ver sección 2)
+if (IMAGES.bg.complete && IMAGES.bg.naturalWidth > 0) {
+  // si frames=2, el ancho "nativo" de cada frame es la mitad
+  const natFrameW = (TITLE_ANIM.frames === 2)
+    ? IMAGES.bg.naturalWidth / 2
+    : IMAGES.bg.naturalWidth;
+
+  const natFrameH = IMAGES.bg.naturalHeight;
+
+  const maxW = Math.min(GAME.width * 1, 590);
+  const s = Math.min(maxW / natFrameW, 1);
+
+  const w = natFrameW * s;
+  const h = natFrameH * s;
+
+  const x = (GAME.width - w) / 2 + TITLE_ANIM.offX;
+  const y = GAME.height * 0.40 + TITLE_ANIM.offY;
+
+  // fuente dentro del sprite si hay 2 frames
+  const srcX = (TITLE_ANIM.frames === 2 ? TITLE_ANIM.mouthFrame * natFrameW : 0);
+  const srcY = 0;
+
+  ctx.drawImage(IMAGES.bg, srcX, srcY, natFrameW, natFrameH, x, y, w, h);
+}
+
+
+  
+  drawTextOutlined('MUEVE A OTAKIN PARA ATRAPARLOS', GAME.width/2, GAME.height * 0.46, {
+    font: '400 20px Pixel, Inter, system-ui, sans-serif', color: '#3dd5ff'
   });
-  drawTextOutlined('Mueve a Otakin para atraparlos', GAME.width/2, GAME.height * 0.50, {
-    font: '800 16px Inter, system-ui, sans-serif', color: '#3dd5ff'
-  });
-  drawTextOutlined('Toca Jugar para comenzar (30s)', GAME.width/2, GAME.height * 0.55, {
-    font: '800 16px Inter, system-ui, sans-serif', color: '#ffffff'
+  drawTextOutlined('TOCA "JUGAR" PARA COMENZAR (30s)', GAME.width/2, GAME.height * 0.49, {
+    font: '400 16px Pixel, Inter, system-ui, sans-serif', color: '#ffffff'
   });
   ctx.restore();
 }
@@ -428,23 +498,23 @@ function drawPlayer() {
 }
 
 function drawHUD() {
-  drawTextOutlined('Puntos: ' + GAME.score, 16, 30, {
-    font: '900 18px Inter, system-ui, sans-serif', color: '#fff', align: 'left'
+  drawTextOutlined('PUNTOS: ' + GAME.score, 216, 30, {
+    font: '400 22px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'left'
   });
-  drawTextOutlined('Tiempo: ' + Math.ceil(GAME.time), GAME.width - 16, 30, {
-    font: '900 18px Inter, system-ui, sans-serif', color: '#fff', align: 'right'
+  drawTextOutlined('TIEMPO: ' + Math.ceil(GAME.time), GAME.width - 16, 30, {
+    font: '400 22px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'right'
   });
 }
 
 function drawGameOver() {
   drawTextOutlined('¡Tiempo!', GAME.width/2, GAME.height*0.42, {
-    font: '900 28px Inter, system-ui, sans-serif', color: '#fff'
+    font: '400 36px Pixel, Inter, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined(`Puntaje: ${GAME.score}`, GAME.width/2, GAME.height*0.47, {
-    font: '900 18px Inter, system-ui, sans-serif', color: '#fff'
+  drawTextOutlined(`PUNTAJE: ${GAME.score}`, GAME.width/2, GAME.height*0.47, {
+    font: '400 18px Pixel, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined('Toca Jugar para intentar de nuevo', GAME.width/2, GAME.height*0.52, {
-    font: '900 16px Inter, system-ui, sans-serif', color: '#fff'
+  drawTextOutlined('TOCA PARA JUGAR DE NUEVO', GAME.width/2, GAME.height*0.52, {
+    font: '400 16px Pixel, system-ui, sans-serif', color: '#fff'
   });
 }
 
@@ -453,7 +523,7 @@ function drawPause() {
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.fillRect(0,0,GAME.width,GAME.height);
   ctx.restore();
-  drawTextOutlined('Pausa', GAME.width/2, GAME.height*0.42, {
+  drawTextOutlined('PAUSA', GAME.width/2, GAME.height*0.42, {
     font: '900 24px Inter, system-ui, sans-serif', color: '#fff'
   });
   drawTextOutlined('Toca Reanudar para continuar', GAME.width/2, GAME.height*0.47, {
@@ -464,6 +534,20 @@ function drawPause() {
 function loop(now) {
   if (!GAME.lastTime) GAME.lastTime = now;
   const dt = Math.min(0.033, (now - GAME.lastTime) / 1000);
+  
+  // actualizar anim de portada aunque estemos en menú
+TITLE_ANIM.t += dt;
+TITLE_ANIM.offX = Math.sin(TITLE_ANIM.t * 2.2) * 6;  // left-right
+TITLE_ANIM.offY = Math.sin(TITLE_ANIM.t * 1.6) * 3;  // "breathing"
+
+// alternar boca cada ~0.12s (ajusta a gusto)
+TITLE_ANIM.mouthTimer += dt;
+if (TITLE_ANIM.mouthTimer >= 0.32) {
+  TITLE_ANIM.mouthTimer = 0;
+  TITLE_ANIM.mouthFrame = 1 - TITLE_ANIM.mouthFrame; // 0 <-> 1
+}
+
+  
   GAME.lastTime = now;
   update(dt);
   draw();
