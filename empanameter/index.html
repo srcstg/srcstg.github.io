@@ -11,7 +11,7 @@
     canvas { width: 100vw; height: 100vh; touch-action: none; display:block; image-rendering: pixelated; }
 
     .controls {
-      position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
+      position: fixed; left: 50%; bottom: 0.5rem; transform: translateX(-50%);
       display: flex; gap: 1.5rem; justify-content: center; pointer-events: none; width: auto;
     }
 	
@@ -25,21 +25,21 @@
     .btn {
       pointer-events: auto;
       border: 1px solid rgba(255,255,255,.15);
-      padding: 1.4rem 1.8rem;
-      font-size: 1.25rem;
+      padding: 1.2rem 1.2rem;
+	 ont-family: "Pixel", sans-serif;
+  font-optical-sizing: auto;
+      font-size: 35px;
       border-radius: 14px;
+	  
       -webkit-tap-highlight-color: transparent;
       /* bloqueo de selección/callout en móviles */
       user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
       -webkit-touch-callout: none;
-      font-weight: 800;
+      font-weight: 400;
       cursor: pointer;
       transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
       /* contorno para texto HTML (aplica a "Jugar") */
-      -webkit-text-stroke: 2px #000; text-stroke: 2px #000; paint-order: stroke fill;
-      text-shadow:
-        2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000,
-        2px 2px #000, -2px 2px #000, 2px -2px #000, -2px -2px #000;
+     
     }
     .btn:active { transform: translateY(1px) scale(.98); }
 
@@ -59,40 +59,23 @@
       position: relative;
       color: #fff;
       border: 0;
-      background: linear-gradient(90deg, #00c853, #00e676, #00c853);
-      background-size: 200% 100%;
-      animation: btnGradient 2.8s ease-in-out infinite;
+      background: linear-gradient(90deg, #AC5CFF, #D8B3FF, #AC5CFF);
+      background-size: 200% 200%;
+      animation: btnGradient 1.5s linear infinite;
       box-shadow: 0 10px 26px rgba(0,200,83,.35);
       overflow: hidden;
     }
     #start::after {
-      content: "";
-      position: absolute; inset: 2px;
-      border-radius: 12px;
-      background:
-        linear-gradient(120deg,
-          rgba(255,255,255,.35) 0%,
-          rgba(255,255,255,0) 25%,
-          rgba(255,255,255,.35) 50%,
-          rgba(255,255,255,0) 75%,
-          rgba(255,255,255,.35) 100%);
-      background-size: 200% 100%;
-      mix-blend-mode: soft-light;
-      animation: btnSweep 1.6s linear infinite;
-      pointer-events: none;
+     
     }
     #start:hover { box-shadow: 0 12px 30px rgba(0,200,83,.5); }
 
     @keyframes btnGradient {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
     }
-    @keyframes btnSweep {
-      0% { background-position: -100% 0; }
-      100% { background-position: 200% 0; }
-    }
-
+   
     .toast { position: fixed; top: .75rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.12); padding: .5rem .75rem; border-radius: 10px; font-size: .85rem; opacity: 0; transition: opacity .25s ease; }
     .toast.show { opacity: 1; }
 
@@ -116,7 +99,7 @@
     <span class="sr-only">Izquierda</span>
   </div>
   <!-- Botón jugar (texto) -->
-  <div class="btn" id="start">Jugar</div>
+  <div class="btn" id="start">JUGAR</div>
   <!-- Flecha derecha como SVG -->
   <div class="btn" id="right" aria-label="Mover a la derecha">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -128,31 +111,52 @@
 <div class="toast" id="toast">Consejo: también puedes arrastrar para mover la cesta</div>
 
 <script type="module">
-// ===== Fondo mosaico =====
-let BG_PATTERN = null;
-const CELL = 154;  // tamaño cuadrito
-const GAP  = 1;   // grosor rejilla
-function buildBackgroundPattern(ctx) {
-  const N = 6;
-  const off = document.createElement('canvas');
-  off.width  = CELL * N;
-  off.height = CELL * N;
-  const c = off.getContext('2d');
-  c.imageSmoothingEnabled = false;
-  c.fillStyle = '#000';
-  c.fillRect(0,0,off.width,off.height);
-  const RED='#1c1c1c', BLUE='#000', WHITE='#fff';
-  for (let j=0;j<N;j++){
-    for (let i=0;i<N;i++){
-      let k=(i-j)%N; if(k<0) k+=N;
-      let col=(k===0||k===1)?RED:(k===2||k===3)?BLUE:WHITE;
-      c.fillStyle=col;
-      const x=i*CELL + GAP*0.5, y=j*CELL + GAP*0.5;
-      c.fillRect(x,y,CELL-GAP,CELL-GAP);
-    }
-  }
-  BG_PATTERN = ctx.createPattern(off,'repeat');
+
+// ===== Fondo único centrado =====
+const BG = {
+  img: new Image(),
+  scale: 'none',     // 'none' | 'contain' | 'cover'
+  alignX: 'center',  // 'left' | 'center' | 'right' | número px
+  alignY: 'center'   // 'top'  | 'center' | 'bottom' | número px
+};
+
+BG.img.src = './img/fondo1.png'; // tu 1024x1536 (o el path que uses)
+
+/** Dibuja el fondo según la escala y centrado */
+function drawBackground() {
+  if (!BG.img.complete || !BG.img.naturalWidth) return;
+
+  const canW = GAME.width, canH = GAME.height;
+  const imgW = BG.img.naturalWidth, imgH = BG.img.naturalHeight;
+
+  let s = 1;
+  if (BG.scale === 'contain') {
+    s = Math.min(canW / imgW, canH / imgH);
+  } else if (BG.scale === 'contain') {
+    s = Math.max(canW / imgW, canH / imgH);
+  } // 'none' => s = 1
+
+  const w = imgW * s;
+  const h = imgH * s;
+
+  // Centrado/alineación
+  let x;
+  if (typeof BG.alignX === 'number') x = BG.alignX;
+  else if (BG.alignX === 'left')     x = 0;
+  else if (BG.alignX === 'right')    x = canW - w;
+  else                                x = (canW - w) / 2; // center
+
+  let y;
+  if (typeof BG.alignY === 'number') y = BG.alignY;
+  else if (BG.alignY === 'top')      y = 0;
+  else if (BG.alignY === 'bottom')   y = canH - h;
+  else                                y = (canH - h) / 2; // center
+
+  ctx.drawImage(BG.img, x, y, w, h);
 }
+
+
+
 
 // --- Configuración básica ---
 const DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -161,12 +165,51 @@ const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 // --- Sprites/Imágenes ---
-const IMAGES = { player: new Image(), drop: new Image(), logo: new Image(), title: new Image(), bg: new Image() };
+const IMAGES = { player: new Image(), drop: new Image(), logo: new Image(), title: new Image(), bg: new Image(),longa: new Image() };
 IMAGES.player.src = './img/otakin_animate.png';
 IMAGES.drop.src   = './img/choripan_8bit.png';
 IMAGES.logo.src   = './img/womganiza.png';
 IMAGES.title.src  = './img/title.png';   // NUEVO (pantalla inicial)
 IMAGES.bg.src     = './img/portada.png';      // NUEVO (tile de fondo)
+IMAGES.longa.src     = './img/l.png';      // NUEVO (tile de fondo)
+
+
+
+
+// ==== Audio ====
+const AUDIO = {
+  music: new Audio('./audio/s3.mp3'),
+  start: new Audio('./audio/s2.mp3'),
+  eat:   new Audio('./audio/s1.mp3'),
+  unlocked: false
+};
+AUDIO.music.loop = true;
+AUDIO.music.volume = 0.6;  // música
+AUDIO.start.volume = 0.9;  // click/woosh start
+AUDIO.eat.volume   = 0.8;  // pop al comer
+
+// iOS/Android: desbloquea audio en primer toque
+function unlockAudio() {
+  if (AUDIO.unlocked) return;
+  AUDIO.unlocked = true;
+  // “primer play-pause” para permitir luego reproducir sin bloqueo
+  [AUDIO.music, AUDIO.start, AUDIO.eat].forEach(a=>{
+    a.muted = false;
+    a.play().then(()=>a.pause()).catch(()=>{});
+  });
+}
+document.addEventListener('pointerdown', unlockAudio, { once: true });
+
+// Helpers
+function playMusic(restart=false){
+  if (restart) AUDIO.music.currentTime = 0;
+  AUDIO.music.play().catch(()=>{});
+}
+function pauseMusic(){ AUDIO.music.pause(); }
+function playSfx(sfx){
+  try { sfx.currentTime = 0; sfx.play(); } catch {}
+}
+
 
 
 
@@ -183,9 +226,9 @@ const controls = {
 const toast = document.getElementById('toast');
 
 function updateStartButtonLabel() {
-  if (GAME.state === 'menu' || GAME.state === 'gameover') controls.start.textContent = 'Jugar';
-  else if (GAME.state === 'playing') controls.start.textContent = 'Pausa';
-  else if (GAME.state === 'paused') controls.start.textContent = 'Reanudar';
+  if (GAME.state === 'menu' || GAME.state === 'gameover') controls.start.textContent = 'JUGAR';
+  else if (GAME.state === 'playing') controls.start.textContent = 'PAUSA';
+  else if (GAME.state === 'paused') controls.start.textContent = 'REANUDAR';
 }
 
 const GAME = {
@@ -213,7 +256,7 @@ const TITLE_ANIM = {
 
 // Entidades
 const player = {
-  w: 85, h: 98, displayW: 85, displayH: 98,
+  w: 150, h: 150, displayW:190, displayH: 190,
   x: 180 - 48, y: 640 - 220,
   speed: 520, vx: 0,
   animFrame: 0, eatingTimer: 0, frameTimer: 0,
@@ -253,9 +296,9 @@ function resize() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   GAME.width = vw;
   GAME.height = vh;
-  player.y = GAME.height - 220;
+  player.y = GAME.height - 260;
   player.x = clamp(player.x, 0, GAME.width - player.displayW);
-  if (!BG_PATTERN) buildBackgroundPattern(ctx);
+  //if (!BG_PATTERN) buildBackgroundPattern(ctx);
 }
 window.addEventListener('resize', resize);
 resize();
@@ -330,21 +373,31 @@ function startGame() {
   GAME.time = 30;
   GAME.lastSpawn = 0;
   drops.length = 0;
+  
+   playSfx(AUDIO.start);   // 🔊 SFX Start
+  playMusic(true);        // 🎵 música en loop (reinicia al empezar)
+  
   showToast('¡Atrapa todos los choripanes!');
   updateStartButtonLabel();
 }
 function endGame() {
   GAME.state = 'gameover';
+    pauseMusic();           // (opcional) pausar al terminar
+
   showToast(`Fin del juego. Puntos: ${GAME.score}`);
   updateStartButtonLabel();
 }
 function pauseGame() {
   GAME.state = 'paused';
+    pauseMusic();           // pausa música
+
   showToast('Juego en pausa');
   updateStartButtonLabel();
 }
 function resumeGame() {
   GAME.state = 'playing';
+    playMusic(false);       // reanuda música
+
   showToast('Juego reanudado');
   updateStartButtonLabel();
 }
@@ -353,6 +406,10 @@ function spawnDrop() {
   drops.push({ x: rnd(r, GAME.width - r), y: -r - 10, r, vy: rnd(260, 420) });
 }
 function update(dt) {
+  
+  
+  
+  
   if (player.eatingTimer > 0) {
     player.eatingTimer -= dt;
     player.frameTimer  -= dt;
@@ -362,6 +419,10 @@ function update(dt) {
     }
     if (player.eatingTimer <= 0) player.animFrame = 0;
   }
+  
+  
+  
+  
   if (GAME.state === 'menu' || GAME.state === 'gameover' || GAME.state === 'paused') return;
 
   let vx = 0;
@@ -381,6 +442,13 @@ function update(dt) {
     if (aabb(playerHitbox, d)) {
       drops.splice(i, 1);
       GAME.score += 1;
+	  
+	      // ===== Parte 4: SFX comer + screen shake opcional =====
+    playSfx(AUDIO.eat);      // sonido de “comer”
+    //triggerShake(100, 3);    // (opcional) pequeña vibración de cámara
+    // ======================================================
+	  
+	  
       player.eatingTimer = 0.5;
       continue;
     }
@@ -389,15 +457,23 @@ function update(dt) {
 
   GAME.time -= dt;
   if (GAME.time <= 0) { GAME.time = 0; endGame(); }
+
+
+
+
 }
 
 // --- Dibujo ---
 function draw() {
-  if (!BG_PATTERN) buildBackgroundPattern(ctx);
-  ctx.fillStyle = BG_PATTERN;
-  ctx.fillRect(0, 0, GAME.width, GAME.height);
+  // Fondo según estado
+  drawBackground();
 
   if (GAME.state === 'menu') { drawTitle(); return; }
+  
+  if (AUDIO.unlocked && AUDIO.music.paused) {
+  playMusic(true);   // arranca la música en loop ya en la pantalla de intro
+}
+
 
   drawPlayer();
 
@@ -424,26 +500,14 @@ function drawTitle() {
   ctx.save();
   ctx.textAlign = 'center';
   if (IMAGES.logo.complete && IMAGES.logo.naturalWidth > 0) {
-    const logoWidth = 240;
+    const logoWidth = 390;
     const scale = logoWidth / IMAGES.logo.naturalWidth;
     const logoHeight = IMAGES.logo.naturalHeight * scale;
     const logoX = (GAME.width - logoWidth) / 2;
-    const logoY = GAME.height * 0.06;
+    const logoY = GAME.height * 0.02;
     ctx.drawImage(IMAGES.logo, logoX, logoY, logoWidth, logoHeight);
   }
   
-  
-   // IMAGEN DE TÍTULO COOL
-  if (IMAGES.title.complete && IMAGES.title.naturalWidth > 0) {
-    const maxW = Math.min(GAME.width * 1, 430);
-    const s = Math.min(maxW / IMAGES.title.naturalWidth, 1);
-    const w = IMAGES.title.naturalWidth * s;
-    const h = IMAGES.title.naturalHeight * s;
-    const x = (GAME.width - w) / 2;
-    const y = GAME.height * 0;
-    // pequeño glow
-       ctx.drawImage(IMAGES.title, x, y, w, h);
-  }
 
 
 // IMAGEN DE OTKIN EN LA PORTADA (con bob + side)
@@ -456,14 +520,14 @@ if (IMAGES.bg.complete && IMAGES.bg.naturalWidth > 0) {
 
   const natFrameH = IMAGES.bg.naturalHeight;
 
-  const maxW = Math.min(GAME.width * 1, 590);
+  const maxW = Math.min(GAME.width * 1, 600);
   const s = Math.min(maxW / natFrameW, 1);
 
   const w = natFrameW * s;
   const h = natFrameH * s;
 
   const x = (GAME.width - w) / 2 + TITLE_ANIM.offX;
-  const y = GAME.height * 0.40 + TITLE_ANIM.offY;
+  const y = GAME.height * 0.37 + TITLE_ANIM.offY;
 
   // fuente dentro del sprite si hay 2 frames
   const srcX = (TITLE_ANIM.frames === 2 ? TITLE_ANIM.mouthFrame * natFrameW : 0);
@@ -473,11 +537,43 @@ if (IMAGES.bg.complete && IMAGES.bg.naturalWidth > 0) {
 }
 
 
+// IMAGEN DE LONGA EN LA PORTADA (bob/tilt suave, sin sprite-sheet)
+if (IMAGES.longa.complete && IMAGES.longa.naturalWidth > 0) {
+  const natW = IMAGES.longa.naturalWidth;
+  const natH = IMAGES.longa.naturalHeight;
+
+  const maxW = Math.min(GAME.width * 1.0, 250);
+  const s = Math.min(maxW / natW, 1);
+
+  const w = natW * s;
+  const h = natH * s;
+
+  // posición base centrada + offsets de animación
+  const baseX = (GAME.width - w) / 2;
+  const baseY = GAME.height * .65;
+  const x = baseX + TITLE_ANIM.offX;
+  const y = baseY + TITLE_ANIM.offY;
+
+  // rotación leve (opcional). Quita estas 3 líneas si no quieres tilt:
+  const tilt = Math.sin(TITLE_ANIM.t * 5.9) * (Math.PI / 180) * 2; // ±2°
+  ctx.save();
+  ctx.translate(x + w/2, y + h/2);
+  ctx.rotate(tilt);
+
+  // dibuja la imagen completa (sin partirla)
+  const srcX = 0, srcY = 0, srcW = natW, srcH = natH;
+  ctx.drawImage(IMAGES.longa, srcX, srcY, srcW, srcH, -w/2, -h/2, w, h);
+
+  ctx.restore();
+}
+
+
+
   
-  drawTextOutlined('MUEVE A OTAKIN PARA ATRAPARLOS', GAME.width/2, GAME.height * 0.46, {
-    font: '400 20px Pixel, Inter, system-ui, sans-serif', color: '#3dd5ff'
+  drawTextOutlined('MUEVE A OTAKIN PARA ATRAPARLOS', GAME.width/2, GAME.height * 0.38, {
+    font: '400 25px Pixel, Inter, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined('TOCA "JUGAR" PARA COMENZAR (30s)', GAME.width/2, GAME.height * 0.49, {
+  drawTextOutlined('TOCA "JUGAR" PARA COMENZAR (30s)', GAME.width/2, GAME.height * 0.41, {
     font: '400 16px Pixel, Inter, system-ui, sans-serif', color: '#ffffff'
   });
   ctx.restore();
@@ -498,23 +594,23 @@ function drawPlayer() {
 }
 
 function drawHUD() {
-  drawTextOutlined('PUNTOS: ' + GAME.score, 216, 30, {
-    font: '400 22px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'left'
+  drawTextOutlined('PUNTOS: ' + GAME.score, 16, 30, {
+    font: '400 38px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'left'
   });
   drawTextOutlined('TIEMPO: ' + Math.ceil(GAME.time), GAME.width - 16, 30, {
-    font: '400 22px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'right'
+    font: '400 38px Pixel, Inter, system-ui, sans-serif', color: '#fff', align: 'right'
   });
 }
 
 function drawGameOver() {
-  drawTextOutlined('¡Tiempo!', GAME.width/2, GAME.height*0.42, {
-    font: '400 36px Pixel, Inter, system-ui, sans-serif', color: '#fff'
+  drawTextOutlined('¡Tiempo!', GAME.width/2, GAME.height*0.40, {
+    font: '100 26px Pixel, Inter, system-ui, sans-serif', color: '#fff'
   });
   drawTextOutlined(`PUNTAJE: ${GAME.score}`, GAME.width/2, GAME.height*0.47, {
-    font: '400 18px Pixel, system-ui, sans-serif', color: '#fff'
+    font: '100 55px Pixel, system-ui, sans-serif', color: '#fff'
   });
-  drawTextOutlined('TOCA PARA JUGAR DE NUEVO', GAME.width/2, GAME.height*0.52, {
-    font: '400 16px Pixel, system-ui, sans-serif', color: '#fff'
+  drawTextOutlined('O00', GAME.width/2, GAME.height*0.51, {
+    font: '100 16px Pixel, system-ui, sans-serif', color: '#fff'
   });
 }
 
