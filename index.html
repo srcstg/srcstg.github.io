@@ -176,6 +176,14 @@
       }
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+      const silent = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+      const src = audioCtx.createBufferSource();
+      src.buffer = silent;
+      src.connect(audioCtx.destination);
+      src.start();
+
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
       const compressor = audioCtx.createDynamicsCompressor();
       compressor.threshold.value = -18;
       compressor.knee.value = 12;
@@ -206,7 +214,7 @@
 
     function playBassNote(freq, vel) {
       if (!audioCtx || !masterBus) return;
-      if (audioCtx.state === 'suspended') { audioCtx.resume(); return; }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       if (activeVoices >= MAX_VOICES) return;
 
       activeVoices++;
