@@ -1,37 +1,26 @@
 <!DOCTYPE html>
-<html lang="en,es">
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Open Graph (para Facebook, LinkedIn, WhatsApp, etc.) -->
-  <meta property="og:title" content="D10 bad lines" />
-  <meta property="og:description" content="bad lines index experience" />
+  <meta property="og:title" content="D10 SPACE" />
+  <meta property="og:description" content="Estudio creativo de diseño y desarrollo digital." />
   <meta property="og:image" content="https://d10.cl/img/1x/thumbd10.png" />
   <meta property="og:url" content="https://d10.cl/" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="D10 SPACE" />
-  <meta name="twitter:description" content="breve resumen de líneas colgado." />
+  <meta name="twitter:description" content="Estudio creativo de diseño y desarrollo digital." />
   <meta name="twitter:image" content="https://d10.cl/img/1x/thumbd10.png" />
 
   <!-- end meta -->
-  <title>D10 bad lines index</title>
+  <title>D10 SPACE</title>
   <link rel="shortcut icon" href="img/favico.ico">
-  <link rel="stylesheet" href="bootstrap-4.1.0-dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="css/fixed.css">
-  <link rel="stylesheet" href="css/lightbox.css">
   <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
   <style>
     * {
       margin: 0;
@@ -119,7 +108,7 @@
       <a href="mailto:hello@d10.cl">hello@d10.cl</a>
     </div>
     <div class="footer-right">
-      © 2024 D10 SPACE v1.0.0.3
+      © 2026 D10 SPACE v1.1
     </div>
   </footer>
   <canvas id="canvas"></canvas>
@@ -138,6 +127,184 @@
     const mouse = { x: 0, y: 0, isDown: false };
     let lastInteraction = Date.now();
     let autoMotion = false;
+
+    // --- Contrabass Pizzicato Engine (Web Audio API) ---
+    let audioCtx = null;
+    let roomConvolver = null;
+    let masterBus = null;
+    const prevMouse = { y: -1 };
+    const lineLastPlayed = new Map();
+    const NOTE_COOLDOWN = 50;
+    const MAX_VOICES = 20;
+    const GLOBAL_COOLDOWN = 10;
+    let activeVoices = 0;
+    let lastNoteTime = 0;
+
+    function buildBassScale(count) {
+      const penta = [0, 2, 4, 7, 9];
+      const low = 28;
+      const high = 55;
+
+      const pool = [];
+      let oct = 0;
+      while (low + oct * 12 <= high) {
+        for (let i = 0; i < penta.length; i++) {
+          const n = low + oct * 12 + penta[i];
+          if (n <= high) pool.push(n);
+        }
+        oct++;
+      }
+
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const idx = Math.round(i * (pool.length - 1) / (count - 1));
+        result.push(pool[idx]);
+      }
+      return result.reverse();
+    }
+
+    let bassScale = buildBassScale(numLines);
+
+    function midiToFreq(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function initAudio() {
+      if (audioCtx) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return;
+      }
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      const compressor = audioCtx.createDynamicsCompressor();
+      compressor.threshold.value = -18;
+      compressor.knee.value = 12;
+      compressor.ratio.value = 8;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.15;
+
+      masterBus = audioCtx.createGain();
+      masterBus.gain.value = 0.85;
+      masterBus.connect(compressor).connect(audioCtx.destination);
+
+      roomConvolver = audioCtx.createConvolver();
+      const rate = audioCtx.sampleRate;
+      const len = rate * 1.8;
+      const impulse = audioCtx.createBuffer(2, len, rate);
+      for (let ch = 0; ch < 2; ch++) {
+        const data = impulse.getChannelData(ch);
+        for (let i = 0; i < len; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.5);
+        }
+      }
+      roomConvolver.buffer = impulse;
+
+      const reverbGain = audioCtx.createGain();
+      reverbGain.gain.value = 0.12;
+      roomConvolver.connect(reverbGain).connect(masterBus);
+    }
+
+    function playBassNote(freq, vel) {
+      if (!audioCtx || !masterBus) return;
+      if (audioCtx.state === 'suspended') { audioCtx.resume(); return; }
+      if (activeVoices >= MAX_VOICES) return;
+
+      activeVoices++;
+      const now = audioCtx.currentTime;
+      const attenuation = 1 / Math.sqrt(Math.max(1, activeVoices));
+      const v = 0.18 * vel * attenuation;
+      const dur = 0.8 + (50 / freq);
+
+      const osc1 = audioCtx.createOscillator();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(freq * 1.02, now);
+      osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.06);
+
+      const osc2 = audioCtx.createOscillator();
+      osc2.type = 'triangle';
+      osc2.frequency.value = freq;
+
+      const osc3 = audioCtx.createOscillator();
+      osc3.type = 'sine';
+      osc3.frequency.value = freq * 2;
+
+      const g1 = audioCtx.createGain();
+      g1.gain.setValueAtTime(v, now);
+      g1.gain.setValueAtTime(v * 0.9, now + 0.02);
+      g1.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      const g2 = audioCtx.createGain();
+      g2.gain.setValueAtTime(v * 0.35, now);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + dur * 0.7);
+
+      const g3 = audioCtx.createGain();
+      g3.gain.setValueAtTime(v * 0.12, now);
+      g3.gain.exponentialRampToValueAtTime(0.0001, now + dur * 0.3);
+
+      const thump = audioCtx.createOscillator();
+      thump.type = 'sine';
+      thump.frequency.setValueAtTime(freq * 3, now);
+      thump.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.05);
+      const gThump = audioCtx.createGain();
+      gThump.gain.setValueAtTime(v * 0.5, now);
+      gThump.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(freq * 4, now);
+      filter.frequency.exponentialRampToValueAtTime(freq * 1.2, now + dur * 0.25);
+      filter.Q.value = 1.0;
+
+      const bus = audioCtx.createGain();
+      bus.gain.value = 1;
+
+      osc1.connect(g1).connect(bus);
+      osc2.connect(g2).connect(bus);
+      osc3.connect(g3).connect(bus);
+      thump.connect(gThump).connect(bus);
+      bus.connect(filter);
+      filter.connect(masterBus);
+      if (roomConvolver) filter.connect(roomConvolver);
+
+      osc1.start(now); osc2.start(now); osc3.start(now); thump.start(now);
+      osc1.stop(now + dur); osc2.stop(now + dur); osc3.stop(now + dur);
+      thump.stop(now + 0.1);
+
+      osc1.onended = () => { activeVoices = Math.max(0, activeVoices - 1); };
+    }
+
+    function checkLineCrossings(curY, prevY) {
+      if (!audioCtx || prevY < 0) return;
+      const now = Date.now();
+      if (now - lastNoteTime < GLOBAL_COOLDOWN) return;
+
+      const minY = Math.min(curY, prevY);
+      const maxY = Math.max(curY, prevY);
+      let played = 0;
+
+      const crossed = [];
+      for (let i = 0; i < lines.length; i++) {
+        const ly = lines[i].y;
+        if (ly >= minY && ly <= maxY) {
+          if (now - (lineLastPlayed.get(i) || 0) > NOTE_COOLDOWN) {
+            crossed.push(i);
+          }
+        }
+      }
+
+      const maxPerFrame = 8;
+      const step = crossed.length <= maxPerFrame ? 1 : Math.ceil(crossed.length / maxPerFrame);
+      for (let j = 0; j < crossed.length && played < maxPerFrame; j += step) {
+        const i = crossed[j];
+        const speed = Math.abs(curY - prevY);
+        const vel = Math.max(0.3, Math.min(1, speed / 25));
+        playBassNote(midiToFreq(bassScale[i] || 40), vel);
+        lineLastPlayed.set(i, now);
+        lastNoteTime = now;
+        played++;
+      }
+    }
+    // --- End Contrabass Engine ---
 
     class Line {
       constructor(y) {
@@ -210,7 +377,7 @@
 
     function animate() {
       const now = Date.now();
-      autoMotion = now - lastInteraction > 50;
+      autoMotion = now - lastInteraction > 5000;
 
       ctx.clearRect(0, 0, width, height);
       for (let line of lines) {
@@ -229,28 +396,66 @@
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
+
+      lines.length = 0;
+      const newNumLines = Math.floor(height / lineSpacing);
+      for (let i = 0; i < newNumLines; i++) {
+        lines.push(new Line(i * lineSpacing));
+      }
+      bassScale = buildBassScale(newNumLines);
     });
 
-    ['mousemove', 'mousedown', 'mouseup'].forEach(event => {
-      canvas.addEventListener(event, (e) => {
-        resetInactivityTimer();
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-
-        if (event === 'mousedown') mouse.isDown = true;
-        if (event === 'mouseup') mouse.isDown = false;
-      });
+    canvas.addEventListener('mousedown', (e) => {
+      initAudio();
+      resetInactivityTimer();
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.isDown = true;
+      prevMouse.y = e.clientY;
     });
 
-    ['touchmove', 'touchstart'].forEach(event => {
-      canvas.addEventListener(event, (e) => {
-        resetInactivityTimer();
-        if (e.touches && e.touches.length > 0) {
-          mouse.x = e.touches[0].clientX;
-          mouse.y = e.touches[0].clientY;
-        }
-      }, { passive: true });
+    canvas.addEventListener('mouseup', (e) => {
+      resetInactivityTimer();
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.isDown = false;
+      initAudio();
     });
+
+    canvas.addEventListener('mousemove', (e) => {
+      initAudio();
+      resetInactivityTimer();
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      checkLineCrossings(e.clientY, prevMouse.y);
+      prevMouse.y = e.clientY;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      initAudio();
+      resetInactivityTimer();
+      mouse.isDown = true;
+      if (e.touches && e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+        prevMouse.y = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      resetInactivityTimer();
+      if (e.touches && e.touches.length > 0) {
+        const ty = e.touches[0].clientY;
+        mouse.x = e.touches[0].clientX;
+        mouse.y = ty;
+        checkLineCrossings(ty, prevMouse.y);
+        prevMouse.y = ty;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => {
+      mouse.isDown = false;
+    }, { passive: true });
     animate();
   </script>
 </body>
