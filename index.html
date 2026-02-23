@@ -108,7 +108,7 @@
       <a href="mailto:hello@d10.cl">hello@d10.cl</a>
     </div>
     <div class="footer-right">
-      © 2026 D10 SPACE v1.1.0
+      © 2026 D10 SPACE v1.1.0.1
     </div>
   </footer>
   <canvas id="canvas"></canvas>
@@ -169,20 +169,30 @@
       return 440 * Math.pow(2, (midi - 69) / 12);
     }
 
+    let audioUnlocked = false;
+
+    function unlockAudio() {
+      if (!audioCtx) return;
+      if (audioUnlocked && audioCtx.state === 'running') return;
+
+      const buffer = audioCtx.createBuffer(1, 1, 22050);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(audioCtx.destination);
+      src.start(0);
+
+      audioCtx.resume().then(() => {
+        audioUnlocked = true;
+      });
+    }
+
     function initAudio() {
       if (audioCtx) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        unlockAudio();
         return;
       }
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-      const silent = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
-      const src = audioCtx.createBufferSource();
-      src.buffer = silent;
-      src.connect(audioCtx.destination);
-      src.start();
-
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      unlockAudio();
 
       const compressor = audioCtx.createDynamicsCompressor();
       compressor.threshold.value = -18;
@@ -439,6 +449,10 @@
       prevMouse.y = e.clientY;
     });
 
+    ['touchstart', 'touchend', 'click'].forEach(evt => {
+      document.addEventListener(evt, () => initAudio(), { once: false, passive: true });
+    });
+
     canvas.addEventListener('touchstart', (e) => {
       initAudio();
       resetInactivityTimer();
@@ -451,6 +465,7 @@
     }, { passive: true });
 
     canvas.addEventListener('touchmove', (e) => {
+      initAudio();
       resetInactivityTimer();
       if (e.touches && e.touches.length > 0) {
         const ty = e.touches[0].clientY;
