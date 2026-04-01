@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Display Oficina</title>
+<link rel="shortcut icon" href="../img/favico.ico">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(175deg,
+      #e8f4fd 0%,
+      #cce8f8 20%,
+      #aad8f5 45%,
+      #c5e8fa 65%,
+      #e2f3fc 82%,
+      #f4faff 100%
+    );
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(100px);
+    opacity: 0.45;
+  }
+  .orb-1 { width:800px; height:800px; background:radial-gradient(#9dd4ef,transparent 70%); top:-250px; left:-200px; animation: od1 30s ease-in-out infinite; }
+  .orb-2 { width:600px; height:600px; background:radial-gradient(#bde6f7,transparent 70%); bottom:-150px; right:-150px; animation: od2 38s ease-in-out infinite; }
+  .orb-3 { width:450px; height:450px; background:radial-gradient(#daf0fc,transparent 70%); top:38%; left:42%; animation: od3 24s ease-in-out infinite; }
+  @keyframes od1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(90px,70px)} }
+  @keyframes od2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-80px,-60px)} }
+  @keyframes od3 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(55px,-45px)} 66%{transform:translate(-45px,55px)} }
+
+  /* Logos debajo de las formas (lava + vidrio); el enlace .back-home sigue encima */
+  .logo-wrap {
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .logo-wrap svg {
+    fill: #000;
+    filter: drop-shadow(0 3px 18px rgba(0, 0, 0, 0.12));
+  }
+
+  .logo-sorrymom { width: 320px; top: 14%; left:  7%; animation: fl1 18s ease-in-out infinite; }
+  .logo-sorrymom svg { width: 100%; }
+  .logo-twg      { width: 260px; top: 52%; left: 56%; animation: fl2 22s ease-in-out infinite; }
+  .logo-twg svg  { width: 100%; }
+  .logo-brutal   { width: 360px; top: 70%; left: 10%; animation: fl3 26s ease-in-out infinite; }
+  .logo-brutal img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 3px 18px rgba(0, 0, 0, 0.12));
+  }
+
+  @keyframes fl1 {
+    0%   { transform:translate(0,0) rotate(0deg); }
+    20%  { transform:translate(28px,-22px) rotate(.4deg); }
+    40%  { transform:translate(50px,12px) rotate(-.3deg); }
+    60%  { transform:translate(18px,36px) rotate(.45deg); }
+    80%  { transform:translate(-18px,8px) rotate(-.2deg); }
+    100% { transform:translate(0,0) rotate(0deg); }
+  }
+  @keyframes fl2 {
+    0%   { transform:translate(0,0) rotate(0deg); }
+    25%  { transform:translate(-36px,28px) rotate(-.5deg); }
+    50%  { transform:translate(18px,55px) rotate(.3deg); }
+    75%  { transform:translate(46px,-18px) rotate(.55deg); }
+    100% { transform:translate(0,0) rotate(0deg); }
+  }
+  @keyframes fl3 {
+    0%   { transform:translate(0,0) rotate(0deg); }
+    30%  { transform:translate(42px,-28px) rotate(.28deg); }
+    55%  { transform:translate(-22px,-46px) rotate(-.4deg); }
+    80%  { transform:translate(28px,18px) rotate(.18deg); }
+    100% { transform:translate(0,0) rotate(0deg); }
+  }
+
+  /* Metaball: capa detrás de logos (z 2) y capa delante (z 5–6) */
+  #lava-wrapper-back,
+  #lava-wrapper {
+    position: absolute;
+    inset: 0;
+    filter: blur(28px) contrast(18);
+  }
+  #lava-wrapper-back { z-index: 2; }
+  #lava-wrapper { z-index: 5; }
+
+  #blob-canvas-back,
+  #blob-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+
+  #glass-canvas-back,
+  #glass-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  #glass-canvas-back { z-index: 2; }
+  #glass-canvas { z-index: 6; }
+
+  .back-home {
+    position: fixed;
+    bottom: 14px;
+    right: 16px;
+    z-index: 20;
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: #18496b;
+    text-decoration: none;
+    opacity: 0.75;
+    pointer-events: auto;
+  }
+  .back-home:hover { opacity: 1; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div id="lava-wrapper-back">
+    <canvas id="blob-canvas-back"></canvas>
+  </div>
+  <canvas id="glass-canvas-back"></canvas>
+
+  <!-- LOGOS -->
+  <div class="logo-wrap logo-sorrymom">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2024.06 676.11">
+      <path d="M607.12,134.45c1.49,9.77-2.37,19.01-11.48,27.48-11.23,10.15-25.28,17.7-40.65,21.86-9.06,2.4-89.3,22.54-116.51-9.31-4.92-6.1-7.39-13.72-9.7-21.66-4.05-13.79-9.27-28.12-19.98-39.52-7.34-8.05-17.59-14.47-30.48-19.1-47.83-16.79-98.75-11.5-147.99-6.39-18.43,1.92-37.5,3.9-56.2,4.71-6.51.3-13.55.8-20.92,2.44-12.03,2.7-19.44,6.35-22.01,10.85-.83,1.92-.81,3.67.05,5.35,2.28,4.48,10.08,7.58,16.06,8.88,14.68,3.33,29.56,6.36,43.96,9.29,43.81,8.93,89.1,18.16,132.77,36.54,10.57,4.54,20.93,9.74,30.96,14.76,13.56,6.8,27.59,13.82,42.14,19.24,14.65,4.87,30.17,7.51,45.18,10.07,8.8,1.49,17.91,3.04,26.8,5.03,30.81,6.11,77.41,15.36,91.04,54.27,7.37,19.91,6.97,43.1-1.11,63.61-11.89,35.1-40.49,64.61-76.48,78.87-29.14,10.62-54.89,17.86-78.76,22.15-30.65,5.16-62.31,7.71-94.39,7.71-73,0-148.19-13.2-218.72-38.9-6.11-2.27-12.45-4.34-18.58-6.33-14.96-4.87-30.43-9.91-44.08-18.38C3.97,362.64-1.95,340.65.52,325.17c1.58-15.05,10.68-29.89,24.95-40.63,44.92-34.55,109.58-39.62,160.87-12.61,17.66,9.01,33.31,21.51,48.44,33.6,16.22,12.95,32.98,26.35,52.17,35.34,56.79,27.27,127.9,26.55,211.39-2.14,9.92-4.27,25.65-15.63,25.79-27.96-.24-6.82-7.25-10.97-20.84-12.28-6-.63-13.45-1.42-20.58-1.73-16.86-.77-34.38-.16-51.33.43-45.99,1.61-93.54,3.27-134.41-22.29-8.41-4.95-17-10.42-25.31-15.71-14.54-9.25-29.57-18.82-44.71-26.35-12.67-6.18-26.57-9.04-40.88-11.65-5.12-.96-10.29-2.02-15.29-3.05-6.14-1.26-12.48-2.56-18.72-3.67-2.43-.44-4.87-.86-7.31-1.28-16.52-2.86-33.61-5.81-48.37-14.61-14.29-8.51-33.01-23.02-41.02-43.88-8.07-20.78,6.47-38.72,15.85-47.56,13.62-13.09,30.81-22.33,45.83-29.64,37.65-18.43,78.72-28.76,114.25-37.01,26.96-6.2,55.8-12.16,84.07-13.66h.22c24.95-.87,52.71,2.61,80.28,10.06,13.13,3.89,26.3,8.47,39.03,12.89,6.31,2.19,12.83,4.45,19.23,6.59,19.8,6.97,37.71,12.48,54.76,16.87,17.35,4.39,39.85,10.77,60.05,21.16,25.49,12.16,36.44,28.67,38.19,40.05ZM1174.02,117.02c5.27,14.14,5,29.64-.79,44.85-5.35,14.08-15.15,26.88-27.59,36.05-19.39,14.4-42.95,17.77-65.74,21.04-1.15.19-2.36.37-3.59.55-6.18.89-12.57,1.82-17.34,5.31-1.8,1.59-2.58,2.98-2.32,4.12.74,3.25,8.94,5.55,13.34,6.78l.47.13c30.81,10,56.52,37.08,65.53,69.02,6.53,26.65,2.24,50.69-12.06,67.74-13.16,15.69-33.6,24.12-58.07,24.13-2.37,0-4.78-.08-7.22-.24-19.76-1.11-34.63-7.64-44.17-19.42-11.36-15.84-10.03-39.99-6.9-63.74,2.56-18.46-1.79-36.26-11.64-47.63-7.57-8.74-18.2-13.4-30.71-13.46-17.49.29-33.55,12.78-38.16,29.71-3.6,11.12-3.2,23.24-2.82,34.96.14,4.08.28,8.29.24,12.41.54,29.36-20.78,53.81-50.7,58.12-21.22,3.86-83.58,6.8-90.74-29.24-4.28-27.49,21.26-61.91,41.77-89.57,7.44-10.02,14.47-19.49,19.31-27.54.01-.04.03-.07.06-.1,12.13-16.99,16.33-38.91,11.81-61.71-1.35-8.37-3.48-17.42-5.74-27.01-5.89-25.06-12.58-53.46-5.72-75.31,4.18-11.73,16.86-31.69,55.03-34.14h.17c13.08-1.1,26.25.59,38.52,2.59l5.25.9c21.67,3.7,42.13,7.21,63.58,10.23,13.56,1.86,27.84,2.26,41.65,2.65,29.29.83,59.59,1.68,86.14,16.22,18.88,10.58,32.78,25.35,39.15,41.6ZM1113.37,128.13c-2.05-5.84-10.09-9.71-16.34-11.24-9.54-2.5-19.61-3.25-29.66-3.25-6.08,0-12.14.27-18.08.59l-.16.02h-.02c-13.47.85-40.34,6.2-67.52,15.94-29.87,10.71-49.41,23.07-55.02,34.81-2.42,5.53-.25,11.74,5.29,15.06,4.88,2.99,10.57,3.93,16.46,4.71,43.91,4.59,91.55-5.07,137.73-27.94,11.59-5.61,19.69-11.6,24.76-18.31,2.83-3.68,3.68-7.17,2.56-10.39ZM2009.69,29.4c-9.98-9.05-33.58-22.17-79.58-8.31-52.31,17.03-80.45,69.45-101.08,118.47-1.43,3.3-2.79,6.74-4.1,10.07-4.29,10.87-8.72,22.1-16.62,30.73-4.68,5.39-12.19,8.06-19.12,6.8-6.02-1.1-10.51-4.86-12.65-10.61-1.51-3.82-2.21-8.42-2.89-12.87l-.2-1.33c-2.12-13.19-4.79-28.78-8.58-44.4-8.98-35.82-24.08-67.3-44.89-93.59-12.06-14.5-25.61-27.4-42.91-23.73h-.01l-.22.05c-24.05,5.86-40.64,36.5-44.02,62.28-3.74,19.5-.27,38.89,9.77,54.58,10.32,16.22,23.75,31.07,36.74,45.43,7.47,8.25,15.18,16.78,22.13,25.38,1.09,1.39,2.22,2.81,3.38,4.27,18.49,23.31,43.82,55.24,37.21,85.3-4.77,21.78-24.9,34.48-36.53,40.13-6.67,3.53-13.81,6.42-20.72,9.21-9.47,3.82-19.26,7.77-28.12,13.51-19.7,13.45-26.52,30.43-20.26,50.49,10.77,32.68,47.55,50.83,80.67,50.83,5.07,0,10.05-.43,14.84-1.29,26.73-4.79,50.12-23.96,65.86-53.94,6.78-12.43,10.98-25.06,15.42-38.42,1.83-5.5,3.72-11.19,5.8-16.83,8.91-23.62,21.22-54.53,37.57-84.21,24.17-44.29,51.15-63.07,82.4-84.8,14.88-10.35,30.26-21.04,46.92-35.47,14.03-12.6,28.26-26.39,34.64-44.16,7.33-19.11,2.98-40.64-10.85-53.57ZM1570.33,385.6c4.6,12.67,4.22,24.96-1.06,34.63-5.02,9.19-14.04,15.5-26.11,18.24-9.1,2.01-18.74,3.01-28.85,3.01-10.88,0-22.3-1.16-34.19-3.48-37.61-6.88-47.42-30.31-58.77-57.43-2.39-5.72-4.87-11.63-7.7-17.65-8.21-17.62-25.5-32.2-45.12-38.04-18.81-5.3-37.63-2.18-45.73,7.59-6.08,7.33-5.95,17.95.39,30.71,2.07,4.43,4.8,8.77,7.43,12.97,2.77,4.4,5.63,8.96,7.78,13.66,3.99,8.43,4.47,16.77,1.37,24.1-3.31,7.83-10.56,13.99-20.43,17.35-17.62,5.97-36.86,5.34-53.51,4.28-53.81-3.93-66.65-26.06-67.96-43.93-.72-12.47,3.19-24.9,6.34-34.9,2.27-7.26,4.78-14.15,7.44-21.44.62-1.71,1.25-3.42,1.87-5.15,8.38-21.76,13.22-36.54,9.81-58.39-.43-3.04-.91-6.12-1.4-9.22-2.78-17.79-5.66-36.18-.97-53.33,3.78-13.91,14.12-27.28,27.65-35.77,12.96-8.1,29.57-10.71,44.13-12.53l.21-.03h.02c19-1.87,38.15,1.03,56.67,3.83,8.65,1.3,17.59,2.66,26.35,3.49,8.39.95,17.29,1.94,26.1,2.66,12.5,1.16,25.5,1.13,38.07,1.12,20.37-.04,41.43-.07,60.89,4.89,23.4,5.95,50.26,22.63,48.94,50.07-.32,15.43-8.21,31.19-21.62,43.2-10.21,9.24-22.4,16.12-35.24,19.88-11.04,3.26-22.65,5.04-33.88,6.77l-3.52.55c-8.89.93-16.95,3.39-17.31,5.28-.08.42.55,1.51,3.41,3.02,4.66,1.83,9.72,3.12,14.62,4.38,4.59,1.17,9.34,2.38,13.83,4.05,40.03,13.35,84.11,31,100.05,71.56ZM1437.79,264.03c9.08.05,18.49.09,26.96-3.35,4.99-1.8,10.85-5.96,12.04-10.89.64-2.62-.16-5.17-2.38-7.56-2.93-3.09-7.06-4.96-11.09-6.53-4.74-1.74-9.76-3.37-14.61-4.94-2.41-.78-4.81-1.56-7.2-2.36-3.49-1.13-7.06-2.36-10.52-3.55-9.97-3.44-20.28-7-30.68-8.89-11.86-1.91-23.84-1.97-34.63-.15l-.15.03c-12.63,2.52-24.44,9.48-31.6,18.62-3.65,5.23-4.74,10.71-3.12,15.78,1.83,5.72,7.03,10.48,14.27,13.06,8.06,3,16.9,3.58,25.25,3.76,18.66.75,37.53-.94,51.89-2.49,5.12-.6,10.43-.57,15.57-.54ZM804.82,206.96c-.78-10.9-9.32-20.1-25.42-27.35-32.64-14.2-67.17-20-97.23-16.29h-.03l-.2.03c-7.86,1.17-15.7,3.19-23.29,5.14l-.52.13c-10.24,2.64-22.06,6.31-32.12,13.44-8.07,5.84-11.75,12.24-10.94,19.01,2.01,16.8,31.22,29.57,37.08,31.96,25.42,10.07,49.52,15.15,71.83,15.15,5.02,0,9.95-.26,14.78-.78,12.4-.64,30.7-2.57,46.49-11.85,14.85-8.29,19.85-20.17,19.57-28.59ZM374.65,580.35l-115.31-131.28H27.22v223.92h135.72l-3-155.88h10.38l150.62,155.88h108.01l150.62-155.88h9.18l-3,155.88h135.71v-223.92h-230.91l-115.89,131.28ZM1308.42,560.88c0,55.96-6.66,85.25-44.5,100.32-31.52,12.55-69.16,14.92-236.9,14.92s-207.43-2.23-239.3-14.92c-38.08-15.25-44.5-43.66-44.5-101.57,0-31.73,2.68-51.49,8.96-66.06,6.67-15.48,17.63-25.56,35.54-32.69,31.88-12.69,67.48-14.92,238.1-14.92s206.23,2.23,238.1,14.92c37.84,15.07,44.5,44.25,44.5,100ZM1171.06,566.81c0-30.55-3.62-38.51-10.74-43.07-11.95-7.27-27.17-8.19-134.5-8.19-115.35,0-128.23,1.01-137.88,10.8l-.05.05c-5.33,5.32-7.32,16.19-7.32,40.11,0,20.5,1.08,28.12,13.19,33.11,14.67,5.94,33.36,6.91,133.25,6.91s115.74-1.1,130.95-6.95c8.9-3.64,13.09-8.1,13.09-32.76ZM1793.15,449.07l-115.89,131.28-115.31-131.28h-232.12v223.92h135.72l-3-155.88h10.38l150.62,155.88h108.01l150.62-155.88h9.18l-3,155.88h135.72v-223.92h-230.91Z"/>
+    </svg>
+  </div>
+
+  <div class="logo-wrap logo-twg">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1659.43 487.14">
+      <path d="M575.33,273.68L686.79,10.54h123.46v265.54L921.72,10.54h141.43l-220.54,464.09h-137.84v-234.44l-98.28,234.44h-141.43L435.09,10.54h136.64l3.6,3.59v259.56ZM1495.18,143.97c-24.25-166.5-249.21-178.3-357.64-87.91-92.33,76.97-131.08,244.99-67.92,349.92,57,94.72,207.73,109.75,282.38,27.98l-2.37,40.67h89.89l53.94-255.97h-188.18l-22.77,100.47h64.72c-22.61,63.01-133.49,70.28-156.95,4.72-21.13-59.05,4.73-173.36,69.04-198.91,44.51-17.69,100.31-4.62,99.9,50.65h139.04c-3.74-10.35-1.52-21.06-3.06-31.63ZM25.17,10.54L0,132.54h127.05L55.14,474.63h146.23l69.76-341.84,129.1-.36,23.64-116.47-3.15-5.42H25.17ZM1611.91,132.32c70.04-9.53,60.24-118.89-13.43-114.06-79.45,5.21-69.5,125.35,13.43,114.06ZM1565.72,52.76c32-54.49,111.12,7.7,64.37,53.47-2.67-10.31-3.81-22.2-11.98-29.92,16.76-4.17,7.17-29.89-3.61-29.89h-34.76v59.81h14.4s1.21-23.95,1.21-23.95c14.8.09,14.9,12.74,18.27,23.64l16.47.31c-36.99,36.21-88.67-12.09-64.37-53.47ZM1594.12,58.37c23.98-3.24,21.39,15.07.02,14.37l-.02-14.37Z"/>
+    </svg>
+  </div>
+
+  <a class="back-home" href="../index.html">office mood</a>
+
+  <div class="logo-wrap logo-brutal">
+    <img src="logos/brutal.svg" width="2579" height="900" alt="Brutal">
+  </div>
+
+  <div id="lava-wrapper">
+    <canvas id="blob-canvas"></canvas>
+  </div>
+  <canvas id="glass-canvas"></canvas>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  LAVA LAMP — morfología en continuo cambio (metaballs + vidrio)
+//  Técnica: canvas blur+contrast (metaball fusion) + glass overlay
+// ═══════════════════════════════════════════════════════════
+
+const blobCanvas     = document.getElementById('blob-canvas');
+const glassCanvas    = document.getElementById('glass-canvas');
+const blobCanvasBack = document.getElementById('blob-canvas-back');
+const glassCanvasBack = document.getElementById('glass-canvas-back');
+const bc  = blobCanvas.getContext('2d');
+const gc  = glassCanvas.getContext('2d');
+const bcB = blobCanvasBack.getContext('2d');
+const gcB = glassCanvasBack.getContext('2d');
+
+function resize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  blobCanvas.width = glassCanvas.width = w;
+  blobCanvas.height = glassCanvas.height = h;
+  blobCanvasBack.width = glassCanvasBack.width = w;
+  blobCanvasBack.height = glassCanvasBack.height = h;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── Noise suave: suma de sinusoides con frecuencias primas ───
+// Simula la deformación viscosa del aceite.
+// Cada "tentáculo" del blob es una combinación de 5-6 ondas
+// con períodos largos (8-40 seg) que mutan lentamente.
+
+function noise1D(t, waves) {
+  // waves: [{freq, amp, phase}]
+  return waves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t + w.phase), 0);
+}
+
+// Genera juego de ondas aleatorio para morfología
+function makeWaves(count, baseAmp) {
+  const primes = [0.031, 0.047, 0.061, 0.073, 0.089, 0.097, 0.113, 0.127];
+  return Array.from({length: count}, (_, i) => ({
+    freq:  primes[i % primes.length] * (0.7 + Math.random() * 0.6),
+    amp:   baseAmp * (0.5 + Math.random() * 0.5),
+    phase: Math.random() * Math.PI * 2,
+  }));
+}
+
+// ─── Definición de blobs ────────────────────────────────────
+// period: tiempo en ms para un ciclo vertical completo (muy lento)
+// xWaves: ondas que controlan la deriva horizontal
+// morphWaves: ondas que deforman el contorno (muchas, lentas)
+
+function makeBlob(xFrac, r, periodMs, phaseOffset) {
+  return {
+    xBase:       xFrac,
+    r,
+    period:      periodMs,
+    phaseOffset,
+
+    xWaves: makeWaves(2, 0.068),
+    yWaves: makeWaves(2, 0.062),
+
+    // Pocas capas y amplitudes bajas → siluetas más cercanas al círculo/elipse
+    morphWaves: [
+      makeWaves(2, 0.14),
+      makeWaves(2, 0.085),
+      makeWaves(2, 0.048),
+    ],
+
+    morphSpeeds: [0.00016, 0.00024, 0.00034],
+    morphPhases: [0, 0, 0].map(() => Math.random() * Math.PI * 2),
+
+    contourSpin: 0.00001 + Math.random() * 0.000018,
+    ripplePhase: Math.random() * Math.PI * 2,
+    rippleAmp:   0.014 + Math.random() * 0.01,
+
+    // Recorrido lento por la pantalla (fracción ~0.06–0.11 del ancho/alto)
+    roamAmp:  0.055 + Math.random() * 0.05,
+    roamPhX:  Math.random() * Math.PI * 2,
+    roamPhY:  Math.random() * Math.PI * 2,
+    roamVx:   0.00007 + Math.random() * 0.00006,
+    roamVy:   0.00006 + Math.random() * 0.000055,
+  };
+}
+
+const blobs = [
+  makeBlob(0.18, 118, 44000,  0),
+  makeBlob(0.40,  90, 36000,  9000),
+  makeBlob(0.62, 145, 56000, 18000),
+  makeBlob(0.80,  72, 30000,  5000),
+  makeBlob(0.30,  62, 26000, 22000),
+  makeBlob(0.90, 105, 48000, 14000),
+  makeBlob(0.52,  88, 40000,  3000),
+  makeBlob(0.07,  98, 52000, 31000),
+].map((b, i) => ({ ...b, layer: i % 2 === 0 ? 'back' : 'front' }));
+
+// ─── Posición y radios en un instante ───────────────────────
+function blobState(b, t, W, H) {
+
+  // Ciclo vertical: seno muy lento con easing para que tarde más en los extremos
+  const tOff   = t + b.phaseOffset;
+  const raw    = Math.sin((tOff / b.period) * Math.PI * 2);
+  // Power easing: pasa rápido por el centro, lento en extremos
+  const eased  = Math.sign(raw) * Math.pow(Math.abs(raw), 0.65);
+
+  const margin = b.r * 1.5;
+  const innerH = H - margin * 2;
+
+  const xDrift = b.xWaves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t * 0.001 + w.phase), 0);
+  const yDrift = b.yWaves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t * 0.001 + w.phase), 0);
+
+  // Lava + deriva vertical amplia
+  let yFrac = 0.5 + eased * 0.34 + yDrift * 0.38;
+  yFrac = Math.max(0.06, Math.min(0.94, yFrac));
+  let y = margin + innerH * yFrac;
+
+  // Órbita suave por toda la pantalla (independiente de xBase/y de lava)
+  const roamX = Math.sin(t * b.roamVx + b.roamPhX) * b.roamAmp * W;
+  const roamY = Math.cos(t * b.roamVy + b.roamPhY) * b.roamAmp * H;
+  let x = (b.xBase + xDrift) * W + roamX;
+  x = Math.max(b.r * 0.5, Math.min(W - b.r * 0.5, x));
+
+  y += roamY * 0.95;
+  y = Math.max(margin + b.r * 0.4, Math.min(H - margin - b.r * 0.4, y));
+
+  const velY = Math.abs(Math.cos((tOff / b.period) * Math.PI * 2));
+
+  const stretch = 1 + velY * 0.08;
+  const squeeze = 1 - velY * 0.04;
+  const ry = b.r * stretch;
+  const rx = b.r * squeeze;
+
+  return { x, y, rx, ry, velY };
+}
+
+// ─── Contorno orgánico del blob ─────────────────────────────
+// Deformación suave (casi redonda) + ripple bajo en frecuencia angular
+function blobContour(b, cx, cy, rx, ry, t, N = 88) {
+  b.morphSpeeds.forEach((spd, i) => {
+    b.morphPhases[i] += spd * 16;
+  });
+
+  const spin = t * b.contourSpin;
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    const angle = (i / N) * Math.PI * 2;
+    const a = angle + spin;
+
+    let dr = 0;
+    b.morphWaves.forEach((layer, li) => {
+      layer.forEach((w, wi) => {
+        const angFreq = li + wi + 2;
+        const tDrift = t * (0.00006 + li * 0.00004) * (1 + wi * 0.3);
+        dr += w.amp * Math.sin(
+          angFreq * a + b.morphPhases[li] * (wi * 0.45 + 0.75) + w.phase + tDrift
+        );
+      });
+    });
+
+    dr += b.rippleAmp * Math.sin(4 * a + t * 0.0001 + b.ripplePhase);
+
+    dr *= 0.78;
+    const r = 1 + dr;
+    pts.push([
+      cx + rx * r * Math.cos(angle),
+      cy + ry * r * Math.sin(angle),
+    ]);
+  }
+  return pts;
+}
+
+// ─── Catmull-Rom suavizado → canvas path ────────────────────
+function drawSmooth(ctx, pts) {
+  const N = pts.length;
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 0; i < N; i++) {
+    const p0 = pts[(i - 1 + N) % N];
+    const p1 = pts[i];
+    const p2 = pts[(i + 1) % N];
+    const p3 = pts[(i + 2) % N];
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
+  }
+  ctx.closePath();
+}
+
+// ─── Centroide ───────────────────────────────────────────────
+function centroid(pts) {
+  const n = pts.length;
+  return [
+    pts.reduce((s, p) => s + p[0], 0) / n,
+    pts.reduce((s, p) => s + p[1], 0) / n,
+  ];
+}
+
+function drawOneBlob(b, ts, W, H, bcCtx, gcCtx) {
+  const { x, y, rx, ry } = blobState(b, ts, W, H);
+  const pts = blobContour(b, x, y, rx, ry, ts);
+
+  drawSmooth(bcCtx, pts);
+  bcCtx.fillStyle = 'rgba(175, 222, 250, 0.86)';
+  bcCtx.fill();
+
+  const [cx, cy] = centroid(pts);
+
+  const grad = gcCtx.createRadialGradient(
+    cx - rx * 0.30, cy - ry * 0.35, ry * 0.03,
+    cx, cy, ry * 1.12
+  );
+  grad.addColorStop(0,    'rgba(255,255,255, 0.60)');
+  grad.addColorStop(0.25, 'rgba(225,244,255, 0.32)');
+  grad.addColorStop(0.65, 'rgba(195,234,252, 0.14)');
+  grad.addColorStop(1,    'rgba(165,218,248, 0.04)');
+
+  drawSmooth(gcCtx, pts);
+  gcCtx.fillStyle = grad;
+  gcCtx.fill();
+
+  drawSmooth(gcCtx, pts);
+  gcCtx.strokeStyle = 'rgba(255,255,255, 0.55)';
+  gcCtx.lineWidth = 2;
+  gcCtx.stroke();
+
+  const hlPts = blobContour(
+    { ...b, morphPhases: b.morphPhases.map(p => p + 0.9) },
+    cx - rx * 0.24, cy - ry * 0.30,
+    rx * 0.36, ry * 0.26,
+    ts
+  );
+  const hlGrad = gcCtx.createRadialGradient(
+    cx - rx * 0.28, cy - ry * 0.34, 0,
+    cx - rx * 0.24, cy - ry * 0.30,
+    rx * 0.36
+  );
+  hlGrad.addColorStop(0, 'rgba(255,255,255,0.72)');
+  hlGrad.addColorStop(1, 'rgba(255,255,255,0.00)');
+  drawSmooth(gcCtx, hlPts);
+  gcCtx.fillStyle = hlGrad;
+  gcCtx.fill();
+}
+
+// ─── Loop ────────────────────────────────────────────────────
+function animate(ts) {
+  const W = blobCanvas.width;
+  const H = blobCanvas.height;
+
+  bcB.clearRect(0, 0, W, H);
+  gcB.clearRect(0, 0, W, H);
+  bc.clearRect(0, 0, W, H);
+  gc.clearRect(0, 0, W, H);
+
+  blobs.forEach(b => {
+    if (b.layer === 'back') {
+      drawOneBlob(b, ts, W, H, bcB, gcB);
+    }
+  });
+  blobs.forEach(b => {
+    if (b.layer === 'front') {
+      drawOneBlob(b, ts, W, H, bc, gc);
+    }
+  });
+
+  requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
