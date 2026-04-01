@@ -10,7 +10,7 @@ Repositorio del sitio web de **D10 SPACE**, estudio creativo de diseño y desarr
 | `js/` | Scripts del sitio (`custom.js`, `contact.js`, `lightbox.js`, `validator.js`, jQuery). |
 | `img/` | Recursos gráficos (SVG, video de fondo, favicon, miniaturas OG). |
 | `brutal/img/` | SVG y gráficos usados por `indexbrutal.html`. |
-| `bootstrap-4.1.0-dist/` | Bootstrap 4 (CSS/JS) empaquetado en el repo. |
+| `bootstrap-4.1.0-dist/` | Distribución Bootstrap 4 en el repo; **ninguna página la enlaza** (legado, se puede eliminar si no la necesitas). |
 
 ---
 
@@ -36,6 +36,14 @@ Repositorio del sitio web de **D10 SPACE**, estudio creativo de diseño y desarr
 | Archivo | Título / propósito |
 |---------|-------------------|
 | [`3d/3d.html`](3d/3d.html) | **Visor GLB con model-viewer** — `<model-viewer>` de Google: carga `/3d/head__d42.glb`, rotación automática, controles de cámara, AR y sombras. |
+
+### `3900/` (display oficina)
+
+| Archivo | Título / propósito |
+|---------|-------------------|
+| [`3900/display.html`](3900/display.html) | **Display Oficina** — Pantalla tipo “office mood”: fondo en degradado azul claro, orbes difuminados animados, logos **Sorry Mom**, **TWG** y **Brutal** (SVG embebidos + `logos/brutal.svg`), efecto **lava lamp** en canvas (metaballs con blur/contraste) y capas de **vidrio**; enlace “office mood” a `../index.html`. Respeta `prefers-reduced-motion`. |
+
+Recursos en [`3900/logos/`](3900/logos/): `brutal.svg`, `twg.svg`, `sorrymom.svg` (referencias según uso en la página).
 
 ### `sm/` (Sorry Mom y demos)
 

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#c5e8fa">
 <title>Display Oficina</title>
 <link rel="shortcut icon" href="../img/favico.ico">
 <style>
@@ -43,8 +44,8 @@
     z-index: 3;
   }
   .logo-wrap svg {
-    fill: #000;
-    filter: drop-shadow(0 3px 18px rgba(0, 0, 0, 0.12));
+    fill: #2c3338;
+    filter: drop-shadow(0 3px 18px rgba(44, 51, 56, 0.18));
   }
 
   .logo-sorrymom { width: 320px; top: 14%; left:  7%; animation: fl1 18s ease-in-out infinite; }
@@ -56,7 +57,7 @@
     width: 100%;
     height: auto;
     display: block;
-    filter: drop-shadow(0 3px 18px rgba(0, 0, 0, 0.12));
+    filter: drop-shadow(0 3px 18px rgba(44, 51, 56, 0.18));
   }
 
   @keyframes fl1 {
@@ -82,15 +83,24 @@
     100% { transform:translate(0,0) rotate(0deg); }
   }
 
-  /* Metaball: capa detrás de logos (z 2) y capa delante (z 5–6) */
-  #lava-wrapper-back,
+  @media (prefers-reduced-motion: reduce) {
+    .orb { animation: none !important; }
+    .logo-wrap { animation: none !important; }
+  }
+
+  /* Metaball: capa detrás (más suave) y delante */
+  #lava-wrapper-back {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    filter: blur(34px) contrast(15);
+  }
   #lava-wrapper {
     position: absolute;
     inset: 0;
+    z-index: 5;
     filter: blur(28px) contrast(18);
   }
-  #lava-wrapper-back { z-index: 2; }
-  #lava-wrapper { z-index: 5; }
 
   #blob-canvas-back,
   #blob-canvas {
@@ -168,6 +178,15 @@
 //  LAVA LAMP — morfología en continuo cambio (metaballs + vidrio)
 //  Técnica: canvas blur+contrast (metaball fusion) + glass overlay
 // ═══════════════════════════════════════════════════════════
+
+let motionFactor = 1;
+function updateMotionFactor() {
+  motionFactor = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0.22 : 1;
+}
+updateMotionFactor();
+const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+if (mqReduce.addEventListener) mqReduce.addEventListener('change', updateMotionFactor);
+else mqReduce.addListener(updateMotionFactor);
 
 const blobCanvas     = document.getElementById('blob-canvas');
 const glassCanvas    = document.getElementById('glass-canvas');
@@ -270,17 +289,16 @@ function blobState(b, t, W, H) {
   const margin = b.r * 1.5;
   const innerH = H - margin * 2;
 
-  const xDrift = b.xWaves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t * 0.001 + w.phase), 0);
-  const yDrift = b.yWaves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t * 0.001 + w.phase), 0);
+  const xDrift = b.xWaves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t * 0.001 + w.phase), 0) * motionFactor;
+  const yDrift = b.yWaves.reduce((s, w) => s + w.amp * Math.sin(w.freq * t * 0.001 + w.phase), 0) * motionFactor;
 
   // Lava + deriva vertical amplia
   let yFrac = 0.5 + eased * 0.34 + yDrift * 0.38;
   yFrac = Math.max(0.06, Math.min(0.94, yFrac));
   let y = margin + innerH * yFrac;
 
-  // Órbita suave por toda la pantalla (independiente de xBase/y de lava)
-  const roamX = Math.sin(t * b.roamVx + b.roamPhX) * b.roamAmp * W;
-  const roamY = Math.cos(t * b.roamVy + b.roamPhY) * b.roamAmp * H;
+  const roamX = Math.sin(t * b.roamVx + b.roamPhX) * b.roamAmp * W * motionFactor;
+  const roamY = Math.cos(t * b.roamVy + b.roamPhY) * b.roamAmp * H * motionFactor;
   let x = (b.xBase + xDrift) * W + roamX;
   x = Math.max(b.r * 0.5, Math.min(W - b.r * 0.5, x));
 
@@ -301,7 +319,7 @@ function blobState(b, t, W, H) {
 // Deformación suave (casi redonda) + ripple bajo en frecuencia angular
 function blobContour(b, cx, cy, rx, ry, t, N = 88) {
   b.morphSpeeds.forEach((spd, i) => {
-    b.morphPhases[i] += spd * 16;
+    b.morphPhases[i] += spd * 16 * motionFactor;
   });
 
   const spin = t * b.contourSpin;
@@ -361,12 +379,14 @@ function centroid(pts) {
   ];
 }
 
-function drawOneBlob(b, ts, W, H, bcCtx, gcCtx) {
+function drawOneBlob(b, ts, W, H, bcCtx, gcCtx, isBack) {
   const { x, y, rx, ry } = blobState(b, ts, W, H);
   const pts = blobContour(b, x, y, rx, ry, ts);
 
   drawSmooth(bcCtx, pts);
-  bcCtx.fillStyle = 'rgba(175, 222, 250, 0.86)';
+  bcCtx.fillStyle = isBack
+    ? 'rgba(165, 215, 248, 0.58)'
+    : 'rgba(175, 222, 250, 0.86)';
   bcCtx.fill();
 
   const [cx, cy] = centroid(pts);
@@ -375,18 +395,25 @@ function drawOneBlob(b, ts, W, H, bcCtx, gcCtx) {
     cx - rx * 0.30, cy - ry * 0.35, ry * 0.03,
     cx, cy, ry * 1.12
   );
-  grad.addColorStop(0,    'rgba(255,255,255, 0.60)');
-  grad.addColorStop(0.25, 'rgba(225,244,255, 0.32)');
-  grad.addColorStop(0.65, 'rgba(195,234,252, 0.14)');
-  grad.addColorStop(1,    'rgba(165,218,248, 0.04)');
+  if (isBack) {
+    grad.addColorStop(0,    'rgba(255,255,255, 0.38)');
+    grad.addColorStop(0.3,  'rgba(210, 236, 252, 0.20)');
+    grad.addColorStop(0.7,  'rgba(175, 220, 245, 0.10)');
+    grad.addColorStop(1,    'rgba(150, 205, 235, 0.03)');
+  } else {
+    grad.addColorStop(0,    'rgba(255,255,255, 0.60)');
+    grad.addColorStop(0.25, 'rgba(225,244,255, 0.32)');
+    grad.addColorStop(0.65, 'rgba(195,234,252, 0.14)');
+    grad.addColorStop(1,    'rgba(165,218,248, 0.04)');
+  }
 
   drawSmooth(gcCtx, pts);
   gcCtx.fillStyle = grad;
   gcCtx.fill();
 
   drawSmooth(gcCtx, pts);
-  gcCtx.strokeStyle = 'rgba(255,255,255, 0.55)';
-  gcCtx.lineWidth = 2;
+  gcCtx.strokeStyle = isBack ? 'rgba(255,255,255, 0.32)' : 'rgba(255,255,255, 0.55)';
+  gcCtx.lineWidth = isBack ? 1.35 : 2;
   gcCtx.stroke();
 
   const hlPts = blobContour(
@@ -400,7 +427,7 @@ function drawOneBlob(b, ts, W, H, bcCtx, gcCtx) {
     cx - rx * 0.24, cy - ry * 0.30,
     rx * 0.36
   );
-  hlGrad.addColorStop(0, 'rgba(255,255,255,0.72)');
+  hlGrad.addColorStop(0, isBack ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.72)');
   hlGrad.addColorStop(1, 'rgba(255,255,255,0.00)');
   drawSmooth(gcCtx, hlPts);
   gcCtx.fillStyle = hlGrad;
@@ -409,6 +436,11 @@ function drawOneBlob(b, ts, W, H, bcCtx, gcCtx) {
 
 // ─── Loop ────────────────────────────────────────────────────
 function animate(ts) {
+  if (document.hidden) {
+    requestAnimationFrame(animate);
+    return;
+  }
+
   const W = blobCanvas.width;
   const H = blobCanvas.height;
 
@@ -419,12 +451,12 @@ function animate(ts) {
 
   blobs.forEach(b => {
     if (b.layer === 'back') {
-      drawOneBlob(b, ts, W, H, bcB, gcB);
+      drawOneBlob(b, ts, W, H, bcB, gcB, true);
     }
   });
   blobs.forEach(b => {
     if (b.layer === 'front') {
-      drawOneBlob(b, ts, W, H, bc, gc);
+      drawOneBlob(b, ts, W, H, bc, gc, false);
     }
   });
 
