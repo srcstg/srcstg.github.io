@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>GREENROOM — Showcase · Detalle (v3.3 motion)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="showcase-bottom-nav-active.css" />
+  <link rel="stylesheet" href="showcase-header-logo.css" />
+  <link rel="stylesheet" href="showcase-content-enter.css" />
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-line: #e0e0e0;
+      --grey-text: #888888;
+      --grey-pill: #f0f0f0;
+      --radius-hero: 28px;
+      --radius-phone: 40px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #e8e8ea;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .device {
+      width: 100%;
+      max-width: 390px;
+      min-height: min(844px, 92vh);
+      background: var(--white);
+      border-radius: var(--radius-phone);
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .badge-var {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #999;
+      text-transform: uppercase;
+      z-index: 20;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px 120px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .back {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      color: var(--black);
+      text-decoration: none;
+      border-radius: 50%;
+      transition: background 0.2s ease;
+    }
+
+    .back:hover {
+      background: var(--grey-pill);
+    }
+
+    .logo-mark--on-light img {
+      filter: brightness(0);
+    }
+
+    .top-spacer {
+      width: 40px;
+    }
+
+    .hero {
+      position: relative;
+      border-radius: var(--radius-hero);
+      overflow: hidden;
+      aspect-ratio: 4 / 3;
+      margin-bottom: 18px;
+      background: #0a0a0a;
+    }
+
+    .hero-parallax {
+      position: absolute;
+      inset: -18% 0 -18% 0;
+      background: #0a0a0a center / cover no-repeat;
+      background-image: url("https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=900&q=80");
+      will-change: transform;
+      clip-path: inset(100% 0 0 0);
+      animation: heroWipe 1s cubic-bezier(0.76, 0, 0.14, 1) 0.06s forwards;
+    }
+
+    @keyframes heroWipe {
+      to {
+        clip-path: inset(0 0 0 0);
+      }
+    }
+
+    .hero-shade {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
+    }
+
+    .hero-inner {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .hero-top {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .agency {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .heart-foot {
+      align-self: flex-end;
+      margin-top: auto;
+      padding-bottom: 4px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      opacity: 0.95;
+    }
+
+    .hero-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: white;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .hero-desc {
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.4;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px 16px;
+      margin-bottom: 14px;
+    }
+
+    .meta-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--grey-text);
+    }
+
+    .price-block {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: start;
+      text-align: right;
+    }
+
+    .price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--black);
+    }
+
+    .price-sub {
+      font-size: 0.625rem;
+      color: var(--grey-text);
+      margin-top: 2px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--grey-pill);
+      color: var(--black);
+    }
+
+    .section-tab {
+      font-size: 1.0625rem;
+      font-weight: 800;
+      color: var(--black);
+      display: inline-block;
+      margin-bottom: 14px;
+      padding-bottom: 6px;
+      border-bottom: 4px solid var(--black);
+      opacity: 0;
+      transform: translateY(12px);
+      transition:
+        opacity 0.5s ease,
+        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .section-tab.is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .body-text {
+      font-size: 0.875rem;
+      line-height: 1.65;
+      color: #444;
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition:
+        opacity 0.45s ease,
+        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .body-text.is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .body-text:nth-of-type(1) {
+      transition-delay: 0.06s;
+    }
+
+    .body-text:nth-of-type(2) {
+      transition-delay: 0.12s;
+    }
+
+    .tag-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tag-cell {
+      font-size: 0.8125rem;
+      padding: 14px 12px;
+      border-radius: 14px;
+      background: var(--grey-pill);
+      color: var(--black);
+      text-align: center;
+      font-weight: 500;
+      opacity: 0;
+      transform: scale(0.96);
+      transition:
+        opacity 0.4s ease,
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .tag-cell.is-revealed {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .tag-cell:nth-child(1) {
+      transition-delay: 0s;
+    }
+    .tag-cell:nth-child(2) {
+      transition-delay: 0.05s;
+    }
+    .tag-cell:nth-child(3) {
+      transition-delay: 0.1s;
+    }
+    .tag-cell:nth-child(4) {
+      transition-delay: 0.15s;
+    }
+
+    .sticky-cta {
+      position: absolute;
+      bottom: 72px;
+      left: 0;
+      right: 0;
+      padding: 12px 20px 8px;
+      background: linear-gradient(to top, var(--white) 85%, transparent);
+      transform: translateY(115%);
+      opacity: 0;
+      transition:
+        transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.35s ease;
+    }
+
+    .sticky-cta.in-view {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .btn-aplicar {
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 18px;
+      background: var(--black);
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .sticky-cta.in-view .btn-aplicar {
+      animation: ctaSpring 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+    }
+
+    @keyframes ctaSpring {
+      0% {
+        transform: scale(0.94);
+      }
+      60% {
+        transform: scale(1.03);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .btn-aplicar:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-aplicar:active {
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-parallax {
+        animation: none;
+        clip-path: inset(0 0 0 0);
+      }
+
+      .sticky-cta {
+        transform: none;
+        opacity: 1;
+      }
+
+      .section-tab,
+      .body-text,
+      .tag-cell {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+
+      .sticky-cta.in-view .btn-aplicar {
+        animation: none;
+      }
+    }
+
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--white);
+      border-top: 1px solid var(--grey-line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 12px 8px;
+    }
+
+    .nav-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      color: var(--grey-text);
+    }
+
+    .nav-icon.active {
+      color: var(--black);
+    }
+
+    .nav-showcase {
+      position: absolute;
+      bottom: 76px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: #aaa;
+      pointer-events: none;
+    }
+
+    .nav-showcase a {
+      pointer-events: auto;
+      color: #666;
+      margin: 0 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="device">
+    <span class="badge-var">Motion 3.3</span>
+    <div
+      class="scroll"
+      id="showcaseScroll"
+      data-content-enter=".meta-grid, .pills"
+    >
+      <header class="top-bar">
+        <a href="2.html" class="back" aria-label="Volver">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </a>
+        <span class="logo logo-mark logo-mark--on-light">
+          <img
+            src="https://i.ibb.co/7xKHDKCr/1774198653897.png"
+            alt="GREENROOM"
+            width="200"
+            height="48"
+            decoding="async"
+          />
+        </span>
+        <span class="top-spacer"></span>
+      </header>
+
+      <section class="hero" id="heroSection" aria-hidden="false">
+        <div class="hero-parallax" id="heroParallax" aria-hidden="true"></div>
+        <div class="hero-shade" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <div class="hero-top">
+            <span class="agency">Music Agency</span>
+          </div>
+          <div>
+            <h1 class="hero-title">Mackensi Tour 26: Foto + Backstage</h1>
+            <p class="hero-desc">
+              Cobertura fotográfica completa de la gira de Mackensi en Madrid, incluyendo show en vivo.
+            </p>
+          </div>
+          <button type="button" class="heart-foot" aria-label="Favorito">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <div class="meta-grid">
+        <div>
+          <div class="meta-line">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            30 May 2026 - 15 Jun 2026
+          </div>
+          <div class="meta-line" style="margin-top: 6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Madrid, España
+          </div>
+        </div>
+        <div class="price-block">
+          <div class="price">$1,500</div>
+          <div class="price-sub">Presupuesto por día</div>
+        </div>
+      </div>
+
+      <div class="pills">
+        <span class="pill">Fotógrafo</span>
+        <span class="pill">Filmmaker</span>
+      </div>
+
+      <h2 class="section-tab">Detalles</h2>
+      <p class="body-text">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+      </p>
+      <p class="body-text">
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+
+      <div class="tag-grid">
+        <div class="tag-cell">Característica 1</div>
+        <div class="tag-cell">Detalle 2</div>
+        <div class="tag-cell">Dato 3</div>
+        <div class="tag-cell">Información 4</div>
+      </div>
+    </div>
+
+    <div class="sticky-cta" id="stickyCta" aria-hidden="false">
+      <button type="button" class="btn-aplicar">Aplicar</button>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <span class="nav-icon active">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      </span>
+      <a href="6.html" class="nav-icon" aria-label="Mis proyectos">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+      </a>
+      <span class="nav-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+      </span>
+      <span class="nav-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </span>
+    </nav>
+
+    <div class="nav-showcase">
+      <span>3.3 · Scroll + reveal</span>
+      <a href="2.html">← 2</a>
+      <a href="3.html">3</a>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const scrollEl = document.getElementById("showcaseScroll");
+      const heroBg = document.getElementById("heroParallax");
+      const sticky = document.getElementById("stickyCta");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let ctaRevealed = false;
+
+      function onScroll() {
+        const y = scrollEl.scrollTop;
+        if (heroBg && !reduce) {
+          heroBg.style.transform = `translateY(${y * 0.2}px)`;
+        }
+        if (sticky && !reduce) {
+          if (y > 72) ctaRevealed = true;
+          sticky.classList.toggle("in-view", ctaRevealed);
+        }
+      }
+
+      scrollEl.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+
+      if (!reduce) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) entry.target.classList.add("is-revealed");
+            });
+          },
+          { threshold: 0.15, rootMargin: "0px 0px -10% 0px" }
+        );
+        document.querySelectorAll(".section-tab, .body-text, .tag-cell").forEach((el) => io.observe(el));
+      }
+    })();
+  </script>
+  <script src="showcase-content-enter.js"></script>
+</body>
+</html>

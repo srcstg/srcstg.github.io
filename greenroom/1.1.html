@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>GREENROOM — Showcase · Invitación (v1.1 motion)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="showcase-header-logo.css" />
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-bg: #f2f2f2;
+      --grey-muted: #a1a1a6;
+      --blue-link: #00bfff;
+      --radius-phone: 40px;
+      --radius-input: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #1c1c1c;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .phone-stack {
+      position: relative;
+      width: 100%;
+      max-width: 390px;
+      min-height: min(844px, 92vh);
+      border-radius: var(--radius-phone);
+      flex-shrink: 0;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    #liquid-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* Sin velo blanco ni blur: el gradiente se ve directo (100 % opaco en el canvas) */
+    .device {
+      width: 100%;
+      min-height: min(844px, 92vh);
+      background: transparent;
+      border-radius: var(--radius-phone);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 48px 28px 32px;
+      text-align: center;
+    }
+
+    .logo {
+      margin-bottom: auto;
+      padding-top: 8px;
+      opacity: 0;
+      animation: logoPop 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) 0.05s forwards;
+      transform-origin: center top;
+      line-height: 0;
+    }
+
+    @keyframes logoPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(-12px);
+      }
+      70% {
+        transform: scale(1.03) translateY(0);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .hint {
+      font-size: 1rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.92);
+      line-height: 1.45;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: fadeUp 0.55s ease 0.28s forwards;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .code-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: auto;
+      flex-wrap: nowrap;
+      padding: 8px 4px;
+    }
+
+    .digit {
+      --digit-spring: cubic-bezier(0.34, 1.56, 0.52, 1.12);
+      width: 52px;
+      height: 64px;
+      border: none;
+      border-radius: var(--radius-input);
+      background: var(--grey-bg);
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      color: var(--black);
+      outline: none;
+      opacity: 0;
+      transform: translateY(24px) scale(0.92);
+      animation: digitLand 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      transition:
+        transform 0.58s var(--digit-spring),
+        opacity 0.45s ease,
+        box-shadow 0.5s var(--digit-spring),
+        filter 0.4s ease,
+        font-size 0.45s var(--digit-spring);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .digit:nth-child(1) {
+      animation-delay: 0.42s;
+    }
+    .digit:nth-child(2) {
+      animation-delay: 0.52s;
+    }
+    .digit:nth-child(3) {
+      animation-delay: 0.62s;
+    }
+    .digit:nth-child(4) {
+      animation-delay: 0.72s;
+    }
+
+    @keyframes digitLand {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Evita reiniciar digitLand al entrar/salir del foco */
+    .code-row.is-editing-code .digit {
+      animation: none;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .code-row.is-editing-code.has-active-digit .digit:not(:focus) {
+      opacity: 0.62;
+      transform: translateY(1px) scale(0.76);
+      filter: brightness(0.9);
+    }
+
+    .code-row.is-editing-code .digit:focus {
+      z-index: 3;
+      font-size: 1.68rem;
+      box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.98),
+        0 10px 36px rgba(0, 0, 0, 0.42),
+        0 3px 16px rgba(0, 0, 0, 0.28);
+      transform: translateY(-3px) scale(1.24);
+      filter: brightness(1.08);
+    }
+
+    /* Fallback si JS no añade is-editing-code */
+    .digit:focus {
+      box-shadow: 0 0 0 2px var(--white), 0 4px 16px rgba(0, 0, 0, 0.25);
+      transform: scale(1.06);
+    }
+
+    .footer-hint {
+      font-size: 0.8125rem;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 48px;
+      opacity: 0;
+      animation: fadeUp 0.5s ease 0.95s forwards;
+    }
+
+    .footer-hint a.apply {
+      color: var(--blue-link);
+      text-decoration: none;
+      font-weight: 500;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      display: inline-block;
+    }
+
+    .footer-hint a.apply:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+
+    .nav-showcase {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .nav-showcase a {
+      color: rgba(255, 255, 255, 0.55);
+      margin: 0 6px;
+    }
+
+    .cta-row {
+      margin-top: 28px;
+      opacity: 0;
+      animation: fadeUp 0.55s ease 0.85s forwards;
+    }
+
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--black);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        110deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.25) 45%,
+        transparent 55%
+      );
+      transform: translateX(-120%);
+      transition: transform 0.6s ease;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .btn-primary:hover::after {
+      transform: translateX(120%);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .badge-var {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: rgba(255, 255, 255, 0.35);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <!-- Gradiente líquido a pantalla completa del marco · Cameron Knight https://codepen.io/cameronknight/pen/ogxWmBP -->
+  <div class="phone-stack">
+    <div id="liquid-bg" aria-hidden="true"></div>
+    <div class="device" id="device">
+      <span class="badge-var">Motion 1.1</span>
+      <div class="screen">
+        <div class="logo logo-mark">
+          <img
+            src="https://i.ibb.co/7xKHDKCr/1774198653897.png"
+            alt="GREENROOM"
+            width="200"
+            height="48"
+            decoding="async"
+          />
+        </div>
+        <p class="hint">Ingresa tu código<br />de invitación</p>
+        <div class="code-row" role="group" aria-label="Código de invitación">
+          <input class="digit" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1" />
+          <input class="digit" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 2" />
+          <input class="digit" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 3" />
+          <input class="digit" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 4" />
+        </div>
+        <div class="cta-row">
+          <a href="2.html" class="btn-primary" style="display: block; text-decoration: none; text-align: center">Continuar</a>
+        </div>
+        <p class="footer-hint">¿No tienes código? <a class="apply" href="#">Aplicar</a></p>
+      </div>
+      <div class="nav-showcase">
+        <span>1.1 · Stagger</span>
+        <a href="1.html">1</a>
+        <a href="2.html">2 →</a>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="liquid-gradient-invite-bg.js"></script>
+  <script>
+    const inputs = document.querySelectorAll(".digit");
+    const codeRow = document.querySelector(".code-row");
+
+    codeRow?.addEventListener("focusin", () => {
+      codeRow.classList.add("is-editing-code", "has-active-digit");
+    });
+    codeRow?.addEventListener("focusout", () => {
+      requestAnimationFrame(() => {
+        if (!codeRow.contains(document.activeElement)) codeRow.classList.remove("has-active-digit");
+      });
+    });
+
+    inputs.forEach((input, i) => {
+      input.addEventListener("input", () => {
+        if (input.value && i < inputs.length - 1) inputs[i + 1].focus();
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !input.value && i > 0) inputs[i - 1].focus();
+      });
+    });
+  </script>
+</body>
+</html>

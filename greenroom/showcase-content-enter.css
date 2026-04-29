@@ -1,0 +1,30 @@
+/**
+ * Entrada escalonada tipo feed (2.html) para cards / filas / bloques de contenido.
+ * Activar con data-content-enter en un ancestro común (p. ej. .scroll-tilt-inner).
+ * Selector por defecto: .card, .pcard, [data-inbox-swipe]. Personalizar con el valor del atributo.
+ */
+@keyframes grCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gr-enter-item {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: grCardIn 0.58s cubic-bezier(0, 0, 0.25, 1) forwards;
+  animation-delay: var(--enter-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gr-enter-item {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

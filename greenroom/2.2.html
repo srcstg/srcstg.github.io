@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>GREENROOM — Showcase · Inicio (v2.2 motion)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="showcase-bottom-nav-active.css" />
+  <link rel="stylesheet" href="showcase-header-logo.css" />
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-line: #e0e0e0;
+      --grey-text: #888888;
+      --grey-pill: #f0f0f0;
+      --radius-card: 24px;
+      --radius-phone: 40px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #e8e8ea;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .device {
+      width: 100%;
+      max-width: 390px;
+      min-height: min(844px, 92vh);
+      background: var(--white);
+      border-radius: var(--radius-phone);
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 20px 100px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 0;
+    }
+
+    .logo-mark--on-light img {
+      filter: brightness(0);
+    }
+
+    .tabs-shell {
+      position: relative;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+    }
+
+    .tabs-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .tab-glider {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 48px;
+      border-radius: 3px;
+      background: var(--black);
+      transition:
+        transform 0.42s cubic-bezier(0.65, 0, 0.25, 1),
+        width 0.42s cubic-bezier(0.65, 0, 0.25, 1);
+      pointer-events: none;
+      will-change: transform, width;
+    }
+
+    .tab {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--grey-text);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding-bottom: 8px;
+      position: relative;
+      transition: color 0.28s ease, transform 0.2s ease;
+    }
+
+    .tab.active {
+      color: var(--black);
+      font-weight: 700;
+    }
+
+    .feed-list > .card {
+      transition:
+        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.35s ease;
+    }
+
+    .feed-list > a.card:hover {
+      transform: translateY(-4px) scale(1.012);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    .feed-list > .card:active {
+      transform: translateY(-2px) scale(1.006);
+    }
+
+    .badge-var {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #999;
+      text-transform: uppercase;
+      z-index: 5;
+    }
+
+    .section-title {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 16px;
+    }
+
+    .card {
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      margin-bottom: 20px;
+      background: var(--white);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      opacity: 0;
+    }
+
+    .feed-list > .card:nth-child(1) {
+      transform: translateX(-28px);
+      animation: cardSweepA 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+    }
+
+    .feed-list > .card:nth-child(2) {
+      transform: translateX(28px);
+      animation: cardSweepB 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.18s forwards;
+    }
+
+    @keyframes cardSweepA {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes cardSweepB {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .card-visual {
+      position: relative;
+      aspect-ratio: 16 / 11;
+      background: #111 center / cover no-repeat;
+      background-image: url("https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80");
+    }
+
+    .card-visual.b {
+      background-image: url("https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80");
+    }
+
+    .card-visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 55%);
+    }
+
+    .card-top {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .agency {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .card-title-block {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 48px;
+      z-index: 1;
+    }
+
+    .card-title {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.88);
+      line-height: 1.35;
+    }
+
+    .fab-arrow {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--black);
+      border: none;
+      color: white;
+      display: grid;
+      place-items: center;
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    .card-meta {
+      padding: 14px 4px 4px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .meta-left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .meta-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.6875rem;
+      color: var(--grey-text);
+      margin-bottom: 4px;
+    }
+
+    .meta-line svg {
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pill {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--grey-pill);
+      color: var(--black);
+    }
+
+    .price-block {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--black);
+    }
+
+    .price-sub {
+      font-size: 0.625rem;
+      color: var(--grey-text);
+      margin-top: 2px;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--white);
+      border-top: 1px solid var(--grey-line);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 12px 8px;
+    }
+
+    .nav-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      color: var(--grey-text);
+      cursor: pointer;
+      border-radius: 12px;
+      transition:
+        color 0.2s ease,
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        background 0.2s ease;
+    }
+
+    .nav-icon.active {
+      color: var(--black);
+    }
+
+    .nav-icon:active {
+      transform: scale(0.88);
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-showcase {
+      position: absolute;
+      bottom: 76px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    .nav-showcase a {
+      color: #666;
+      margin: 0 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="device">
+    <span class="badge-var">Motion 2.2</span>
+    <div class="scroll">
+      <div class="logo logo-mark logo-mark--on-light">
+        <img
+          src="https://i.ibb.co/7xKHDKCr/1774198653897.png"
+          alt="GREENROOM"
+          width="200"
+          height="48"
+          decoding="async"
+        />
+      </div>
+      <div class="tabs-shell" id="tabsShell">
+        <div class="tabs-row">
+          <button type="button" class="tab active" data-tab="all">Todos</button>
+          <button type="button" class="tab" data-tab="you">Para ti</button>
+        </div>
+        <div class="tab-glider" id="tabGlider" aria-hidden="true"></div>
+      </div>
+      <h1 class="section-title">Proyectos recientes</h1>
+
+      <div class="feed-list">
+      <a href="3.html" class="card" id="card-a">
+        <div class="card-visual">
+          <div class="card-top">
+            <span class="agency">Music Agency</span>
+            <button type="button" class="icon-btn" aria-label="Favorito">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+          </div>
+          <div class="card-title-block">
+            <div class="card-title">Mackensi Tour 26: Foto + Backstage</div>
+            <p class="card-desc">Cobertura fotográfica completa de la gira de Mackensi en Madrid, incluyendo show en vivo.</p>
+          </div>
+          <button type="button" class="fab-arrow" aria-label="Ver detalle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
+          </button>
+        </div>
+        <div class="card-meta">
+          <div class="meta-row">
+            <div class="meta-left">
+              <div class="meta-line">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+                30 May 2026 - 15 Jun 2026
+              </div>
+              <div class="meta-line">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Madrid, España
+              </div>
+              <div class="pills">
+                <span class="pill">Fotógrafo</span>
+                <span class="pill">Filmmaker</span>
+              </div>
+            </div>
+            <div class="price-block">
+              <div class="price">$1,500</div>
+              <div class="price-sub">Presupuesto por día</div>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <div class="card" style="pointer-events: none; opacity: 0.85">
+        <div class="card-visual b">
+          <div class="card-top">
+            <span class="agency">Playagency X</span>
+            <button type="button" class="icon-btn" aria-label="Favorito">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.4">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+          </div>
+          <div class="card-title-block">
+            <div class="card-title">Mountain Fest: Filmmaker &amp; Dancers</div>
+          </div>
+          <button type="button" class="fab-arrow" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
+          </button>
+        </div>
+        <div class="card-meta">
+          <div class="meta-row">
+            <div class="meta-left">
+              <div class="meta-line">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+                12 Jul 2026 - 14 Jul 2026
+              </div>
+              <div class="meta-line">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Barcelona, España
+              </div>
+            </div>
+            <div class="price-block">
+              <div class="price">$2,200</div>
+              <div class="price-sub">Presupuesto fijo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <span class="nav-icon active">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      </span>
+      <a href="6.html" class="nav-icon" aria-label="Mis proyectos">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+      </a>
+      <span class="nav-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+          <polyline points="22,6 12,13 2,6" />
+        </svg>
+      </span>
+      <span class="nav-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </span>
+    </nav>
+
+    <div class="nav-showcase">
+      <span>2.2 · Tabs + hover</span>
+      <a href="1.html">← 1</a>
+      <a href="2.html">2</a>
+      <a href="3.html">3 →</a>
+    </div>
+  </div>
+  <script>
+    function moveTabGlider() {
+      const shell = document.getElementById("tabsShell");
+      const glider = document.getElementById("tabGlider");
+      const active = shell.querySelector(".tab.active");
+      if (!shell || !glider || !active) return;
+      const sr = shell.getBoundingClientRect();
+      const ar = active.getBoundingClientRect();
+      glider.style.width = `${ar.width}px`;
+      glider.style.transform = `translateX(${ar.left - sr.left}px)`;
+    }
+
+    document.querySelectorAll(".tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        btn.classList.add("active");
+        moveTabGlider();
+      });
+    });
+
+    window.addEventListener("load", () => requestAnimationFrame(moveTabGlider));
+    window.addEventListener("resize", () => requestAnimationFrame(moveTabGlider));
+  </script>
+</body>
+</html>

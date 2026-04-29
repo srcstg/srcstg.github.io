@@ -1,0 +1,57 @@
+/**
+ * Ícono activo del bottom nav: trazo del SVG recorre tonos (hue-rotate).
+ * Borde fino en la casilla del ícono (sin círculo ni halo de gradiente detrás).
+ */
+.bottom-nav .nav-icon.active {
+  color: #ff3cac;
+  border-radius: 13px;
+  outline: 1px solid rgba(255, 45, 140, 0.6);
+  outline-offset: 0;
+  animation: grNavOutlineChroma 9s linear infinite;
+}
+
+.bottom-nav .nav-icon.active svg {
+  stroke: currentColor;
+  vector-effect: non-scaling-stroke;
+  animation: grNavIconChroma 9s linear infinite;
+}
+
+@keyframes grNavIconChroma {
+  from {
+    filter: hue-rotate(0deg) saturate(1.32) brightness(1.08);
+  }
+  to {
+    filter: hue-rotate(360deg) saturate(1.32) brightness(1.08);
+  }
+}
+
+@keyframes grNavOutlineChroma {
+  0% {
+    outline-color: rgba(255, 45, 140, 0.65);
+  }
+  25% {
+    outline-color: rgba(34, 211, 238, 0.55);
+  }
+  50% {
+    outline-color: rgba(163, 230, 53, 0.52);
+  }
+  75% {
+    outline-color: rgba(168, 85, 247, 0.55);
+  }
+  100% {
+    outline-color: rgba(255, 45, 140, 0.65);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-nav .nav-icon.active {
+    animation: none;
+    outline-color: rgba(255, 255, 255, 0.35);
+    color: var(--text, #f0f0f0);
+  }
+
+  .bottom-nav .nav-icon.active svg {
+    animation: none;
+    filter: none;
+  }
+}
