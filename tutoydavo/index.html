@@ -523,12 +523,16 @@
       });
     }
 
+    function midUrl(webUrl) {
+      return webUrl.replace('/web%2F', '/mid%2F').replace('/web/', '/mid/');
+    }
+
     function openLightbox(index) {
       current = index;
       lbImg.src = FOTOS[current];
       lbImg.alt = `Foto ${current + 1} de ${FOTOS.length}`;
       lbCounter.textContent = `${current + 1} / ${FOTOS.length}`;
-      lbDownload.href = FOTOS[current];
+      lbDownload.href = midUrl(FOTOS[current]);
       lightbox.classList.add('active');
       document.body.style.overflow = 'hidden';
       lbImg.focus();
@@ -544,7 +548,7 @@
       lbImg.src = FOTOS[current];
       lbImg.alt = `Foto ${current + 1} de ${FOTOS.length}`;
       lbCounter.textContent = `${current + 1} / ${FOTOS.length}`;
-      lbDownload.href = FOTOS[current];
+      lbDownload.href = midUrl(FOTOS[current]);
     }
 
     lbClose.addEventListener('click', closeLightbox);
