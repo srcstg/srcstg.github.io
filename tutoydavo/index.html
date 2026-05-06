@@ -481,7 +481,8 @@
       FOTOS.forEach((url, i) => {
         const path = decodeURIComponent(url.replace('https://tutoydavo.d10.cl/', ''));
         const parts = path.split('/');
-        const folder = parts.length > 1 ? parts[0] : 'General';
+        // estructura: mid / seccion / archivo.jpg
+        const folder = parts.length > 2 ? parts[1] : parts.length > 1 ? parts[0] : 'General';
         if (!groups.has(folder)) groups.set(folder, []);
         groups.get(folder).push({ url, index: i });
       });
