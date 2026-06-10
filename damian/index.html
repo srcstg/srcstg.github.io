@@ -144,13 +144,25 @@ h2::before,h2::after{content:"";height:2px;background:var(--ink);flex:1;max-widt
   font-weight:700;margin:0 0 16px;letter-spacing:.05em;
 }
 
+/* ── Guía de regalos ── */
+.gifts{
+  border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:5px;
+  background:var(--paper2);padding:24px 22px;margin:14px 2px 30px;
+}
+.gifts .glabel{
+  font-size:11px;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase;
+  font-weight:600;color:var(--mustard);margin:14px 0 6px;
+}
+.gifts .glabel:first-child{margin-top:0}
+.gifts .gitems{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.6;margin:0}
+
 /* ── Formulario ── */
 form{
   border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:5px;
   background:#fffdf6;padding:24px 22px 28px;text-align:left;margin:0 2px;
 }
 .fhead{
-  text-align:center;font-family:'Courier Prime',monospace;font-size:12px;
+  text-align:center;font-family:'Courier Prime',monospace;font-size:12px;font-weight:700;
   letter-spacing:.22em;text-indent:.22em;text-transform:uppercase;
   border-bottom:2px solid var(--ink);padding-bottom:11px;margin-bottom:14px;
 }
@@ -167,6 +179,14 @@ input[type=text],input[type=tel],textarea{
 }
 input:focus,textarea:focus{outline:none;border-bottom-color:var(--red);background:var(--paper)}
 textarea{resize:none;min-height:42px}
+
+.telrow{
+  display:flex;align-items:baseline;gap:10px;max-width:240px;margin:0 auto;
+  border-bottom:2px solid var(--ink);
+}
+.telrow .telprefix{font-family:'Courier Prime',monospace;font-size:17px;font-weight:700;white-space:nowrap}
+.telrow input{border-bottom:0;text-align:left;padding-left:0}
+.telrow:focus-within{border-bottom-color:var(--red);background:var(--paper)}
 
 .stepper{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:8px}
 .stepbtn{
@@ -354,12 +374,16 @@ textarea{resize:none;min-height:42px}
             <span class="stepval" id="acompVal">0</span>
             <button type="button" class="stepbtn" id="plus" aria-label="más">+</button>
           </div>
+          <p class="hint" style="text-align:center;margin-top:8px">Si cuentas a tu pareja, avísale — así no confirma por su cuenta.</p>
         </div>
 
         <div id="telBlock">
           <label class="lbl" for="telefono">Teléfono <span class="opt">(opcional)</span></label>
           <p class="hint">para avisarte el lugar apenas exista</p>
-          <input type="tel" id="telefono" name="telefono" maxlength="20" placeholder="+56 9 ____ ____">
+          <div class="telrow">
+            <span class="telprefix">+56 9</span>
+            <input type="tel" id="telefono" name="telefono" maxlength="9" inputmode="numeric" placeholder="____ ____">
+          </div>
         </div>
 
         <label class="lbl" for="mensaje">Mensaje <span class="opt">(opcional)</span></label>
@@ -394,10 +418,14 @@ textarea{resize:none;min-height:42px}
   <section class="card" id="regalos">
     <div class="inner">
       <h2>Los regalos</h2>
-      <p class="lead">Tu presencia es suficiente. Pero si quieres llegar con algo,
-      existe una lista — la armamos con esmero y cero sutileza.</p>
-      <a class="btn ghost" id="giftBtn" href="#" target="_blank" rel="noopener">Ver la lista →</a>
-      <br>
+      <p class="lead">Tu presencia es suficiente — lo que más nos importa es
+      ver a los amigos. Pero si quieres llegar con algo, esta guía ayuda:</p>
+      <div class="gifts">
+        <p class="glabel">Nos falta</p>
+        <p class="gitems">Pañales (¡siempre faltan!) y casi todo lo demás.</p>
+        <p class="glabel">Ya tenemos</p>
+        <p class="gitems">Cuna · cuna colecho · coche · sillón de amamantar</p>
+      </div>
       <button class="next" data-next>Continuar<span class="chev">▾</span></button>
     </div>
   </section>
@@ -434,7 +462,6 @@ const CONFIG = {
   LUGAR:    "",            // ✏️ ej: "Casa de los abuelos, Ñuñoa" — vacío = "POR CONFIRMAR*"
   PLAZO:    "viernes 20 de junio",   // ✏️ fecha límite para confirmar
 
-  LISTA_REGALOS_URL: "",   // ✏️ pega el link de tu lista de regalos
   WHATSAPP: "",            // ✏️ tu número, formato 569XXXXXXXX (sin +) — para dudas y respaldo
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzeEJq_uFZp8MiMaa4CorXCE7bheLLkcpT_n_uNfn1nozGiBcRYyeVzg1AAx0F3-AtB/exec",
 };
@@ -511,9 +538,6 @@ document.addEventListener("keydown", (e) => {
   if (CONFIG.HORA && CONFIG.LUGAR) {
     $("fichaNote").innerHTML = "Las sillas ya están contadas. Gracias por confirmar a tiempo. <br>— Barbi &amp; David";
   }
-
-  if (CONFIG.LISTA_REGALOS_URL) $("giftBtn").href = CONFIG.LISTA_REGALOS_URL;
-  else $("giftBtn").addEventListener("click", (e) => { e.preventDefault(); alert("La lista está en camino. Vuelve pronto."); });
 
   const wa = configurado(CONFIG.WHATSAPP) ? "https://wa.me/" + CONFIG.WHATSAPP : null;
   if (wa) { $("dudasLink").href = wa; $("fixLink").href = wa + "?text=" + encodeURIComponent("Hola! Confirmé al baby shower de Damián pero tengo un cambio: "); }
@@ -609,11 +633,12 @@ $("form").addEventListener("submit", (e) => {
   if (!nombre) { $("nombre").focus(); return; }
 
   const asiste = vaAsistir();
+  const digitos = $("telefono").value.replace(/\D/g, "");
   const datos = {
     nombre,
     acompanantes: String(asiste ? acomp : 0),
     actitud: asiste ? "Sí, voy" : "No puedo",
-    telefono: asiste ? $("telefono").value.trim() : "",
+    telefono: (asiste && digitos) ? "+56 9 " + digitos : "",
     mensaje: $("mensaje").value.trim(),
   };
   const total = asiste ? acomp + 1 : 0;

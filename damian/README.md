@@ -16,10 +16,12 @@ confirmación de asistencia (RSVP) a una planilla de Google.
 
 Abre `index.html` y busca el bloque `CONFIG` (está al inicio del `<script>`, marcado con ✏️):
 
-- `MAMA` / `PAPA` — nombres para los créditos (Dirección / Producción); ya vienen como "Barbi" y "David"
+- `MAMA` / `PAPA` — nombres para los créditos; ya vienen como "Barbi" y "David"
 - `PLAZO` — fecha límite para confirmar (sugerido: viernes 20 de junio)
-- `LISTA_REGALOS_URL` — link a tu lista de regalos
 - `WHATSAPP` — tu número formato `569XXXXXXXX` (dudas + respaldo si falla el form)
+
+Los regalos no usan lista externa: la tarjeta "Los regalos" trae la guía
+"Nos falta / Ya tenemos" directamente en el HTML (edítala ahí si cambia).
 - `HORA` y `LUGAR` — déjalos vacíos por ahora; cuando los definas, los rellenas,
   haces push, y la página cambia sola de "POR CONFIRMAR" al dato real.
 
