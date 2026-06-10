@@ -25,8 +25,8 @@ Abre `index.html` y busca el bloque `CONFIG` (está al inicio del `<script>`, ma
 
 ## 🔌 Paso 2 — Conectar la planilla de Google (2 min)
 
-1. La planilla ya existe en tu Drive (la creó Claude): **"Baby Shower Damián — Confirmaciones"**
-   → https://docs.google.com/spreadsheets/d/1QjheiAInfl4r5-kkPNdu0YX-9r8Jo6kWqnIip67YKiQ/edit
+1. La planilla de confirmaciones es **"damian babyshower"** (creada por David):
+   → https://docs.google.com/spreadsheets/d/1f1LfwXEI5ifb7R_fpPWwyD-XMV1LZcUKMcRZ7rmDGI8/edit
 2. Ábrela y entra al menú **Extensiones → Apps Script**.
 3. Borra lo que aparezca y pega el contenido completo de `apps-script.gs`. Guarda (💾).
 4. Botón **Implementar → Nueva implementación**.

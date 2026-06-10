@@ -221,11 +221,6 @@ textarea{resize:none;min-height:42px}
 .confirmed .exp{font-size:11px;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;color:var(--mustard);font-weight:600}
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
 
-/* ── FAQ ── */
-.faq{text-align:left;max-width:460px;margin:10px auto 0}
-.faq .q{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;margin:18px 0 4px;color:var(--red)}
-.faq .a{font-family:'Courier Prime',monospace;font-size:14px;line-height:1.6;margin:0}
-
 /* ── Créditos ── */
 .credits{font-family:'Courier Prime',monospace}
 .credits .row{display:flex;align-items:baseline;gap:10px;max-width:420px;margin:11px auto;font-size:13px;text-align:left}
@@ -336,9 +331,8 @@ textarea{resize:none;min-height:42px}
         <div class="row"><span class="k">Fecha</span><span class="dots"></span><span class="v">Sábado 27 de junio</span></div>
         <div class="row"><span class="k">Hora</span><span class="dots"></span><span class="v tbd" id="horaV">Por confirmar*</span></div>
         <div class="row"><span class="k">Lugar</span><span class="dots"></span><span class="v tbd" id="lugarV">Por confirmar*</span></div>
-        <div class="row"><span class="k">Vestuario</span><span class="dots"></span><span class="v">A prueba de babas</span></div>
-        <p class="note" id="fichaNote">* El lugar y la hora dependen <b>estrictamente</b> de cuántas personas
-        confirmen. Por eso, confirme. <br>— El Comité Organizador</p>
+        <p class="note" id="fichaNote">* El lugar y la hora dependen de cuántos seamos.
+        Por eso, confirma. <br>— Barbi &amp; David</p>
       </div>
       <button class="next" data-next>Continuar<span class="chev">▾</span></button>
     </div>
@@ -349,55 +343,59 @@ textarea{resize:none;min-height:42px}
     <div class="inner">
       <p class="num">Capítulo II</p>
       <h2>La confirmación</h2>
-      <p class="lead">El comité ruega completar el formulario. No existe la opción «no asistiré»; no fue impresa.</p>
+      <p class="lead">Cuéntanos si vienes — del número de confirmados depende el lugar.</p>
       <p class="censo" id="censo" hidden></p>
 
       <form id="form" autocomplete="off">
-        <p class="fhead">Formulario oficial de asistencia</p>
+        <p class="fhead">Confirmación de asistencia</p>
 
         <label class="lbl" for="nombre">Nombre y apellido</label>
         <input type="text" id="nombre" name="nombre" required maxlength="80" placeholder="________________">
 
-        <label class="lbl">¿Cuántas personas lo acompañan?</label>
-        <p class="hint">(sin contarse a usted — el subcomité de sillas lo agradece)</p>
-        <div class="stepper">
-          <button type="button" class="stepbtn" id="minus" aria-label="menos">−</button>
-          <span class="stepval" id="acompVal">0</span>
-          <button type="button" class="stepbtn" id="plus" aria-label="más">+</button>
-        </div>
-
-        <label class="lbl">Declaración de intenciones</label>
+        <label class="lbl">¿Te sumas?</label>
         <div class="choices">
-          <label class="choice"><input type="radio" name="actitud" value="Asistiré" checked><span>Asistiré</span></label>
-          <label class="choice"><input type="radio" name="actitud" value="Asistiré, obviamente"><span>Asistiré, obviamente</span></label>
+          <label class="choice"><input type="radio" name="actitud" value="Sí, voy" checked><span>Sí, voy</span></label>
+          <label class="choice"><input type="radio" name="actitud" value="No puedo"><span>No puedo</span></label>
         </div>
 
-        <label class="lbl" for="telefono">Teléfono <span class="opt">(opcional)</span></label>
-        <p class="hint">para avisarle la ubicación apenas exista</p>
-        <input type="tel" id="telefono" name="telefono" maxlength="20" placeholder="+56 9 ____ ____">
+        <div id="acompBlock">
+          <label class="lbl">¿Cuántos van contigo?</label>
+          <p class="hint">(sin contarte a ti — el comité de sillas lo agradece)</p>
+          <div class="stepper">
+            <button type="button" class="stepbtn" id="minus" aria-label="menos">−</button>
+            <span class="stepval" id="acompVal">0</span>
+            <button type="button" class="stepbtn" id="plus" aria-label="más">+</button>
+          </div>
+        </div>
+
+        <div id="telBlock">
+          <label class="lbl" for="telefono">Teléfono <span class="opt">(opcional)</span></label>
+          <p class="hint">para avisarte el lugar apenas exista</p>
+          <input type="tel" id="telefono" name="telefono" maxlength="20" placeholder="+56 9 ____ ____">
+        </div>
 
         <label class="lbl" for="mensaje">Mensaje <span class="opt">(opcional)</span></label>
-        <p class="hint">palabras solemnes para el archivo histórico de Damián</p>
+        <p class="hint">déjale unas palabras a Damián</p>
         <textarea id="mensaje" name="mensaje" maxlength="280" rows="1"></textarea>
 
         <div class="submitwrap">
           <button type="submit" class="btn" id="submitBtn">Confirmar asistencia →</button>
-          <p class="plazo" id="plazo">Plazo del comité: viernes 20 de junio</p>
+          <p class="plazo" id="plazo">Confirma antes del viernes 20 de junio</p>
         </div>
       </form>
 
       <!-- Tarjeta post-confirmación -->
       <div class="confirmed" id="confirmed">
-        <div class="stamp">Aceptado</div>
+        <div class="stamp" id="stampTxt">Confirmado</div>
         <p class="exp" id="expediente">Expediente Nº 0000</p>
-        <p id="confText">Quedó usted formalmente adentro.</p>
-        <p>El lugar será revelado en cuanto terminemos de contar las sillas.
-        Le avisaremos por WhatsApp — la producción es rápida para esas cosas.</p>
+        <p id="confText">Quedaste adentro.</p>
+        <p id="confSub">El lugar lo revelamos en cuanto terminemos de contar las sillas.
+        Te avisamos por WhatsApp.</p>
         <div class="actions">
           <a class="btn sm ghost" id="icsBtn" href="#" download="baby-shower-damian.ics">+ Agendar el 27</a>
           <a class="btn sm ghost" id="shareBtn" href="#" target="_blank" rel="noopener">Reenviar invitación</a>
         </div>
-        <p class="hint" style="text-align:center;margin-top:18px">¿Cambio de planes? <a id="fixLink" href="#" target="_blank" rel="noopener" style="color:var(--red)">notifíquelo a la producción</a>.</p>
+        <p class="hint" style="text-align:center;margin-top:18px">¿Cambio de planes? <a id="fixLink" href="#" target="_blank" rel="noopener" style="color:var(--red)">escríbenos</a>.</p>
       </div>
 
       <button class="next" data-next>Continuar<span class="chev">▾</span></button>
@@ -409,35 +407,15 @@ textarea{resize:none;min-height:42px}
     <div class="inner">
       <p class="num">Capítulo III</p>
       <h2>El registro de obsequios</h2>
-      <p class="lead">Su presencia es suficiente. No obstante, existe una lista.
-      El comité la preparó con esmero y cero sutileza.</p>
-      <a class="btn ghost" id="giftBtn" href="#" target="_blank" rel="noopener">Consultar la lista →</a>
+      <p class="lead">Tu presencia es suficiente. Pero si quieres llegar con algo,
+      existe una lista — la armamos con esmero y cero sutileza.</p>
+      <a class="btn ghost" id="giftBtn" href="#" target="_blank" rel="noopener">Ver la lista →</a>
       <br>
       <button class="next" data-next>Continuar<span class="chev">▾</span></button>
     </div>
   </section>
 
-  <!-- ── ESCENA 5 · PREGUNTAS ────────────────────────────────── -->
-  <section class="card" id="faq">
-    <div class="inner">
-      <p class="num">Capítulo IV</p>
-      <h2>Preguntas al comité</h2>
-      <div class="faq">
-        <p class="q">¿Dónde es?</p>
-        <p class="a">Todavía no lo sabemos. No es suspenso artístico: es logística.
-        Cuando usted confirme, lo sabremos todos antes.</p>
-        <p class="q">¿Puedo llevar acompañantes?</p>
-        <p class="a">Sí. Indique cuántos en el formulario. Cada silla se solicita por escrito.</p>
-        <p class="q">¿Habrá comida?</p>
-        <p class="a">Obviamente.</p>
-        <p class="q">¿Qué me pongo?</p>
-        <p class="a">Algo que tolere babas, abrazos y una cantidad excesiva de fotografías.</p>
-      </div>
-      <button class="next" data-next>Continuar<span class="chev">▾</span></button>
-    </div>
-  </section>
-
-  <!-- ── ESCENA 6 · CRÉDITOS ─────────────────────────────────── -->
+  <!-- ── ESCENA 5 · CRÉDITOS ─────────────────────────────────── -->
   <section class="card" id="fin">
     <div class="inner credits">
       <div class="orn">✦ ✦ ✦</div>
@@ -449,7 +427,7 @@ textarea{resize:none;min-height:42px}
       <p class="fin">FIN<span style="color:var(--red)">*</span></p>
       <p class="finnote">* en realidad, el comienzo.</p>
       <br>
-      <a class="dudas" id="dudasLink" href="#" target="_blank" rel="noopener">¿Dudas? Línea directa con la producción →</a>
+      <a class="dudas" id="dudasLink" href="#" target="_blank" rel="noopener">¿Dudas? Escríbenos →</a>
       <br>
       <button class="next" id="backTop">Volver al inicio<span class="chev" style="animation:none">▴</span></button>
     </div>
@@ -471,7 +449,7 @@ const CONFIG = {
 
   LISTA_REGALOS_URL: "",   // ✏️ pega el link de tu lista de regalos
   WHATSAPP: "",            // ✏️ tu número, formato 569XXXXXXXX (sin +) — para dudas y respaldo
-  APPS_SCRIPT_URL: "",     // ✏️ URL de la app web de Google Apps Script (ver README.md)
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzeEJq_uFZp8MiMaa4CorXCE7bheLLkcpT_n_uNfn1nozGiBcRYyeVzg1AAx0F3-AtB/exec",
 };
 /* ════════════════════════════════════════════════════════════════ */
 
@@ -539,16 +517,16 @@ document.addEventListener("keydown", (e) => {
 (function pintar(){
   if (CONFIG.MAMA) $("mama").textContent = CONFIG.MAMA;
   if (CONFIG.PAPA) $("papa").textContent = CONFIG.PAPA;
-  $("plazo").textContent = "Plazo del comité: " + CONFIG.PLAZO;
+  $("plazo").textContent = "Confirma antes del " + CONFIG.PLAZO;
 
   if (CONFIG.HORA)  { const el = $("horaV");  el.textContent = CONFIG.HORA;  el.classList.remove("tbd"); }
   if (CONFIG.LUGAR) { const el = $("lugarV"); el.textContent = CONFIG.LUGAR; el.classList.remove("tbd"); }
   if (CONFIG.HORA && CONFIG.LUGAR) {
-    $("fichaNote").innerHTML = "Las sillas ya fueron contadas. El comité agradece a quienes confirmaron a tiempo. <br>— El Comité Organizador";
+    $("fichaNote").innerHTML = "Las sillas ya están contadas. Gracias por confirmar a tiempo. <br>— Barbi &amp; David";
   }
 
   if (CONFIG.LISTA_REGALOS_URL) $("giftBtn").href = CONFIG.LISTA_REGALOS_URL;
-  else $("giftBtn").addEventListener("click", (e) => { e.preventDefault(); alert("La lista está siendo curada por el comité. Vuelva pronto."); });
+  else $("giftBtn").addEventListener("click", (e) => { e.preventDefault(); alert("La lista está en camino. Vuelve pronto."); });
 
   const wa = configurado(CONFIG.WHATSAPP) ? "https://wa.me/" + CONFIG.WHATSAPP : null;
   if (wa) { $("dudasLink").href = wa; $("fixLink").href = wa + "?text=" + encodeURIComponent("Hola! Confirmé al baby shower de Damián pero tengo un cambio: "); }
@@ -601,21 +579,40 @@ let acomp = 0;
 $("minus").addEventListener("click", () => { acomp = Math.max(0, acomp - 1); $("acompVal").textContent = acomp; });
 $("plus").addEventListener("click",  () => { acomp = Math.min(6, acomp + 1); $("acompVal").textContent = acomp; });
 
+/* ── Sí / No: mostrar u ocultar lo que no aplica ── */
+const vaAsistir = () =>
+  ((document.querySelector("input[name=actitud]:checked") || {}).value || "Sí, voy").startsWith("Sí");
+document.querySelectorAll("input[name=actitud]").forEach(r =>
+  r.addEventListener("change", () => {
+    const si = vaAsistir();
+    $("acompBlock").style.display = si ? "" : "none";
+    $("telBlock").style.display = si ? "" : "none";
+    $("submitBtn").textContent = si ? "Confirmar asistencia →" : "Enviar respuesta →";
+  })
+);
+
 /* ── Envío de la confirmación ── */
-function mostrarConfirmado(nombre, total){
+function mostrarConfirmado(nombre, total, asiste){
   $("form").style.display = "none";
   $("confirmed").style.display = "block";
   $("expediente").textContent = "Expediente Nº " + String(1000 + Math.floor(Math.random() * 9000));
-  $("confText").textContent =
-    `Quedó usted formalmente adentro, ${nombre}. ` +
-    (total > 1 ? `Reservamos ${total} sillas.` : "Reservamos su silla.");
+  $("stampTxt").textContent = asiste ? "Confirmado" : "Recibido";
+  if (asiste) {
+    $("confText").textContent =
+      `¡Listo, ${nombre}! ` + (total > 1 ? `Te guardamos ${total} sillas.` : "Te guardamos la silla.");
+    $("confSub").textContent = "El lugar lo revelamos en cuanto terminemos de contar las sillas. Te avisamos por WhatsApp.";
+  } else {
+    $("confText").textContent = `Gracias por avisar, ${nombre}. Te vamos a extrañar.`;
+    $("confSub").textContent = "Si los planes cambian antes del 20, escríbenos y te sumamos de vuelta.";
+    $("icsBtn").style.display = "none";
+  }
 }
 
-// Si ya confirmó antes en este teléfono, mostrar el estado directamente
+// Si ya respondió antes en este teléfono, mostrar el estado directamente
 (function restaurar(){
   try {
     const prev = JSON.parse(localStorage.getItem("damian_rsvp") || "null");
-    if (prev && prev.nombre) mostrarConfirmado(prev.nombre, prev.total);
+    if (prev && prev.nombre) mostrarConfirmado(prev.nombre, prev.total, prev.asiste !== false);
   } catch(e){}
 })();
 
@@ -624,23 +621,38 @@ $("form").addEventListener("submit", (e) => {
   const nombre = $("nombre").value.trim();
   if (!nombre) { $("nombre").focus(); return; }
 
+  const asiste = vaAsistir();
   const datos = {
     nombre,
-    acompanantes: String(acomp),
-    actitud: (document.querySelector("input[name=actitud]:checked") || {}).value || "Asistiré",
-    telefono: $("telefono").value.trim(),
+    acompanantes: String(asiste ? acomp : 0),
+    actitud: asiste ? "Sí, voy" : "No puedo",
+    telefono: asiste ? $("telefono").value.trim() : "",
     mensaje: $("mensaje").value.trim(),
   };
-  const total = acomp + 1;
+  const total = asiste ? acomp + 1 : 0;
   const btn = $("submitBtn");
+
+  const guardarLocal = () =>
+    localStorage.setItem("damian_rsvp", JSON.stringify({ nombre, total, asiste }));
+
+  // «No puedo» no suma sillas: no pasa por la planilla (avisa por WhatsApp si está configurado)
+  if (!asiste) {
+    if (configurado(CONFIG.WHATSAPP)) {
+      const texto = `Hola! Soy ${nombre} — no voy a poder ir al baby shower de Damián 😢` + (datos.mensaje ? `\n${datos.mensaje}` : "");
+      window.open("https://wa.me/" + CONFIG.WHATSAPP + "?text=" + encodeURIComponent(texto), "_blank");
+    }
+    guardarLocal();
+    mostrarConfirmado(nombre, total, false);
+    return;
+  }
 
   // Sin backend configurado → respaldo: confirmación vía WhatsApp
   if (!configurado(CONFIG.APPS_SCRIPT_URL)) {
     if (configurado(CONFIG.WHATSAPP)) {
-      const texto = `🍼 CONFIRMACIÓN — Baby shower de Damián\nNombre: ${nombre}\nTotal personas: ${total}\nDeclaración: ${datos.actitud}` + (datos.mensaje ? `\nMensaje: ${datos.mensaje}` : "");
+      const texto = `🍼 CONFIRMACIÓN — Baby shower de Damián\nNombre: ${nombre}\nTotal personas: ${total}` + (datos.mensaje ? `\nMensaje: ${datos.mensaje}` : "");
       window.open("https://wa.me/" + CONFIG.WHATSAPP + "?text=" + encodeURIComponent(texto), "_blank");
-      localStorage.setItem("damian_rsvp", JSON.stringify({ nombre, total }));
-      mostrarConfirmado(nombre, total);
+      guardarLocal();
+      mostrarConfirmado(nombre, total, true);
     } else {
       alert("Falta conectar el formulario (configura APPS_SCRIPT_URL o WHATSAPP en el archivo).");
     }
@@ -648,20 +660,20 @@ $("form").addEventListener("submit", (e) => {
   }
 
   btn.disabled = true;
-  btn.textContent = "Registrando…";
+  btn.textContent = "Enviando…";
   fetch(CONFIG.APPS_SCRIPT_URL, { method: "POST", body: new URLSearchParams(datos) })
     .then(r => r.json())
     .then(d => {
       if (!d.ok) throw new Error("respuesta no ok");
-      localStorage.setItem("damian_rsvp", JSON.stringify({ nombre, total }));
-      mostrarConfirmado(nombre, total);
+      guardarLocal();
+      mostrarConfirmado(nombre, total, true);
       cargarCenso();
     })
     .catch(() => {
       btn.disabled = false;
       btn.textContent = "Confirmar asistencia →";
       const wa = configurado(CONFIG.WHATSAPP)
-        ? "\n\nPlan B: confírmanos por WhatsApp con el botón «Línea directa con la producción» (última tarjeta)."
+        ? "\n\nPlan B: escríbenos por WhatsApp con el botón «¿Dudas? Escríbenos» (última tarjeta)."
         : "";
       alert("El envío falló (problema de conexión). Intenta de nuevo." + wa);
     });
