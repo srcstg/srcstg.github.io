@@ -3,7 +3,10 @@
     "allow": [
       "mcp__Claude_Preview__preview_start",
       "Bash(netstat -ano)",
-      "Bash(taskkill //PID 14596 //F)"
+      "Bash(taskkill //PID 14596 //F)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
