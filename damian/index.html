@@ -108,11 +108,7 @@ h1 .l3{display:block;font-size:clamp(56px,14vw,92px);letter-spacing:.06em;text-i
 }
 .blank2{color:var(--mustard);letter-spacing:.1em}
 
-/* ── Encabezado de capítulo ── */
-.num{
-  font-size:11px;letter-spacing:.5em;text-indent:.5em;color:var(--mustard);
-  text-transform:uppercase;font-weight:600;margin:0;
-}
+/* ── Encabezado de sección ── */
 h2{
   display:flex;align-items:center;gap:16px;justify-content:center;
   font-size:clamp(17px,4vw,22px);letter-spacing:.24em;text-indent:.24em;
@@ -257,11 +253,6 @@ textarea{resize:none;min-height:42px}
   font-size:110px;font-weight:700;font-variant-numeric:tabular-nums;
   position:relative;z-index:2;background:var(--paper);padding:0 18px;line-height:1;
 }
-.leader .cap-tag{
-  position:absolute;bottom:11vh;font-size:11px;letter-spacing:.4em;text-indent:.4em;
-  text-transform:uppercase;opacity:.7;
-}
-
 @media (max-width:430px){
   h1 .l1{font-size:5.6vw;letter-spacing:.24em;text-indent:.24em}
   .dotnav{right:16px}
@@ -296,7 +287,6 @@ textarea{resize:none;min-height:42px}
 <!-- Cuenta regresiva de cine al abrir (tocar para saltar) -->
 <div class="leader" id="leader" role="presentation">
   <div class="disc"><span class="n" id="leaderNum">3</span></div>
-  <div class="cap-tag">Una invitación, en cinemascope</div>
 </div>
 
 <!-- Puntos de navegación -->
@@ -307,15 +297,15 @@ textarea{resize:none;min-height:42px}
   <!-- ── ESCENA 1 · PORTADA ──────────────────────────────────── -->
   <section class="card" id="portada">
     <div class="inner">
-      <p class="kicker">Barbi y David presentan</p>
+      <p class="kicker">Barbi y David te invitan</p>
       <h1>
         <span class="l1">El Baby Shower</span>
         <span class="l2">· de ·</span>
         <span class="l3">Damián</span>
       </h1>
       <p class="tagline">«Nos atrasamos, pero ya era hora.»</p>
-      <p class="sub">Basada en una historia real</p>
-      <div class="chip" id="countdown">Estreno en — días</div>
+      <p class="sub">Sábado 27 de junio</p>
+      <div class="chip" id="countdown">Faltan — días</div>
       <br>
       <button class="next" data-next>Comenzar<span class="chev">▾</span></button>
     </div>
@@ -324,8 +314,7 @@ textarea{resize:none;min-height:42px}
   <!-- ── ESCENA 2 · FICHA TÉCNICA ────────────────────────────── -->
   <section class="card" id="ficha">
     <div class="inner">
-      <p class="num">Capítulo I</p>
-      <h2>La ficha técnica</h2>
+      <h2>Los datos</h2>
       <div class="ficha">
         <div class="row"><span class="k">Protagonista</span><span class="dots"></span><span class="v">Damián</span></div>
         <div class="row"><span class="k">Fecha</span><span class="dots"></span><span class="v">Sábado 27 de junio</span></div>
@@ -341,7 +330,6 @@ textarea{resize:none;min-height:42px}
   <!-- ── ESCENA 3 · CONFIRMACIÓN ─────────────────────────────── -->
   <section class="card" id="rsvp">
     <div class="inner">
-      <p class="num">Capítulo II</p>
       <h2>La confirmación</h2>
       <p class="lead">Cuéntanos si vienes — del número de confirmados depende el lugar.</p>
       <p class="censo" id="censo" hidden></p>
@@ -405,8 +393,7 @@ textarea{resize:none;min-height:42px}
   <!-- ── ESCENA 4 · REGALOS ──────────────────────────────────── -->
   <section class="card" id="regalos">
     <div class="inner">
-      <p class="num">Capítulo III</p>
-      <h2>El registro de obsequios</h2>
+      <h2>Los regalos</h2>
       <p class="lead">Tu presencia es suficiente. Pero si quieres llegar con algo,
       existe una lista — la armamos con esmero y cero sutileza.</p>
       <a class="btn ghost" id="giftBtn" href="#" target="_blank" rel="noopener">Ver la lista →</a>
@@ -419,11 +406,11 @@ textarea{resize:none;min-height:42px}
   <section class="card" id="fin">
     <div class="inner credits">
       <div class="orn">✦ ✦ ✦</div>
-      <div class="row"><span class="k">Protagonista</span><span class="dots"></span><span class="v">Damián (debut)</span></div>
-      <div class="row"><span class="k">Dirección</span><span class="dots"></span><span class="v" id="mama"><span class="blank2">______</span></span></div>
-      <div class="row"><span class="k">Producción</span><span class="dots"></span><span class="v" id="papa"><span class="blank2">______</span></span></div>
-      <div class="row"><span class="k">Locación</span><span class="dots"></span><span class="v">En negociación</span></div>
-      <div class="row"><span class="k">Estreno</span><span class="dots"></span><span class="v">27 · 06 · 2026</span></div>
+      <div class="row"><span class="k">Protagonista</span><span class="dots"></span><span class="v">Damián</span></div>
+      <div class="row"><span class="k">Mamá</span><span class="dots"></span><span class="v" id="mama"><span class="blank2">______</span></span></div>
+      <div class="row"><span class="k">Papá</span><span class="dots"></span><span class="v" id="papa"><span class="blank2">______</span></span></div>
+      <div class="row"><span class="k">Lugar</span><span class="dots"></span><span class="v">En negociación</span></div>
+      <div class="row"><span class="k">Fecha</span><span class="dots"></span><span class="v">27 · 06 · 2026</span></div>
       <p class="fin">FIN<span style="color:var(--red)">*</span></p>
       <p class="finnote">* en realidad, el comienzo.</p>
       <br>
@@ -440,8 +427,8 @@ textarea{resize:none;min-height:42px}
    ✏️  CONFIGURACIÓN — RELLENA AQUÍ (y solo aquí)
    ════════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  MAMA:     "Barbi",       // créditos: "Dirección"
-  PAPA:     "David",       // créditos: "Producción"
+  MAMA:     "Barbi",       // créditos: fila "Mamá"
+  PAPA:     "David",       // créditos: fila "Papá"
 
   HORA:     "",            // ✏️ ej: "16:00 hrs" — vacío = "POR CONFIRMAR*"
   LUGAR:    "",            // ✏️ ej: "Casa de los abuelos, Ñuñoa" — vacío = "POR CONFIRMAR*"
@@ -550,14 +537,14 @@ document.addEventListener("keydown", (e) => {
   $("icsBtn").href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
 })();
 
-/* ── Cuenta regresiva al estreno ── */
+/* ── Cuenta regresiva ── */
 (function cuenta(){
   const hoy = new Date(); hoy.setHours(0,0,0,0);
   const dias = Math.round((FECHA_EVENTO - hoy) / 86400000);
   $("countdown").textContent =
-    dias > 1 ? `Estreno en ${dias} días` :
-    dias === 1 ? "Estreno: mañana" :
-    dias === 0 ? "El estreno es hoy" : "Ya se estrenó";
+    dias > 1 ? `Faltan ${dias} días` :
+    dias === 1 ? "¡Es mañana!" :
+    dias === 0 ? "¡Es hoy!" : "Ya pasó";
 })();
 
 /* ── Censo en vivo (lee el conteo desde Google Sheets) ── */
