@@ -11,6 +11,7 @@ confirmación de asistencia (RSVP) a una planilla de Google.
 | `index.html` | La invitación. Todo (estilos, lógica, textos) vive en este archivo. |
 | `apps-script.gs` | Código del backend para pegar en Google Apps Script (recibe los RSVP). |
 | `og.png` | Imagen de la tarjeta que muestra WhatsApp al compartir el link. |
+| `DOCUMENTACION.md` | Cómo funciona por dentro y por qué (referencia técnica). |
 
 ## ✏️ Paso 1 — Rellenar los espacios (2 min)
 
@@ -19,11 +20,11 @@ Abre `index.html` y busca el bloque `CONFIG` (está al inicio del `<script>`, ma
 - `MAMA` / `PAPA` — nombres para los créditos; ya vienen como "Barbi" y "David"
 - `PLAZO` — fecha límite para confirmar (sugerido: viernes 20 de junio)
 - `WHATSAPP` — tu número formato `569XXXXXXXX` (dudas + respaldo si falla el form)
+- `HORA` y `LUGAR` — déjalos vacíos por ahora; cuando los definas, los rellenas,
+  haces push, y la página cambia sola de "POR CONFIRMAR" al dato real.
 
 Los regalos no usan lista externa: la tarjeta "Los regalos" trae la guía
 "Nos falta / Ya tenemos" directamente en el HTML (edítala ahí si cambia).
-- `HORA` y `LUGAR` — déjalos vacíos por ahora; cuando los definas, los rellenas,
-  haces push, y la página cambia sola de "POR CONFIRMAR" al dato real.
 
 ## 🔌 Paso 2 — Conectar la planilla de Google (2 min)
 
