@@ -458,8 +458,8 @@ const CONFIG = {
   MAMA:     "Barbi",       // créditos: fila "Mamá"
   PAPA:     "David",       // créditos: fila "Papá"
 
-  HORA:     "",            // ✏️ ej: "16:00 hrs" — vacío = "POR CONFIRMAR*"
-  LUGAR:    "",            // ✏️ ej: "Casa de los abuelos, Ñuñoa" — vacío = "POR CONFIRMAR*"
+  HORA:     "11:00 a 17:00 hrs",          // vacío = "POR CONFIRMAR*"
+  LUGAR:    "Unclub · Ramón Carnicer 65, Providencia",  // vacío = "POR CONFIRMAR*"
   PLAZO:    "viernes 20 de junio",   // ✏️ fecha límite para confirmar
 
   WHATSAPP: "56993592888", // número de David — botón de dudas y avisos de "No puedo"
@@ -536,7 +536,7 @@ document.addEventListener("keydown", (e) => {
   if (CONFIG.HORA)  { const el = $("horaV");  el.textContent = CONFIG.HORA;  el.classList.remove("tbd"); }
   if (CONFIG.LUGAR) { const el = $("lugarV"); el.textContent = CONFIG.LUGAR; el.classList.remove("tbd"); }
   if (CONFIG.HORA && CONFIG.LUGAR) {
-    $("fichaNote").innerHTML = "Las sillas ya están contadas. Gracias por confirmar a tiempo. <br>— Barbi &amp; David";
+    $("fichaNote").innerHTML = "¡Ya tenemos lugar! Nos juntamos en Unclub. Confírmanos igual para tener las sillas justas. <br>— Barbi &amp; David";
   }
 
   const wa = configurado(CONFIG.WHATSAPP) ? "https://wa.me/" + CONFIG.WHATSAPP : null;
