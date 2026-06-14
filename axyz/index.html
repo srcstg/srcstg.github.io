@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXYZ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Avenir', 'Avenir Next', 'Avenir Next LT Pro',
+                   -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: block; }
+    input:focus, select:focus, textarea:focus { outline: none; }
+
+    /* Logos marquee */
+    .logos-wrapper { overflow: hidden; }
+    .logos-track {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+      animation: marquee 50s linear infinite;
+    }
+    .logos-track:hover { animation-play-state: paused; }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Stepper */
+    .step-line {
+      width: 2px;
+      flex: 1;
+      margin-top: 6px;
+      background: rgba(255,255,255,0.10);
+      position: relative;
+      overflow: hidden;
+    }
+    .step-line::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 0%;
+      background: #EE7D65;
+      transition: height 0.8s ease;
+    }
+    .step-line.animate::after { height: 100%; }
+
+    /* Blog modal */
+    .blog-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.85);
+      overflow-y: auto;
+    }
+    .blog-modal.open { display: block; }
+    .blog-modal-inner {
+      background: #27272a;
+      min-height: 100vh;
+      padding: 60px 20px 40px;
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .blog-modal-close {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 101;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #EE7D65;
+      border-radius: 50%;
+      font-size: 20px;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    .blog-modal h2 { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #fff; margin-bottom: 1rem; line-height: 1.4; }
+    .blog-modal h3 { font-size: .95rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #EE7D65; margin: 1.25rem 0 .4rem; }
+    .blog-modal p  { font-size: .85rem; line-height: 1.65; color: rgba(255,255,255,.7); margin-bottom: .75rem; }
+    .blog-modal ul, .blog-modal ol { padding-left: 1.25rem; margin-bottom: .75rem; }
+    .blog-modal li { font-size: .85rem; line-height: 1.65; color: rgba(255,255,255,.7); margin-bottom: .35rem; }
+    .blog-modal ol li { list-style: decimal; }
+    .blog-modal ul li { list-style: disc; }
+
+    /* Reveal text on scroll */
+    .reveal-text {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal-text.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Flip card */
+    .flip-card { perspective: 1000px; }
+    .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-card-front, .flip-card-back { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 0.25rem; }
+    .flip-card-back { transform: rotateY(180deg); }
+
+    /* Horizontal step line */
+    .step-line-h {
+      height: 2px;
+      background: rgba(255,255,255,0.10);
+      position: relative;
+      overflow: hidden;
+    }
+    .step-line-h::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      width: 0%;
+      background: #EE7D65;
+      transition: width 0.9s ease;
+    }
+    .step-line-h.animate::after { width: 100%; }
+
+    /* Desktop: modal más ancho */
+    @media (min-width: 768px) {
+      .blog-modal-inner { max-width: 720px; padding: 60px 48px 48px; }
+    }
+
+    /* ═══ PARALLAX ═══ */
+    .parallax-bg {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    @media (max-width: 767px), (hover: none) and (pointer: coarse) {
+      .parallax-bg { background-attachment: scroll; }
+    }
+
+    /* ── MOBILE OVERRIDES ── */
+    @media (max-width: 767px) {
+      /* Flip cards 15% más pequeñas */
+      .flip-card { min-height: 212px !important; height: 212px !important; }
+    }
+
+    .parallax-band {
+      position: relative;
+      min-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    @media (max-width: 767px) {
+      .parallax-band { min-height: 280px; }
+    }
+    .parallax-band > .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 2;
+    }
+    /* Second parallax band (after #arquitectura): top/left cleared; clip via dimensions */
+    .parallax-band.parallax-overlay-rb > .overlay {
+      inset: auto;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .parallax-band > .content {
+      position: relative;
+      z-index: 3;
+      padding: 0 1.25rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+
+    .reveal-img {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal-img.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Cards "Tu tranquilidad" — fade-in + escala sutil con stagger */
+    .reveal-card {
+      opacity: 0;
+      transform: translateY(18px) scale(0.97);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      transition-delay: var(--card-delay, 0ms);
+    }
+    .reveal-card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /*
+      Tu tranquilidad — outline coral que se dibuja al hover (desktop con mouse).
+      Polish pass: salida simétrica, glow coral, lift de la card, overlay que se atenúa.
+    */
+    .tranquilidad-frame {
+      --tranquilidad-stroke: #ee7d65;
+      background-color: #27272a;
+      transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    .tranquilidad-outline-path {
+      fill: none;
+      stroke: var(--tranquilidad-stroke);
+      stroke-width: 2.5;
+      stroke-linecap: butt;
+      stroke-linejoin: miter;
+      stroke-miterlimit: 4;
+      vector-effect: non-scaling-stroke;
+      /* Con non-scaling-stroke, dasharray opera en pixeles (no viewBox units).
+         1500px cubre cualquier card típico (~1300px perímetro) con buffer. */
+      stroke-dasharray: 1500 100000;
+      stroke-dashoffset: 1500;
+      stroke-opacity: 0;
+      filter: drop-shadow(0 0 6px rgba(238, 125, 101, 0.5));
+      /* Transición simétrica: el trazo se desdibuja al salir del hover en vez de desaparecer */
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.33, 1, 0.68, 1),
+                  stroke-opacity 0.4s ease;
+      pointer-events: none;
+    }
+    /* Overlay negro: se atenúa en hover para revelar mejor la imagen B&N */
+    .tranquilidad-frame .bg-black\/50 {
+      transition: background-color 0.5s ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .tranquilidad-frame:hover {
+        transform: translateY(-3px);
+      }
+      .tranquilidad-frame:hover .tranquilidad-outline-path {
+        stroke-dashoffset: 0;
+        stroke-opacity: 1;
+      }
+      .tranquilidad-frame:hover .bg-black\/50 {
+        background-color: rgba(0, 0, 0, 0.25);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tranquilidad-frame,
+      .tranquilidad-outline-path,
+      .tranquilidad-frame .bg-black\/50 {
+        transition: none;
+      }
+    }
+
+    /* ════════ POLISH PASS 1 ════════ */
+
+    /* Smooth scroll en anclas internas */
+    html { scroll-behavior: smooth; }
+
+    /* Botones CTA: hover lift + sombra tintada con el brand */
+    .btn-cta {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  background-color 0.2s ease,
+                  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px rgba(238, 125, 101, 0.45),
+                  0 4px 10px -2px rgba(238, 125, 101, 0.15);
+    }
+    .btn-cta:active { transform: translateY(0); }
+
+    /* Zoom suave en imágenes (wrapper) */
+    .img-zoom-wrap img {
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .img-zoom-wrap:hover img { transform: scale(1.05); }
+  
+    /* Blanco y negro: imagenes excepto el logo AXYZ */
+    img:not([alt="AXYZ"]) {
+      filter: grayscale(1);
+    }
+    /* Excepción: logos de clientes en el marquee se ven a color */
+    .logos-track img {
+      filter: none;
+    }
+
+    /* Blanco y negro: backgrounds .parallax-bg (hero + bandas) */
+    .parallax-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: hsl(0, 0%, 50%);
+      mix-blend-mode: saturation;
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* Capa BN + hijos sobre ::before — el texto sobre overlay en bandas se fija en .parallax-band > .content */
+    .parallax-bg > div {
+      z-index: 2;
+    }
+
+    /* ══════════════ CAD HERO (3D wireframe) ══════════════ */
+    .cad-hero {
+      position: relative;
+      height: 14rem;
+      background:
+        radial-gradient(ellipse 80% 60% at 55% 45%, rgba(238,125,101,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse at 0% 100%, rgba(255,255,255,0.025) 0%, transparent 50%),
+        #0a0a0a;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) { .cad-hero { height: 640px; } }
+
+    .cad-scene { position: absolute; inset: 0; pointer-events: none; }
+    .cad-scene svg { width: 100%; height: 100%; display: block; }
+
+    /* Strokes del wireframe — opacidades reales vienen de stroke-opacity inline (por profundidad) */
+    .edge            { stroke: #fff;    stroke-width: 1;    fill: none; vector-effect: non-scaling-stroke; }
+    .slab            { stroke: #fff;    stroke-width: 0.85; fill: none; vector-effect: non-scaling-stroke; }
+    .mullion         { stroke: #fff;    stroke-width: 0.55; fill: none; vector-effect: non-scaling-stroke; }
+    .cad-bg          { stroke: #fff;    stroke-width: 0.6;  fill: none; vector-effect: non-scaling-stroke; }
+    .ground          { stroke: #fff;    stroke-width: 0.55; fill: none; vector-effect: non-scaling-stroke; }
+    .selected-static { stroke: #EE7D65; stroke-opacity: 0.88; stroke-width: 1.5; fill: none; stroke-linejoin: miter; vector-effect: non-scaling-stroke; }
+    .selected-trace  { stroke: #FFD2BC; stroke-width: 2;     fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: 0; }
+
+    @keyframes cadFade      { to { opacity: 1; } }
+    @keyframes cadFadeTrace { to { opacity: 1; } }
+    @keyframes cadDraw      { to { stroke-dashoffset: 0; } }
+
+    /* Camera fly — zoom in al edificio y se aleja flotando (one-shot intro) */
+    @keyframes cadCameraFly {
+      0%   { transform: scale(1); }
+      25%  { transform: scale(1.3); }
+      35%  { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    /* Breathing sutil después del intro: la escena "respira" para no quedar muerta */
+    @keyframes cadBreathe {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.02); }
+    }
+    #cad-scene-g {
+      transform-origin: 50% 50%;
+      animation: cadCameraFly 8s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards,
+                 cadBreathe 12s ease-in-out 8s infinite;
+    }
+
+    /* Vignette para legibilidad del texto */
+    .cad-vignette {
+      position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      background:
+        radial-gradient(ellipse 55% 50% at 28% 50%, rgba(10,10,10,0.74) 0%, rgba(10,10,10,0) 65%),
+        linear-gradient(180deg, rgba(0,0,0,0.25) 0%, transparent 22%, transparent 70%, rgba(0,0,0,0.48) 100%);
+    }
+    @media (max-width: 767px) {
+      .cad-vignette {
+        background:
+          radial-gradient(ellipse at 50% 50%, rgba(10,10,10,0.74) 0%, rgba(10,10,10,0.08) 68%),
+          linear-gradient(180deg, rgba(0,0,0,0.18) 0%, transparent 30%);
+      }
+    }
+
+    /* Overlay de texto (h1 + CTA) — wrapper interno con max-width 1184 centered */
+    .cad-content {
+      position: absolute; inset: 0; z-index: 4;
+      display: flex;
+    }
+    .cad-content-inner {
+      width: 100%;
+      max-width: 1184px;
+      margin: 0 auto;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0 20px; text-align: center;
+    }
+    .cad-content h1 { text-shadow: 0 2px 24px rgba(0,0,0,0.75), 0 0 60px rgba(0,0,0,0.55); }
+    @media (min-width: 768px) {
+      .cad-content-inner { align-items: flex-start; padding-left: 80px; text-align: left; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      /* Las animaciones del intro (cadDraw, cadFade, cadCameraFly) son one-shot,
+         duran 8s y son sutiles — se dejan pasar.
+         Bloqueamos el movimiento persistente: traza coral y breathing en loop infinito. */
+      .selected-trace { display: none !important; }
+      #cad-scene-g {
+        animation: cadCameraFly 8s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+      }
+    }
+
+    /* ════════ REVEAL ON SCROLL — scroll-driven (CSS) con fallback IO ════════
+       Liga la animación a la posición del elemento en el viewport: cada elemento
+       sube proporcionalmente al scroll, en vez de aparecer todo a la vez. */
+    @keyframes reveal-fade-up {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(40px);
+      will-change: opacity, transform;
+    }
+    /* Modo moderno: scroll-driven (Chrome/Edge 115+, Safari 26+) */
+    @supports (animation-timeline: view()) {
+      .reveal-on-scroll {
+        animation: reveal-fade-up linear forwards;
+        animation-timeline: view();
+        animation-range: entry var(--reveal-start, 0%) entry var(--reveal-end, 60%);
+      }
+    }
+    /* Fallback: IntersectionObserver agrega .visible y dispara la transition */
+    @supports not (animation-timeline: view()) {
+      .reveal-on-scroll {
+        transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1) var(--reveal-delay, 0ms),
+                    transform 0.7s cubic-bezier(0.4, 0, 0.2, 1) var(--reveal-delay, 0ms);
+      }
+      .reveal-on-scroll.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal-on-scroll {
+        opacity: 1;
+        transform: none;
+        animation: none;
+        transition: none;
+      }
+    }
+    /* Blog: imágenes con cortina que sube desde abajo (ligada al scroll) */
+    #blog .img-zoom-wrap {
+      clip-path: inset(0 0 0 0);
+    }
+    @keyframes blog-img-rise {
+      from { clip-path: inset(100% 0 0 0); }
+      to   { clip-path: inset(0 0 0 0); }
+    }
+    @supports (animation-timeline: view()) {
+      #blog .img-zoom-wrap {
+        animation: blog-img-rise linear forwards;
+        animation-timeline: view();
+        animation-range: entry 10% entry 70%;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #blog .img-zoom-wrap {
+        animation: none;
+        clip-path: none;
+      }
+    }</style>
+</head>
+<body class="bg-zinc-900 text-white">
+<div class="bg-zinc-900">
+
+  <!-- ══════════════ NAVBAR ══════════════ -->
+  <header class="sticky top-0 z-50 bg-zinc-950" style="-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-backface-visibility:hidden;">
+    <div class="flex items-center justify-between px-5 py-4 md:mx-auto md:max-w-7xl md:px-6">
+      <a href="index.html"><img src="assets/logo-white.png" alt="AXYZ" class="h-[34px] w-auto"/></a>
+      <nav class="hidden md:flex md:items-center md:gap-10">
+        <a href="#servicios"    class="text-[0.985rem] font-normal text-white/70 hover:text-white transition-colors">Regulación</a>
+        <a href="#arquitectura" class="text-[0.985rem] font-normal text-white/70 hover:text-white transition-colors">Arquitectura</a>
+        <a href="Paginas/contacto.html" class="bg-[#EE7D65] px-5 py-2 text-sm font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors">Contacto</a>
+      </nav>
+      <button type="button" aria-label="Menú" onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('open');" class="flex flex-col items-center justify-center gap-1.5 p-2 md:hidden" style="min-width:44px;min-height:44px;touch-action:manipulation;cursor:pointer;">
+        <span class="block h-px w-7 bg-white"></span>
+        <span class="block h-px w-7 bg-white"></span>
+        <span class="block h-px w-7 bg-white"></span>
+      </button>
+    </div>
+    <nav id="mobile-menu" class="bg-zinc-950 px-5 pb-4 md:hidden">
+      <a href="#servicios"    onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Regulación</a>
+      <a href="#arquitectura" onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Arquitectura</a>
+      <a href="Paginas/contacto.html" onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Contacto</a>
+    </nav>
+  </header>
+
+  <!-- ══════════════ HERO (CAD WIREFRAME 3D) ══════════════ -->
+  <section class="cad-hero">
+    <div class="cad-scene">
+      <svg id="cad-svg" viewBox="285 75 880 495" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"></svg>
+    </div>
+
+    <div class="cad-vignette"></div>
+
+    <div class="cad-content">
+      <div class="cad-content-inner">
+        <h1 class="mb-4 text-base font-bold uppercase leading-tight tracking-normal text-white md:text-6xl md:leading-tight md:tracking-wide md:mb-6">
+          Expertos en regularización<br>
+          y arquitectura
+        </h1>
+        <a href="Paginas/contacto.html" class="bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm">
+          Contáctanos
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-5 py-6 text-center md:py-14">
+    <div class="mx-auto max-w-7xl md:px-6">
+    <p class="mb-4 text-lg md:text-[1.5625rem] font-semibold uppercase tracking-widest text-[#EE7D65]">
+      Empresas que nos respaldan
+    </p>
+    <div class="logos-wrapper">
+      <div class="logos-track">
+        <!-- Set 1 -->
+        <img src="assets/Logos empresas/1_Siena blanco.jpg"   alt="Siena"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/2_Brimax.jpg"          alt="Brimax"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/4_Edificapro.jpg"      alt="Edificapro"   class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/5_Etex II.jpg"         alt="Etex"         class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/6_Ginebra.jpg"         alt="Ginebra"      class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/7_topk9 blanco.jpg"    alt="Topk9"        class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/8_Permanit.jpg"        alt="Permanit"     class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/9_Mi placard.jpg"      alt="Mi Placard"   class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/10_Ecopura.jpg"        alt="Ecopura"      class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/11_Doc popcorn.jpg"    alt="Doc Popcorn"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/12_Salon kids.jpg"     alt="Salon Kids"   class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <!-- Set 2 (duplicate for seamless loop) -->
+        <img src="assets/Logos empresas/1_Siena blanco.jpg"   alt="Siena"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/2_Brimax.jpg"          alt="Brimax"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/4_Edificapro.jpg"      alt="Edificapro"   class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/5_Etex II.jpg"         alt="Etex"         class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/6_Ginebra.jpg"         alt="Ginebra"      class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/7_topk9 blanco.jpg"    alt="Topk9"        class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/8_Permanit.jpg"        alt="Permanit"     class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/9_Mi placard.jpg"      alt="Mi Placard"   class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/10_Ecopura.jpg"        alt="Ecopura"      class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/11_Doc popcorn.jpg"    alt="Doc Popcorn"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="assets/Logos empresas/12_Salon kids.jpg"     alt="Salon Kids"   class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+      </div>
+    </div>
+    </div><!-- end max-w -->
+  </section>
+
+  <!-- ══════════════ TU TRANQUILIDAD ══════════════ -->
+  <section class="bg-zinc-800 pt-4 pb-8 text-center md:pt-8 md:pb-10">
+    <div class="mx-auto max-w-7xl px-5 md:px-6">
+      <h2 class="mb-2 text-2xl font-bold leading-snug text-white md:mb-3 md:text-[2.34rem]">
+        Tu tranquilidad es nuestra prioridad
+      </h2>
+      <p class="mb-5 text-sm leading-relaxed text-white/60 md:mb-10 md:mx-auto md:max-w-2xl md:text-[1.2rem]">
+        En AXYZ ofrecemos servicio seguro, garantías exclusivas, equipo experto y soluciones rápidas.
+      </p>
+      <div class="space-y-3 md:grid md:grid-cols-3 md:gap-6 md:space-y-0">
+        <div class="tranquilidad-frame relative min-h-[224px] overflow-visible md:min-h-[263px]">
+          <svg class="pointer-events-none absolute inset-0 z-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path class="tranquilidad-outline-path" d="M 0 0 L 100 0 L 100 100 L 0 100 L 0 0"/>
+          </svg>
+          <div class="reveal-card relative z-[1] m-[2px] flex min-h-[calc(224px-4px)] flex-col items-center justify-center overflow-hidden p-4 text-center md:min-h-[calc(263px-4px)] md:p-6" style="--card-delay:0ms">
+            <div class="absolute inset-0 overflow-hidden">
+              <img src="assets/Respuesta.jpg" alt="" class="absolute inset-0 h-full w-full object-cover"/>
+              <div class="absolute inset-0 bg-black/50"></div>
+            </div>
+            <div class="relative z-10">
+              <p class="mb-1 text-sm font-bold uppercase tracking-wide text-white md:mb-2 md:text-[1.406rem]">Respuesta Ágil en 24 Horas</p>
+              <p class="text-xs leading-relaxed text-white/80 md:text-[1.2rem]">Atendemos tus consultas sin demoras.</p>
+            </div>
+          </div>
+        </div>
+        <div class="tranquilidad-frame relative min-h-[224px] overflow-visible md:min-h-[263px]">
+          <svg class="pointer-events-none absolute inset-0 z-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path class="tranquilidad-outline-path" d="M 0 0 L 100 0 L 100 100 L 0 100 L 0 0"/>
+          </svg>
+          <div class="reveal-card relative z-[1] m-[2px] flex min-h-[calc(224px-4px)] flex-col items-center justify-center overflow-hidden p-4 text-center md:min-h-[calc(263px-4px)] md:p-6" style="--card-delay:120ms">
+            <div class="absolute inset-0 overflow-hidden">
+              <img src="assets/Arquitectura/Equipo.jpg" alt="" class="absolute inset-0 h-full w-full object-cover"/>
+              <div class="absolute inset-0 bg-black/50"></div>
+            </div>
+            <div class="relative z-10">
+              <p class="mb-1 text-sm font-bold uppercase tracking-wide text-white md:mb-2 md:text-[1.406rem]">Equipo Especializado</p>
+              <p class="text-xs leading-relaxed text-white/80 md:text-[1.2rem]">Arquitectos e ingenieros trabajando juntos para tu éxito.</p>
+            </div>
+          </div>
+        </div>
+        <div class="tranquilidad-frame relative min-h-[224px] overflow-visible md:min-h-[263px]">
+          <svg class="pointer-events-none absolute inset-0 z-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path class="tranquilidad-outline-path" d="M 0 0 L 100 0 L 100 100 L 0 100 L 0 0"/>
+          </svg>
+          <div class="reveal-card relative z-[1] m-[2px] flex min-h-[calc(224px-4px)] flex-col items-center justify-center overflow-hidden p-4 text-center md:min-h-[calc(263px-4px)] md:p-6" style="--card-delay:240ms">
+            <div class="absolute inset-0 overflow-hidden">
+              <img src="assets/planificación.jpg" alt="" class="absolute inset-0 h-full w-full object-cover"/>
+              <div class="absolute inset-0 bg-black/50"></div>
+            </div>
+            <div class="relative z-10">
+              <p class="mb-1 text-sm font-bold uppercase tracking-wide text-white md:mb-2 md:text-[1.406rem]">Asesoría Integral</p>
+              <p class="text-xs leading-relaxed text-white/80 md:text-[1.2rem]">Te guiamos desde la planificación hasta la ejecución.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="Paginas/contacto.html" class="mt-6 inline-block bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm md:mt-10">
+        Contáctanos
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════ CONFIANZA EN AXYZ ══════════════ -->
+  <section id="nosotros" class="bg-zinc-900 pt-4 pb-8 text-center md:pt-8 md:pb-10 scroll-mt-16">
+    <div class="mx-auto max-w-7xl px-5 md:px-6">
+    <h2 class="mb-2 text-2xl font-bold leading-snug text-white md:mb-3 md:text-[2.34rem]">Confianza en AXYZ</h2>
+    <p class="mb-4 text-sm leading-relaxed text-white/60 md:mb-8 md:mx-auto md:max-w-2xl md:text-[1.2rem]">Nuestras tres categorías fundamentales</p>
+    <!-- ── MOBILE: acordeón (solo visible en móvil) ── -->
+    <div class="md:hidden space-y-3 text-left">
+
+      <!-- Item 1 -->
+      <div class="accordion-item bg-zinc-700 rounded overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="accordion-btn w-full flex items-center justify-between px-5 py-4 text-white">
+          <span class="text-sm font-bold uppercase tracking-wide leading-snug">Respuesta ágil en 24 horas</span>
+          <span class="accordion-icon text-[#EE7D65] text-xl font-light leading-none transition-transform duration-300">+</span>
+        </button>
+        <div class="accordion-body max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+          <div class="px-5 pb-5 space-y-3">
+            <p class="text-xs leading-relaxed text-white/80">
+              Porque tu tiempo es valioso, garantizamos que todas tus consultas serán atendidas en menos de 24 horas. Ya sea por WhatsApp, llamada o correo electrónico, obtendrás respuestas rápidas y efectivas para evitar retrasos innecesarios.
+            </p>
+            <p class="text-xs font-bold uppercase tracking-wide text-white">¿Por qué es clave para tu proyecto?</p>
+            <ul class="space-y-2 text-xs leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Resolverás dudas rápidamente sin perder oportunidades ni tiempo en trámites.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Tendrás el respaldo de un equipo profesional en cada paso del proceso.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 2 -->
+      <div class="accordion-item bg-zinc-700 rounded overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="accordion-btn w-full flex items-center justify-between px-5 py-4 text-white">
+          <span class="text-sm font-bold uppercase tracking-wide leading-snug">Equipo multidisciplinario y patrocinio completo</span>
+          <span class="accordion-icon text-[#EE7D65] text-xl font-light leading-none transition-transform duration-300">+</span>
+        </button>
+        <div class="accordion-body max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+          <div class="px-5 pb-5 space-y-3">
+            <p class="text-xs leading-relaxed text-white/80">
+              Con AXYZ, olvídate de coordinar múltiples profesionales. Nuestro equipo incluye arquitectos, ingenieros y expertos en construcción, trabajando en conjunto para ofrecerte un servicio integral.
+            </p>
+            <p class="text-xs font-bold uppercase tracking-wide text-white">¿Cómo te beneficia?</p>
+            <ul class="space-y-2 text-xs leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Evitas errores costosos y retrasos en la gestión de permisos y certificaciones.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Optimizas tiempos al contar con todos los especialistas en un solo lugar.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 3 -->
+      <div class="accordion-item bg-zinc-700 rounded overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="accordion-btn w-full flex items-center justify-between px-5 py-4 text-white">
+          <span class="text-sm font-bold uppercase tracking-wide leading-snug">Asesoría personalizada para resultados óptimos</span>
+          <span class="accordion-icon text-[#EE7D65] text-xl font-light leading-none transition-transform duration-300">+</span>
+        </button>
+        <div class="accordion-body max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+          <div class="px-5 pb-5 space-y-3">
+            <p class="text-xs leading-relaxed text-white/80">
+              Te acompañamos desde la planificación hasta la ejecución, asegurándonos de que cada decisión esté alineada con tus objetivos, presupuesto y plazos.
+            </p>
+            <p class="text-xs font-bold uppercase tracking-wide text-white">¿Por qué es un diferencial?</p>
+            <ul class="space-y-2 text-xs leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Más que trámites y planos, te ofrecemos una estrategia adaptada a tus necesidades.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Evitas imprevistos gracias a nuestro enfoque proactivo y nuestra experiencia en el sector.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── DESKTOP: flip cards (solo visible en desktop) ── -->
+    <div class="hidden md:grid md:grid-cols-3 md:gap-6">
+      <div class="flip-card min-h-[250px] w-full" style="height:250px;" id="card-respuesta">
+        <div class="flip-card-inner">
+          <!-- Frente -->
+          <div class="flip-card-front flex flex-col items-center justify-center gap-4 bg-zinc-700 px-8 py-6 text-center transition-colors duration-200 hover:bg-zinc-500 cursor-pointer">
+            <p class="text-base md:text-[1.336rem] font-bold uppercase tracking-wide text-white leading-snug">
+              Respuesta ágil en 24 horas
+            </p>
+            <button onclick="document.getElementById('card-respuesta').classList.add('flipped')" class="text-2xl font-light text-[#EE7D65] leading-none">+</button>
+          </div>
+          <!-- Reverso -->
+          <div class="flip-card-back flex flex-col bg-zinc-700 px-8 py-6 text-left overflow-y-auto">
+            <button onclick="document.getElementById('card-respuesta').classList.remove('flipped')" class="absolute right-4 top-4 text-xl font-light text-[#EE7D65] leading-none">✕</button>
+            <p class="mt-3 text-[0.831rem] leading-relaxed text-white/80">
+              Porque tu tiempo es valioso, garantizamos que todas tus consultas serán atendidas en menos de 24 horas. Ya sea por WhatsApp, llamada o correo electrónico, obtendrás respuestas rápidas y efectivas para evitar retrasos innecesarios.
+            </p>
+            <p class="mt-4 text-[0.831rem] font-bold uppercase tracking-wide text-white">¿Por qué es clave para tu proyecto?</p>
+            <ul class="mt-2 space-y-2 text-[0.831rem] leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Resolverás dudas rápidamente sin perder oportunidades ni tiempo en trámites.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Tendrás el respaldo de un equipo profesional en cada paso del proceso.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="flip-card min-h-[250px] w-full" style="height:250px;" id="card-equipo">
+        <div class="flip-card-inner">
+          <!-- Frente -->
+          <div class="flip-card-front flex flex-col items-center justify-center gap-4 bg-zinc-700 px-8 py-6 text-center transition-colors duration-200 hover:bg-zinc-500 cursor-pointer">
+            <p class="text-base md:text-[1.336rem] font-bold uppercase tracking-wide text-white leading-snug">
+              Equipo multidisciplinario<br>y patrocinio completo
+            </p>
+            <button onclick="document.getElementById('card-equipo').classList.add('flipped')" class="text-2xl font-light text-[#EE7D65] leading-none">+</button>
+          </div>
+          <!-- Reverso -->
+          <div class="flip-card-back flex flex-col bg-zinc-700 px-8 py-6 text-left overflow-y-auto">
+            <button onclick="document.getElementById('card-equipo').classList.remove('flipped')" class="absolute right-4 top-4 text-xl font-light text-[#EE7D65] leading-none">✕</button>
+            <p class="mt-3 text-[0.831rem] leading-relaxed text-white/80">
+              Con AXYZ, olvídate de coordinar múltiples profesionales. Nuestro equipo incluye arquitectos, ingenieros y expertos en construcción, trabajando en conjunto para ofrecerte un servicio integral.
+            </p>
+            <p class="mt-4 text-[0.831rem] font-bold uppercase tracking-wide text-white">¿Cómo te beneficia?</p>
+            <ul class="mt-2 space-y-2 text-[0.831rem] leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Evitas errores costosos y retrasos en la gestión de permisos y certificaciones.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Optimizas tiempos al contar con todos los especialistas en un solo lugar.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card min-h-[250px] w-full" style="height:250px;" id="card-asesoria">
+        <div class="flip-card-inner">
+          <!-- Frente -->
+          <div class="flip-card-front flex flex-col items-center justify-center gap-4 bg-zinc-700 px-8 py-6 text-center transition-colors duration-200 hover:bg-zinc-500 cursor-pointer">
+            <p class="text-base md:text-[1.336rem] font-bold uppercase tracking-wide text-white leading-snug">
+              Asesoría personalizada<br>para resultados óptimos
+            </p>
+            <button onclick="document.getElementById('card-asesoria').classList.add('flipped')" class="text-2xl font-light text-[#EE7D65] leading-none">+</button>
+          </div>
+          <!-- Reverso -->
+          <div class="flip-card-back flex flex-col bg-zinc-700 px-8 py-6 text-left overflow-y-auto">
+            <button onclick="document.getElementById('card-asesoria').classList.remove('flipped')" class="absolute right-4 top-4 text-xl font-light text-[#EE7D65] leading-none">✕</button>
+            <p class="mt-3 text-[0.831rem] leading-relaxed text-white/80">
+              Te acompañamos desde la planificación hasta la ejecución, asegurándonos de que cada decisión esté alineada con tus objetivos, presupuesto y plazos.
+            </p>
+            <p class="mt-4 text-[0.831rem] font-bold uppercase tracking-wide text-white">¿Por qué es un diferencial?</p>
+            <ul class="mt-2 space-y-2 text-[0.831rem] leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Más que trámites y planos, te ofrecemos una estrategia adaptada a tus necesidades.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Evitas imprevistos gracias a nuestro enfoque proactivo y nuestra experiencia en el sector.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- /desktop flip cards -->
+    <a href="Paginas/contacto.html" class="mt-5 inline-block bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm md:mt-8">
+      Contáctanos
+    </a>
+    <p class="mt-3 text-sm leading-relaxed text-white/60 md:mt-6 md:text-base">
+      Garantías exclusivas: resultados seguros, rápidos y rentables. Experiencia eficiente y confiable
+    </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ BANDA PARALLAX (entre Confianza y Regulación) ══════════════ -->
+  <section class="parallax-bg parallax-band" style="background-image: url('assets/Banner home/Banner home.jpg');">
+    <div class="overlay"></div>
+    <div class="content">
+      <p class="text-2xl md:text-4xl font-bold uppercase tracking-wide text-white leading-snug">
+        Expertos en regularización y arquitectura
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ REGULACIÓN ══════════════ -->
+  <section id="servicios" class="bg-zinc-800 pt-4 pb-8 text-center md:pt-8 md:pb-10 scroll-mt-16">
+    <div class="mx-auto max-w-7xl px-5 md:px-6">
+    <h2 class="mb-2 text-2xl font-bold leading-snug text-white md:mb-3 md:text-[2.34rem]">Regulación</h2>
+    <p class="mb-4 text-sm leading-relaxed text-white/60 md:mb-8 md:mx-auto md:max-w-2xl md:text-[1.2rem]">
+      Especialistas en regularización de propiedades.
+      Gestionamos tu proyecto con ética, experiencia y resultados que te dan tranquilidad.
+    </p>
+
+    <p class="mb-4 text-sm font-semibold uppercase tracking-widest text-[#EE7D65] md:mb-6 md:text-[1.5625rem]">Nuestros pilares</p>
+    <!-- Mobile: filas con borde naranja | Desktop: tarjetas verticales -->
+    <div class="space-y-2 md:grid md:grid-cols-3 md:gap-6 md:space-y-0">
+      <div class="flex items-start gap-3 border-l-4 border-[#EE7D65] bg-zinc-700 px-4 py-3 text-left md:flex-col md:items-center md:min-h-[250px] md:border-l-0 md:px-6 md:pb-6 md:pt-8 md:text-center rounded-r md:rounded">
+        <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#EE7D65] text-xs font-black text-white md:hidden">✓</span>
+        <div>
+          <p class="text-sm font-bold uppercase tracking-wide text-white md:mb-3 md:text-[1.406rem]">Cumplimiento normativo</p>
+          <p class="reveal-text text-xs leading-relaxed text-white/60 md:text-[1.2rem]">
+            Nos aseguramos de cumplir con todas las regulaciones y códigos de construcción aplicables en cada fase de nuestros proyectos.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 border-l-4 border-[#EE7D65] bg-zinc-700 px-4 py-3 text-left md:flex-col md:items-center md:min-h-[250px] md:border-l-0 md:px-6 md:pb-6 md:pt-8 md:text-center rounded-r md:rounded">
+        <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#EE7D65] text-xs font-black text-white md:hidden">✓</span>
+        <div>
+          <p class="text-sm font-bold uppercase tracking-wide text-white md:mb-3 md:text-[1.406rem]">Ética profesional</p>
+          <p class="reveal-text text-xs leading-relaxed text-white/60 md:text-[1.2rem]">
+            Actuamos con integridad y honestidad en todas nuestras interacciones, manteniendo la confianza de nuestros clientes y socios.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 border-l-4 border-[#EE7D65] bg-zinc-700 px-4 py-3 text-left md:flex-col md:items-center md:min-h-[250px] md:border-l-0 md:px-6 md:pb-6 md:pt-8 md:text-center rounded-r md:rounded">
+        <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#EE7D65] text-xs font-black text-white md:hidden">✓</span>
+        <div>
+          <p class="text-sm font-bold uppercase tracking-wide text-white md:mb-3 md:text-[1.406rem]">Responsabilidad social</p>
+          <p class="reveal-text text-xs leading-relaxed text-white/60 md:text-[1.2rem]">
+            Contribuimos al desarrollo sostenible de las comunidades en las que operamos, respetando su cultura, historia y medio ambiente.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-6 mb-4 text-sm font-semibold uppercase tracking-widest text-[#EE7D65] md:mt-12 md:mb-8 md:text-[1.5625rem]">Proceso de aprobación</p>
+
+    <!-- Mobile: vertical stepper -->
+    <div class="text-left md:hidden">
+      <div class="flex gap-3">
+        <div class="flex flex-col items-center">
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-[#EE7D65] text-sm font-bold text-[#EE7D65]">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="pb-5 pt-1">
+          <p class="mb-1 text-base font-bold uppercase tracking-wide text-white">Evaluación de normativas</p>
+          <p class="text-xs leading-relaxed text-white/60">Realizamos un análisis exhaustivo de las regulaciones pertinentes al inicio de cada proyecto.</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <div class="flex flex-col items-center">
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-[#EE7D65] text-sm font-bold text-[#EE7D65]">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="pb-5 pt-1">
+          <p class="mb-1 text-base font-bold uppercase tracking-wide text-white">Seguimiento riguroso</p>
+          <p class="text-xs leading-relaxed text-white/60">Supervisamos de cerca el cumplimiento de las normativas durante todas las etapas del proceso de diseño y construcción.</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <div class="flex flex-col items-center">
+          <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-[#EE7D65] text-sm font-bold text-[#EE7D65]">3</div>
+        </div>
+        <div class="pt-1">
+          <p class="mb-1 text-base font-bold uppercase tracking-wide text-white">Documentación completa</p>
+          <p class="text-xs leading-relaxed text-white/60">Mantenemos registros detallados de todos los aspectos relacionados con el cumplimiento normativo, garantizando la trazabilidad y la transparencia.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop: horizontal stepper centrado -->
+    <div id="proceso-desktop" class="hidden md:block">
+      <div class="relative grid grid-cols-3">
+        <!-- Línea 1→2 (absoluta, desde borde derecho círculo 1 hasta borde izquierdo círculo 2) -->
+        <div class="step-line-h absolute" id="step-h-1-2"
+             style="top:32px; left:calc(100%/6 + 32px); right:calc(50% + 32px); width:auto;"></div>
+        <!-- Línea 2→3 (absoluta, desde borde derecho círculo 2 hasta borde izquierdo círculo 3) -->
+        <div class="step-line-h absolute" id="step-h-2-3"
+             style="top:32px; left:calc(50% + 32px); right:calc(100%/6 + 32px); width:auto;"></div>
+        <!-- Paso 1 -->
+        <div class="relative z-10 flex flex-col items-center px-4 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#EE7D65] bg-zinc-800 text-xl font-bold text-[#EE7D65]">1</div>
+          <p class="mt-6 mb-2 text-xl font-bold uppercase tracking-wide text-white">Evaluación de normativas</p>
+          <p class="text-[1.05rem] leading-relaxed text-white/60">Realizamos un análisis exhaustivo de las regulaciones pertinentes al inicio de cada proyecto.</p>
+        </div>
+        <!-- Paso 2 -->
+        <div class="relative z-10 flex flex-col items-center px-4 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#EE7D65] bg-zinc-800 text-xl font-bold text-[#EE7D65]">2</div>
+          <p class="mt-6 mb-2 text-xl font-bold uppercase tracking-wide text-white">Seguimiento riguroso</p>
+          <p class="text-[1.05rem] leading-relaxed text-white/60">Supervisamos de cerca el cumplimiento de las normativas durante todas las etapas del proceso de diseño y construcción.</p>
+        </div>
+        <!-- Paso 3 -->
+        <div class="relative z-10 flex flex-col items-center px-4 text-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#EE7D65] bg-zinc-800 text-xl font-bold text-[#EE7D65]">3</div>
+          <p class="mt-6 mb-2 text-xl font-bold uppercase tracking-wide text-white">Documentación completa</p>
+          <p class="text-[1.05rem] leading-relaxed text-white/60">Mantenemos registros detallados de todos los aspectos relacionados con el cumplimiento normativo, garantizando la trazabilidad y la transparencia.</p>
+        </div>
+      </div>
+    </div>
+
+    <a href="Paginas/contacto.html" class="mt-6 inline-block bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm md:mt-10">
+      Contáctanos
+    </a>
+    </div>
+  </section>
+
+  <!-- ══════════════ ARQUITECTURA ══════════════ -->
+  <section id="arquitectura" class="bg-zinc-950 pt-4 pb-8 text-center md:pt-8 md:pb-20 scroll-mt-16">
+    <div class="mx-auto max-w-7xl px-5 md:px-6">
+    <h2 class="mb-2 text-2xl font-bold leading-snug text-white md:mb-3 md:text-[2.34rem]">Arquitectura</h2>
+    <p class="mb-5 text-sm leading-relaxed text-white/60 md:mb-10 md:mx-auto md:max-w-2xl md:text-[1.2rem]">
+      Diseño arquitectónico: innovación, funcionalidad y estética. Expertos en regularización y proyectos.
+    </p>
+    <div class="space-y-3 md:grid md:grid-cols-3 md:gap-6 md:space-y-0">
+      <div class="overflow-hidden rounded">
+        <img src="assets/Arquitectura/Diseño Residencial.jpg" alt="Diseño Residencial" class="reveal-img h-36 w-full object-cover md:h-56"/>
+        <div class="bg-zinc-700 px-3 pt-2 pb-3 text-left md:px-4 md:pt-3 md:pb-4">
+          <p class="text-sm font-bold uppercase tracking-wide text-white md:text-[1.406rem]">Diseño Residencial</p>
+          <p class="mt-1 text-xs leading-relaxed text-white/60 line-clamp-2 md:text-[1.05rem]">Creación de hogares que reflejen la identidad y estilo de vida de sus habitantes.</p>
+        </div>
+      </div>
+      <div class="overflow-hidden rounded">
+        <img src="assets/Arquitectura/Espacios comerciales.jpg" alt="Espacios Comerciales" class="reveal-img h-36 w-full object-cover md:h-56"/>
+        <div class="bg-zinc-700 px-3 pt-2 pb-3 text-left md:px-4 md:pt-3 md:pb-4">
+          <p class="text-sm font-bold uppercase tracking-wide text-white md:text-[1.406rem]">Espacios Comerciales</p>
+          <p class="mt-1 text-xs leading-relaxed text-white/60 line-clamp-2 md:text-[1.05rem]">Soluciones arquitectónicas innovadoras para negocios y espacios de trabajo.</p>
+        </div>
+      </div>
+      <div class="overflow-hidden rounded">
+        <img src="assets/Arquitectura/Diseño Urbano.jpg" alt="Diseño Urbano" class="reveal-img h-36 w-full object-cover md:h-56"/>
+        <div class="bg-zinc-700 px-3 pt-2 pb-3 text-left md:px-4 md:pt-3 md:pb-4">
+          <p class="text-sm font-bold uppercase tracking-wide text-white md:text-[1.406rem]">Diseño Urbano</p>
+          <p class="mt-1 text-xs leading-relaxed text-white/60 line-clamp-2 md:text-[1.05rem]">Desarrollo de proyectos que contribuyan al crecimiento y la revitalización de comunidades.</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 text-center md:mt-10">
+      <a href="Paginas/contacto.html" class="inline-block bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm">
+        Contáctanos
+      </a>
+    </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ BANDA PARALLAX 1 ══════════════ -->
+  <section class="parallax-bg parallax-band parallax-overlay-rb" style="background-image: url('assets/Banner home/Banner home.jpg');">
+    <div class="overlay"></div>
+    <div class="content">
+      <p class="text-2xl md:text-4xl font-bold uppercase tracking-wide text-white leading-snug">
+        Construimos espacios que perduran
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ BLOG ══════════════ -->
+  <section id="blog" class="bg-zinc-800 pt-4 pb-8 text-center md:pt-8 md:pb-20">
+    <div class="mx-auto max-w-7xl px-5 md:px-6">
+    <h2 class="mb-2 text-2xl font-bold leading-snug text-white md:mb-3 md:text-[2.34rem]">Blog</h2>
+    <p class="mb-5 text-sm leading-relaxed text-white/60 md:mb-10 md:mx-auto md:max-w-2xl md:text-[1.2rem]">
+      En nuestro blog de www.axyz.cl encontrarás una amplia variedad de información útil que te ayudará en tu proyecto o te permitirá profundizar en temas específicos.
+    </p>
+    <div class="space-y-5 text-left md:grid md:grid-cols-2 md:gap-10 md:space-y-0">
+
+      <div>
+        <div class="w-full overflow-hidden rounded bg-zinc-700 img-zoom-wrap" style="aspect-ratio:1250/700">
+          <img src="assets/Blog/habilitación.jpg" alt="¿Cómo habilitar un local comercial en Chile?" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3">
+          <p class="text-sm text-white/40">Marzo 2025</p>
+          <h3 class="mt-1 text-base font-bold uppercase leading-snug text-white md:text-xl">¿Cómo habilitar un local comercial en Chile?</h3>
+          <p class="mt-1 text-xs leading-relaxed text-white/50 md:text-[1.05rem]">Requisitos, plazos y etapas para la apertura de locales.</p>
+          <button onclick="openModal('modal-habilitacion')" class="mt-2 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65] group">Ver más <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span></button>
+        </div>
+      </div>
+
+      <div>
+        <div class="w-full overflow-hidden rounded bg-zinc-700 img-zoom-wrap" style="aspect-ratio:1250/700">
+          <img src="assets/Blog/patente comercial.jpg" alt="¿Qué son y cómo obtener patentes comerciales en Chile?" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3">
+          <p class="text-sm text-white/40">Marzo 2025</p>
+          <h3 class="mt-1 text-base font-bold uppercase leading-snug text-white md:text-xl">¿Qué son y cómo obtener patentes comerciales en Chile?</h3>
+          <p class="mt-1 text-xs leading-relaxed text-white/50 md:text-[1.05rem]">Guía de requisitos, plazos y etapas para la apertura de locales</p>
+          <button onclick="openModal('modal-patentes')" class="mt-2 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65] group">Ver más <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span></button>
+        </div>
+      </div>
+
+      <div>
+        <div class="w-full overflow-hidden rounded bg-zinc-700 img-zoom-wrap" style="aspect-ratio:1250/700">
+          <img src="assets/Blog/Guía completa.jpg" alt="Guía completa" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3">
+          <p class="text-sm text-white/40">Febrero 2025</p>
+          <h3 class="mt-1 text-base font-bold uppercase leading-snug text-white md:text-xl">Guía completa</h3>
+          <p class="mt-1 text-xs leading-relaxed text-white/50 md:text-[1.05rem]">Certificaciones de instalaciones domiciliarias interiores en Chile</p>
+          <button onclick="openModal('modal-guia')" class="mt-2 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65] group">Ver más <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span></button>
+        </div>
+      </div>
+
+      <div>
+        <div class="w-full overflow-hidden rounded bg-zinc-700 img-zoom-wrap" style="aspect-ratio:1250/700">
+          <img src="assets/Blog/Calificación industrial.jpg" alt="Calificación industrial" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3">
+          <p class="text-sm text-white/40">Febrero 2025</p>
+          <h3 class="mt-1 text-base font-bold uppercase leading-snug text-white md:text-xl">Calificación industrial: ¿Quiénes la necesitan y para qué sirve?</h3>
+          <p class="mt-1 text-xs leading-relaxed text-white/50 md:text-[1.05rem]">Importancia, etapas y sectores que requieren certificación</p>
+          <button onclick="openModal('modal-calificacion')" class="mt-2 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65] group">Ver más <span class="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span></button>
+        </div>
+      </div>
+
+    </div>
+    <div class="mt-6 text-center md:mt-10">
+      <a href="Paginas/blog.html" class="inline-block bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm">
+        Ver todas las entradas
+      </a>
+    </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ MAPA DE PROYECTOS ══════════════ -->
+  <section id="proyectos" class="bg-zinc-900 pt-10 pb-14 text-center">
+    <div class="mx-auto max-w-7xl px-5 md:px-6">
+
+      <!-- Eyebrow -->
+      <p class="mb-2 text-sm font-bold uppercase tracking-widest text-[#EE7D65]">Nuestro alcance</p>
+      <h2 class="mb-10 text-3xl font-bold text-white md:text-[2.34rem]">Proyectos en todo Chile</h2>
+
+      <!-- Stats -->
+      <div class="mb-8 flex justify-center gap-6 md:mb-10 md:gap-20">
+        <div class="text-center">
+          <p class="text-3xl font-black text-[#EE7D65] tabular-nums md:text-5xl" id="stat-proyectos">0</p>
+          <p class="mt-1 text-xs font-semibold uppercase tracking-widest text-white/50 md:text-sm">Proyectos</p>
+        </div>
+        <div class="text-center">
+          <p class="text-3xl font-black text-[#EE7D65] tabular-nums md:text-5xl" id="stat-comunas">0</p>
+          <p class="mt-1 text-xs font-semibold uppercase tracking-widest text-white/50 md:text-sm">Comunas</p>
+        </div>
+        <div class="text-center">
+          <p class="text-3xl font-black text-[#EE7D65] tabular-nums md:text-5xl" id="stat-regiones">0</p>
+          <p class="mt-1 text-xs font-semibold uppercase tracking-widest text-white/50 md:text-sm">Regiones</p>
+        </div>
+      </div>
+
+      <!-- Mapa -->
+      <div id="mapa-proyectos" style="border:1px solid rgba(238,125,101,0.3);" class="w-full h-64 md:h-[480px]"></div>
+
+    </div>
+  </section>
+
+  <!-- Leaflet CSS + JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  (function() {
+    const proyectos = [
+      {name: "01 El Quisco (Colegio El Totoral)", lat: -33.4203867, lng: -71.6256284},
+      {name: "02 Federico Errázuriz, Pudahuel", lat: -33.4361203, lng: -70.7631158},
+      {name: "03 Los Olivos, Pudahuel", lat: -33.4512927, lng: -70.8362846},
+      {name: "04 San Jorge, Rengo", lat: -34.3216293, lng: -70.8923537},
+      {name: "05 Alto Laguna, Paine", lat: -33.8747015, lng: -70.9332273},
+      {name: "06 Santa Teresita, Lampa", lat: -33.2689167, lng: -70.7707393},
+      {name: "07 Manuel de Salas, Ñuñoa", lat: -33.4488326, lng: -70.5932138},
+      {name: "08 Honduras, La Florida", lat: -33.5379672, lng: -70.5738422},
+      {name: "09 Avenida Las Flores, Pudahuel", lat: -33.4546087, lng: -70.8465327},
+      {name: "10 Sergio Saavedra, Pudahuel", lat: -33.43265, lng: -70.7631951},
+      {name: "11 Transversal Uno, Pudahuel", lat: -33.4489176, lng: -70.840421},
+      {name: "12 Río Limarí, Pudahuel", lat: -33.3301663, lng: -70.7495054},
+      {name: "13 Los Senderos, Pudahuel", lat: -33.4464483, lng: -70.8357015},
+      {name: "14 La Cancha, Cuncumen", lat: -33.7326035, lng: -71.4257267},
+      {name: "15 Rodas, Pudahuel", lat: -33.4548299, lng: -70.8199621},
+      {name: "16 Balmaceda, San Bernardo", lat: -33.5942861, lng: -70.678501},
+      {name: "17 Avenida los Molinos, Pudahuel", lat: -33.464254, lng: -70.8570305},
+      {name: "18 Exequiel Fernández, Macul", lat: -33.5082643, lng: -70.6039496},
+      {name: "19 Dardignac, Recoleta", lat: -33.433211, lng: -70.6363936},
+      {name: "20 Belén, Pudahuel", lat: -33.4551804, lng: -70.8224822},
+      {name: "21 Transversal Uno 2, Pudahuel", lat: -33.4490059, lng: -70.8402967},
+      {name: "23 Casas Lo Solar, Lampa", lat: -33.2721799, lng: -70.7594037},
+      {name: "24 Avenida Santa Rosa, La Pintana", lat: -33.5866786, lng: -70.6297363},
+      {name: "25 Avenida Don Luis, Lampa", lat: -33.322688, lng: -70.7301196},
+      {name: "26 Américo Vespucio Norte, Vitacura", lat: -33.3927912, lng: -70.5915875},
+      {name: "27 Pasaje Don José Miguel 2 Sur, Puente Alto", lat: -33.6024708, lng: -70.5862888},
+      {name: "29 Los Mañios, Pudahuel", lat: -33.4595945, lng: -70.8446863},
+      {name: "30 Panguipulli, Pudahuel", lat: -33.4292897, lng: -70.7621679},
+      {name: "31 El Juncal, Quilicura", lat: -33.3287217, lng: -70.7093781},
+      {name: "32 Las Hortensias Oriente, Pudahuel", lat: -33.4504192, lng: -70.8465562},
+      {name: "35 José Miguel Infante, Renca", lat: -33.4067081, lng: -70.7197045},
+      {name: "37 Las Canteras, Colina", lat: -33.3016634, lng: -70.689961},
+      {name: "38 Condell, Providencia", lat: -33.4459742, lng: -70.6262616},
+      {name: "39 Gamero, Independencia", lat: -33.4211924, lng: -70.6617282},
+      {name: "40 Chicureo, Colina", lat: -33.2859849, lng: -70.6747028},
+      {name: "41 Licancabur, Macul", lat: -33.489934, lng: -70.6029052},
+      {name: "42 Santa Rosa, Santiago", lat: -33.4627214, lng: -70.6428704},
+      {name: "43 Laguna Quililo, Pudahuel", lat: -33.4610986, lng: -70.7495411},
+      {name: "44 Avenida el Ventisquero, Renca", lat: -33.4086012, lng: -70.7667425},
+      {name: "45 Pasaje Las Acacias, Estación Central", lat: -33.4618801, lng: -70.7083305},
+      {name: "46 Los Almendros, Pudahuel", lat: -33.4537592, lng: -70.8535495},
+      {name: "47 Arturo Prat, Santiago", lat: -33.4525268, lng: -70.6487068},
+      {name: "48.1 El Aguilucho, Providencia", lat: -33.4431417, lng: -70.5960488},
+      {name: "48.2 Calle Cementerio, Tiltil", lat: -33.089963, lng: -70.9171177},
+      {name: "48.3 Llanquihue, Puerto Montt", lat: -41.2638681, lng: -73.0020266},
+      {name: "48.5 El Totoral, El Quisco", lat: -33.4203867, lng: -71.6256284},
+      {name: "48.6 El Tabo", lat: -33.4968436, lng: -71.6214679},
+      {name: "50 El Trabajo, Conchalí", lat: -33.3825938, lng: -70.689624},
+      {name: "51 Las Hualtatas, Vitacura", lat: -33.3867186, lng: -70.5515697},
+      {name: "52 Paseo Huerfanos, Santiago", lat: -33.4389963, lng: -70.6479585},
+      {name: "53 Los Jardines, Ñuñoa", lat: -33.4647685, lng: -70.590118},
+      {name: "54 Yungay, Renca", lat: -33.3972791, lng: -70.727615},
+      {name: "55 Bascuñán Guerrero, Santiago", lat: -33.4563245, lng: -70.6739404},
+      {name: "57 Las Azaleas Sur, Pudahuel", lat: -33.4564411, lng: -70.8499023},
+      {name: "58 Talcan, Estación Central", lat: -33.4733618, lng: -70.7093430},
+      {name: "59 Avenida Las Flores, Pudahuel", lat: -33.4521075, lng: -70.8490875},
+      {name: "60 Las Tranqueras, Las Condes", lat: -33.3951015, lng: -70.5536353},
+      {name: "61 Miguel Claro, Providencia", lat: -33.4330857, lng: -70.620076},
+      {name: "62 La Cruz", lat: -32.8191435, lng: -71.2772829},
+      {name: "63 Luis Thayer Ojeda, Providencia", lat: -33.4178042, lng: -70.6037203},
+      {name: "64 Los Retamos, El Bosque", lat: -33.5711891, lng: -70.6769330},
+      {name: "65.1 Puerto Vespucio, Pudahuel", lat: -33.4486374, lng: -70.7822171},
+      {name: "65.2 Del Cerro, Curacaví", lat: -33.4074188, lng: -71.1499268},
+      {name: "66 Martin de Solis", lat: -33.5701374, lng: -70.5569846},
+      {name: "67 Los Quénes, La Reina", lat: -33.4547202, lng: -70.5381370},
+      {name: "68 Pasaje Quellón, Maipú", lat: -33.5489079, lng: -70.7616654},
+      {name: "69 Los Cerrillos, Cerrillos", lat: -33.4948302, lng: -70.7071109},
+      {name: "70 Santa Cecilia, Padre Hurtado", lat: -33.5723601, lng: -70.8542066},
+      {name: "71 Avenida Ricardo Lyon, Ñuñoa", lat: -33.4487119, lng: -70.6020906},
+      {name: "72 18 de Septiembre, Arica", lat: -18.4764292, lng: -70.3192927},
+      {name: "73 Barros Arana, San Bernardo", lat: -33.596942, lng: -70.6998766},
+      {name: "74 Los Conquistadores, Providencia", lat: -33.4196207, lng: -70.6163123},
+      {name: "75 Camino El Agua, Pudahuel", lat: -33.4492207, lng: -70.8397909},
+      {name: "76 Punta Graham, Puente Alto", lat: -33.5735417, lng: -70.6018784},
+      {name: "77.1 Almirante Silva Palma, Conchalí", lat: -33.3911253, lng: -70.6823038},
+      {name: "77.2 San Fernando, Conchalí", lat: -33.3924824, lng: -70.6639923},
+      {name: "78 Lo Marcoleta, Quilicura", lat: -33.3619142, lng: -70.7560137},
+      {name: "79 Los Senderos, Pudahuel", lat: -33.4467521, lng: -70.8353821},
+      {name: "80.1 Calle 131, Peñalolén", lat: -33.4657884, lng: -70.5546981},
+      {name: "80.2 Pirque", lat: -33.6118172, lng: -70.4851488},
+      {name: "81 Domingo Santa María, Renca", lat: -33.4137924, lng: -70.6800745},
+      {name: "82 Apoquindo, Las Condes", lat: -33.41467, lng: -70.5887103},
+      {name: "83 Los Patagones, Arica", lat: -18.5186936, lng: -70.1774645},
+      {name: "84 Rivas, San Miguel", lat: -33.4789436, lng: -70.6428939},
+      {name: "86 Los Dominicos, Las Condes", lat: -33.4095974, lng: -70.5445816},
+      {name: "87 Los Almendros 2, La Cisterna", lat: -33.5380741, lng: -70.6791737},
+      {name: "89 Toesca, Santiago", lat: -33.4558965, lng: -70.673599},
+      {name: "90 La Montaña, Colina", lat: -33.3021996, lng: -70.7254786},
+      {name: "91 La Pradera, Peñaflor", lat: -33.6058146, lng: -70.8821242},
+      {name: "93 Apoquindo 2, Las Condes", lat: -33.4077052, lng: -70.5643599},
+      {name: "94.1 Split, Cerro Navia", lat: -33.4261585, lng: -70.74154},
+      {name: "94.2 Jorge Luco, El Bosque", lat: -33.5569492, lng: -70.6737657},
+      {name: "95 La Coruña, Quilicura", lat: -33.3511169, lng: -70.725218},
+      {name: "96 Rodrigo de Araya, Ñuñoa", lat: -33.4735693, lng: -70.5897959},
+      {name: "97 Santa Isabel, Lampa", lat: -33.3123241, lng: -70.7437764},
+      {name: "98 Presidente Kennedy, Las Condes", lat: -33.4018188, lng: -70.5750034},
+      {name: "99 Las Madreselvas, Puente Alto", lat: -33.6074729, lng: -70.5210266},
+      {name: "100 Pedro Mira, San Miguel", lat: -33.4973749, lng: -70.6476875},
+      {name: "101 Calle Dos, Viña del Mar", lat: -33.0009149, lng: -71.499641},
+      {name: "102 Jose Miguel Carrera, El Bosque", lat: -33.5504761, lng: -70.6718836},
+      {name: "103 Luis Thayer Ojeda, Providencia", lat: -33.439105, lng: -70.5959088},
+      {name: "105 Jesús, La Reina", lat: -33.4464594, lng: -70.5683879},
+      {name: "106 Grecia, Rancagua", lat: -34.1594953, lng: -70.7390261},
+      {name: "107 Alvaro Casanova, Peñalolén", lat: -33.4644121, lng: -70.5237223},
+      {name: "108 Santa Lucía, Quilicura", lat: -33.33504, lng: -70.71888},
+      {name: "109 Av. Matta, Santiago", lat: -33.4573317, lng: -70.6376553},
+      {name: "110 Pedro León Gallo, Providencia", lat: -33.4419628, lng: -70.6233577},
+      {name: "111 Zapadores, Recoleta", lat: -33.3908543, lng: -70.6413523},
+      {name: "112 Gran Avenida, San Miguel", lat: -33.513044, lng: -70.6580169},
+      {name: "113 Pizarreño, Maipú", lat: -33.5193855, lng: -70.7426156},
+      {name: "114 Antillas, San Joaquín", lat: -33.5157311, lng: -70.6275905},
+      {name: "115.1 Lupa, Ñuñoa", lat: -33.4524573, lng: -70.6235235},
+      {name: "116 Alvaro Casanova 2, La Reina", lat: -33.4395104, lng: -70.5165099},
+      {name: "117 Longitudinal Ruta 5, Buin", lat: -33.7211445, lng: -70.7271584},
+      {name: "118 Sierra De Bellavista, San Fernando", lat: -34.744808, lng: -70.7759271},
+      {name: "119.1 Juan Andres, Lampa", lat: -33.2857621, lng: -70.7459322},
+      {name: "119.2 Maria Josefina, Lampa", lat: -33.2860541, lng: -70.7469688},
+      {name: "120 Hugo Bravo, Maipú", lat: -33.4741825, lng: -70.7532848},
+      {name: "121 Padre Juan Jaque, Puente Alto", lat: -33.576224, lng: -70.5624974},
+      {name: "122 Carachilla, La Granja", lat: -33.5479929, lng: -70.6149048},
+      {name: "123 Los Paltos, La Pintana", lat: -33.6173449, lng: -70.6420628},
+      {name: "124 Rancagua, Recoleta", lat: -33.3891603, lng: -70.645093},
+      {name: "125 Alejandro Sepúlveda, Peñalolén", lat: -33.4734291, lng: -70.5670849},
+      {name: "126 Puerto Aysen, Pudahuel", lat: -33.462143, lng: -70.7445796},
+      {name: "127 Río Rapel, El Bosque", lat: -33.5817568, lng: -70.6720641},
+      {name: "128 Valle Del Sol, Calera de Tango", lat: -33.6154665, lng: -70.7821391},
+      {name: "129 Lord Cochrane, Santiago", lat: -33.4703929, lng: -70.6522985},
+      {name: "130 Pasaje Cuatro, Peñalolén", lat: -33.502743, lng: -70.5718161},
+      {name: "131 Cerro Castillo, Pudahuel", lat: -33.4360857, lng: -70.7713175},
+    ];
+
+    // Marcador personalizado naranja
+    const orangeIcon = L.divIcon({
+      className: '',
+      html: '<div style="width:10px;height:10px;background:#EE7D65;border-radius:50%;border:2px solid rgba(255,255,255,0.6);box-shadow:0 0 6px rgba(238,125,101,0.8);"></div>',
+      iconSize: [10, 10],
+      iconAnchor: [5, 5],
+      popupAnchor: [0, -8]
+    });
+
+    const map = L.map('mapa-proyectos', {
+      center: [-33.47, -70.65],
+      zoom: 10,
+      zoomControl: true,
+      scrollWheelZoom: false
+    });
+
+    // Tiles oscuros (CartoDB Dark Matter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    proyectos.forEach(p => {
+      L.marker([p.lat, p.lng], {icon: orangeIcon})
+        .addTo(map)
+        .bindPopup(`<b style="color:#EE7D65;font-size:0.75rem;font-family:sans-serif;">${p.name}</b>`);
+    });
+
+    // Animación de contadores al entrar en viewport
+    const targets = {
+      'stat-proyectos': 129,
+      'stat-comunas':    47,
+      'stat-regiones':    4
+    };
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        Object.entries(targets).forEach(([id, end]) => {
+          const el = document.getElementById(id);
+          if (!el || el.dataset.done) return;
+          el.dataset.done = '1';
+          let start = 0;
+          const step = Math.ceil(end / 60);
+          const timer = setInterval(() => {
+            start = Math.min(start + step, end);
+            el.textContent = start + '+';
+            if (start >= end) clearInterval(timer);
+          }, 20);
+        });
+        observer.disconnect();
+      });
+    }, { threshold: 0.3 });
+    observer.observe(document.getElementById('mapa-proyectos'));
+
+  })();
+  </script>
+
+  <!-- ══════════════ BANDA PARALLAX 2 (CTA) ══════════════ -->
+  <section class="parallax-bg parallax-band" style="background-image: url('assets/Banner home/Banner home.jpg'); min-height: 240px;">
+    <div class="overlay"></div>
+    <div class="content">
+      <p class="mb-6 text-2xl md:text-4xl font-bold uppercase tracking-wide text-white leading-snug">
+        ¿Listo para regularizar tu propiedad?
+      </p>
+      <a href="Paginas/contacto.html" class="inline-block bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors md:px-8 md:py-3 md:text-sm">
+        Contáctanos
+      </a>
+    </div>
+  </section>
+
+  <!-- ══════════════ CONTACTO ══════════════ -->
+  <section id="contacto" class="bg-zinc-800 pt-6 pb-12 text-center md:pt-8 md:pb-20">
+    <div class="mx-auto max-w-2xl px-5 md:px-6">
+    <h2 class="mb-2 text-3xl font-bold leading-snug text-white md:text-[2.34rem]">Cuéntanos tu proyecto</h2>
+    <p class="mb-6 text-[1.2rem] leading-relaxed text-white/60">Contáctanos y te responderemos en menos de 24 horas.</p>
+
+    <form id="contact-form" class="space-y-3 text-left" novalidate>
+
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Nombre</label>
+          <input type="text" name="nombre_apellido" placeholder="Nombre completo"
+            class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Teléfono</label>
+          <input type="tel" name="telefono" placeholder="+569"
+            class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Mail</label>
+          <input type="email" name="email" placeholder="tu@email.com"
+            class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Comuna</label>
+          <input type="text" name="comuna" placeholder="Tu comuna"
+            class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Mensaje</label>
+        <textarea name="mensaje" rows="3" placeholder="Cuéntanos sobre tu proyecto"
+          class="w-full resize-none border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"></textarea>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 pt-1">
+        <div class="flex items-center gap-2 border border-white/10 bg-zinc-700 px-4 py-2">
+          <span class="text-sm text-white/60">¿Cuánto es</span>
+          <span id="captcha-q" class="text-sm font-bold text-white"></span>
+          <span class="text-sm text-white/60">?</span>
+          <input type="text" id="captcha-a" inputmode="numeric" maxlength="2"
+            class="w-12 border border-white/10 bg-zinc-600 px-2 py-1 text-center text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"
+            placeholder="—"/>
+        </div>
+        <p id="captcha-err" class="hidden text-xs text-red-400">Respuesta incorrecta, intenta de nuevo.</p>
+      </div>
+
+      <div class="pt-2 text-center">
+        <button type="submit"
+          class="bg-[#EE7D65] px-5 py-2 text-xs font-bold uppercase tracking-widest text-white md:px-8 md:py-3 md:text-sm">
+          Enviar mensaje
+        </button>
+      </div>
+
+    </form>
+    </div>
+  </section>
+
+  <!-- ══════════════ MODALES BLOG ══════════════ -->
+
+  <!-- Modal 1: Habilitación local comercial -->
+  <div id="modal-habilitacion" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-habilitacion')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Cómo habilitar un local comercial en Chile?</h2>
+      <p>Conoce los requisitos y el proceso</p>
+      <p>La habilitación de un local comercial corresponde al conjunto de autorizaciones municipales, sanitarias y técnicas que permiten operar legalmente un local destinado a atención al público, venta de productos o prestación de servicios. Su propósito principal es asegurar que cumpla con las normativas de uso de suelo, seguridad, higiene, accesibilidad y urbanos.</p>
+      <p>Para realizar un proceso de habilitación de local comercial, el cual demora tiempo y requiere de diversos especialistas, debes tener en consideración los siguientes pasos:</p>
+      <ul>
+        <li>Selección del local → Uso de suelo</li>
+        <li>Certificado de informaciones previas → Zonificación y restricciones</li>
+        <li>Proyectos y planos DOM → Arquitectura, electricidad, entre otros</li>
+        <li>Permisos DOM → Excavación, obras, entre otros</li>
+        <li>Factibilidad de servicios → Agua, electricidad, gas, entre otros</li>
+        <li>Permisos especiales → Sanitaria, alcohol, ocupación de la vía, entre otros</li>
+        <li>Inspección municipal → Seguridad, uso de suelo, entre otros</li>
+        <li>Emisión de la habilitación → Permiso municipal que permite operar legalmente</li>
+      </ul>
+      <p>Para que el proceso anteriormente mencionado se realice de la mejor manera y lo más eficiente posible, se debe tener en consideración:</p>
+      <ul>
+        <li><strong style="color:#fff">Uso de suelo y zonificación:</strong> Revisa el Plan Regulador Comunal para confirmar si la comuna permite tu rubro. Luego, solicita un Certificado de Informaciones Previas y de zonificación al DOM.</li>
+        <li><strong style="color:#fff">Proyecto y planos técnicos (DOM):</strong> Debes contar con planos arquitectónicos y de instalaciones (eléctricas, ventilación, contra incendios, baños, accesibilidad universal conforme Ley 20.422). Si no cuentas con los planos, en AXYZ los podemos confeccionar para ti. En caso de zonas históricas se puede requerir de autorización adicional.</li>
+        <li><strong style="color:#fff">Permisos municipales y de obra:</strong> Presenta el proyecto y paga aranceles. En caso de obras mayores, necesitas Permiso de Edificación y luego Recepción Final de Obra.</li>
+        <li><strong style="color:#fff">Factibilidad de servicios:</strong> Obtén certificados de conexión de agua, electricidad, alcantarillado y gas. Si no los tienes, en AXYZ tenemos a los profesionales que pueden hacerlo por ti.</li>
+        <li><strong style="color:#fff">Permisos especiales según el rubro:</strong> Sanitarios por venta o manipulación de alimentos, alcoholes, ocupación de la vía pública con terrazas o toldos, publicidad exterior, elementos de seguridad como alarmas, extintores, cámaras.</li>
+        <li><strong style="color:#fff">Inclusión universal:</strong> baños, rampas, señalética.</li>
+        <li><strong style="color:#fff">Inspección municipal</strong> de verificación de condiciones constructivas, higiene, electricidad, entre otros.</li>
+        <li><strong style="color:#fff">Emisión de la habilitación:</strong> Finalizado el proceso, el municipio otorga el certificado o resolución que autoriza operar.</li>
+      </ul>
+      <h3>Costos y tiempo estimados</h3>
+      <ul>
+        <li>Arancel de inspección que varía por comuna, según capital asignado y uso.</li>
+        <li>Permiso de edificación según superficie y complejidad.</li>
+        <li>Permisos sanitarios de dominio urbano.</li>
+        <li>Tiempo: una habilitación simple sin planos puede demorar un día hábil; con planos y obras puede demorar varias semanas o meses; y si se construye en una zona histórica, estos trámites pueden extenderse más.</li>
+      </ul>
+      <h3>¿Qué se necesita presentar?</h3>
+      <ol>
+        <li>Certificados iniciales: Informaciones previas, zonificación, DOM, entre otros</li>
+        <li>Planos técnicos: Arquitectónicos, eléctricos, ventilación, fachadas, accesos, entre otros</li>
+        <li>Permisos municipales: Permiso de edificación y recepción final</li>
+        <li>Servicios: Factibilidad de agua, electricidad, gas, alcantarillado, entre otros</li>
+        <li>Permisos adicionales: Sanitarios, alcoholes, ocupación de la vía pública, letreros, seguridad y accesibilidad, entre otros</li>
+        <li>Inspección y aranceles: Pago de tasas municipales</li>
+        <li>Resolución de la habilitación: Certificado o permiso emitido por la municipalidad</li>
+      </ol>
+      <p>Como este es un proceso que demora tiempo y requiere de diversos especialistas, para que pueda ser realizado de manera exitosa, les compartimos los siguientes consejos:</p>
+      <ul>
+        <li>Contrata profesionales: un arquitecto o ingeniero para planos técnicos y coordinación con DOM. Recomendamos una empresa de arquitectura con experiencia y todos los profesionales en un mismo lugar. ¡AXYZ es uno de ellos!</li>
+        <li>Consulta en la comuna primero: cada municipio tiene detalles propios (tarifas, formularios).</li>
+        <li>Revisa restricciones: usos históricos, aforo, ruido, olores, horarios.</li>
+        <li>Solicita la inspección final apenas termines obras; puede acelerar tu habilitación.</li>
+      </ul>
+      <p>Si requieres habilitar tu local comercial, en AXYZ contamos con los mejores profesionales y expertos para ayudarte en este proceso, ahorrándote tiempo valioso e inconvenientes. ¡Te invitamos a dejar esta responsabilidad en nuestras manos!</p>
+    </div>
+  </div>
+
+  <!-- Modal 2: Patentes comerciales -->
+  <div id="modal-patentes" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-patentes')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Qué son y cómo obtener patentes comerciales en Chile?</h2>
+      <p>Una patente comercial o también llamada patente municipal, es un permiso legal otorgado por la municipalidad para ejercer actividades comerciales, profesionales, industriales o de expendio de alcoholes en un local con uso de suelo autorizado. Dentro de estas, las patentes comerciales permiten abrir y operar negocios medianos, como cafeterías, boutiques, gimnasios, coworking, centros médicos, dentales o de estética.</p>
+      <h3>Existen diversos tipos</h3>
+      <ul>
+        <li><strong style="color:#fff">Comercial general:</strong> venta de productos o servicios en local físico como tiendas, cafetería, e-commerce con showroom, entre otros.</li>
+        <li><strong style="color:#fff">Industrial:</strong> manufactura y procesamiento de bienes como panaderías y laboratorios pequeños, entre otros.</li>
+        <li><strong style="color:#fff">Profesional:</strong> estudios de contadores, arquitectos, consultorías con local.</li>
+        <li><strong style="color:#fff">Alcoholes:</strong> bares, restaurantes y botillerías, que requieren autorizaciones adicionales del SAG, Seremi de Salud, entre otros.</li>
+        <li><strong style="color:#fff">Microempresa familiar:</strong> para pequeños emprendimientos domésticos con menos de 5 trabajadores.</li>
+      </ul>
+      <p>Tener una patente vigente no solo es obligatorio por ley, sino que garantiza un respaldo legal, evita multas o clausuras e incluso facilita el acceso a arriendos comerciales o acuerdos con proveedores.</p>
+      <h3>Normativa legal municipal</h3>
+      <p>Las patentes se rigen principalmente por el Decreto Ley 3.063 de 1979, Ley de Rentas Municipales, y su reglamento. Cada municipalidad puede exigir normas adicionales relativas a uso de suelo, seguridad, medio ambiente o imagen urbana.</p>
+      <ul>
+        <li><strong style="color:#fff">Las Condes:</strong> priman las patentes definitiva, provisoria, domicilio tributario y microempresa familiar.</li>
+        <li><strong style="color:#fff">Providencia:</strong> exige permisos de obras, factibilidad municipal y cumplir normativa de seguridad e impacto urbano.</li>
+        <li><strong style="color:#fff">Vitacura y Ñuñoa:</strong> similares exigencias en uso de suelo, retiro de basura, estacionamientos, niveles de ruido o emisiones.</li>
+      </ul>
+      <h3>Pasos para obtener una patente comercial</h3>
+      <ol>
+        <li><strong style="color:#fff">Revisión de uso de suelo:</strong> Verificar en la DOM que el local esté permitido para actividad comercial o profesional.</li>
+        <li><strong style="color:#fff">Solicitud ante la municipalidad:</strong> Presenta formulario, cédula, RUT, contrato o título de propiedad, escritura, certificado de inicio de actividades SII, informe de factibilidad de obras, permisos sanitarios, SAG, SEC, u otros requeridos.</li>
+        <li><strong style="color:#fff">Pago de derecho municipal:</strong> Las comunas cobran una tarifa fija por iniciar el trámite.</li>
+        <li><strong style="color:#fff">Inspección municipal:</strong> DOM verifica factibilidad y compatibilidad con ordenanzas urbanas.</li>
+        <li><strong style="color:#fff">Aprobación y pago de la patente:</strong> Se paga anualmente, en dos cuotas: enero y julio.</li>
+        <li><strong style="color:#fff">Recepción del certificado:</strong> La municipalidad emite el certificado físico o digital.</li>
+      </ol>
+      <h3>Costos y plazos estimados</h3>
+      <p>El costo anual se calcula sobre el capital propio declarado al SII, con una tasa de entre 2,5% y 5%, con límites entre 1 UTM y 8.000 UTM. Los plazos son variables según municipalidad y rubro. Algunas comunas del sector oriente tardan varias semanas en análisis de impacto urbano y factibilidad.</p>
+      <h3>Requisitos y documentos</h3>
+      <ul>
+        <li>Formulario y cédula de identidad</li>
+        <li>Inicio de actividades en el SII</li>
+        <li>Documento del local: contrato de arriendo, escritura o dominio vigente</li>
+        <li>Factibilidad DOM</li>
+        <li>Permisos específicos: sanitarios, alcohol, gas, según rubro</li>
+        <li>Representación notarial para trámites por apoderado</li>
+        <li>Microempresa familiar: declaración jurada, máximo 5 trabajadores</li>
+      </ul>
+      <h3>Renovación y multa por no pago</h3>
+      <ul>
+        <li>La patente es vitalicia siempre que esté vigente y pagada.</li>
+        <li>Se puede renovar o modificar el giro presentando documentación actualizada.</li>
+        <li>El impago conlleva multas, intereses y puede ser causal de clausura o cierre forzado.</li>
+      </ul>
+      <p>¿Quieres obtener tu patente comercial sin trámites engorrosos? En AXYZ Arquitectos nos ocupamos de todo el proceso —desde la evaluación técnica hasta la entrega de la resolución— para que tu única preocupación sea hacer crecer tu negocio. ¡Agenda una asesoría gratuita!</p>
+    </div>
+  </div>
+
+  <!-- Modal 3: Guía completa certificaciones -->
+  <div id="modal-guia" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-guia')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Guía completa: Certificaciones de instalaciones domiciliarias interiores en Chile</h2>
+      <p>Las instalaciones domiciliarias interiores en Chile deben cumplir con una serie de normativas y certificaciones para garantizar que sean seguras, funcionales y respetuosas con el medio ambiente. Estas certificaciones son necesarias tanto para las nuevas construcciones como para las remodelaciones de viviendas y edificios.</p>
+      <p>"Las certificaciones no sólo son esenciales para prevenir accidentes y garantizar el bienestar de los residentes, sino que también son un requisito legal en muchos casos. Además, las viviendas que cuentan con instalaciones certificadas suelen tener un mayor valor en el mercado y un acceso más fácil a financiamiento", explica Sebastián Pinto, arquitecto y socio de AXYZ.</p>
+      <h3>Certificación de instalaciones eléctricas</h3>
+      <p>Las instalaciones eléctricas deben cumplir con la norma chilena NCh4/2003, que establece los requisitos mínimos de seguridad en baja tensión.</p>
+      <ul>
+        <li><strong style="color:#fff">¿Qué se certifica?</strong> Desde el cuadro eléctrico hasta cada uno de los circuitos: interruptores, tomas de corriente y cableado.</li>
+        <li><strong style="color:#fff">Proceso:</strong> Un electricista autorizado realiza una revisión exhaustiva y emite el certificado de cumplimiento NCh4/2003.</li>
+      </ul>
+      <p>"Un ejemplo común es la certificación de un sistema de iluminación LED, donde se verifica la calidad del cableado, la correcta conexión a tierra y la distribución de circuitos", indica Sebastián Pinto, arquitecto y socio de AXYZ.</p>
+      <h3>Certificación de instalaciones de gas</h3>
+      <p>Las instalaciones de gas siguen el Proceso CIIGe, que establece los requisitos técnicos para sistemas de gas domiciliarios.</p>
+      <ul>
+        <li><strong style="color:#fff">¿Qué se certifica?</strong> Tuberías, gasodomésticos (calderas, cocinas, calefones) y sistemas de ventilación.</li>
+        <li><strong style="color:#fff">Proceso:</strong> Un instalador de gas autorizado verifica estanqueidad, puntos de conexión y válvulas de seguridad.</li>
+      </ul>
+      <h3>Certificación de agua potable y saneamiento</h3>
+      <p>Deben cumplir con el Decreto 50, que regula el diseño, construcción y mantenimiento de sistemas de distribución de agua potable y evacuación de aguas servidas.</p>
+      <ul>
+        <li><strong style="color:#fff">¿Qué se certifica?</strong> Tuberías de distribución, ausencia de filtraciones y correcta conexión del alcantarillado.</li>
+        <li><strong style="color:#fff">Proceso:</strong> Un profesional certificado revisa que las instalaciones cumplan con las especificaciones técnicas.</li>
+      </ul>
+      <h3>Certificación de calefacción</h3>
+      <p>Estufas a gas o eléctricas requieren certificación regida por la NCh 4/2003, verificando ventilación y conexiones a gas o electricidad.</p>
+      <h3>Certificación de seguridad contra incendios</h3>
+      <p>Alarmas, rociadores automáticos y salidas de emergencia deben instalarse según normativa específica. Un especialista inspecciona y prueba los equipos para verificar que estén operativos.</p>
+      <p>Las certificaciones de instalaciones domiciliarias son fundamentales para garantizar la seguridad, eficiencia y cumplimiento de la normativa vigente. No solo cumplen una función legal, sino que brindan confianza tanto a propietarios como a arrendatarios.</p>
+      <p>Si requieres de una certificación para instalaciones domiciliarias interiores, en AXYZ contamos con los profesionales adecuados para ayudarte en este proceso. ¡Te invitamos a dejar esta responsabilidad en nuestras manos!</p>
+    </div>
+  </div>
+
+  <!-- Modal 4: Calificación industrial -->
+  <div id="modal-calificacion" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-calificacion')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Calificación industrial: ¿Quiénes la necesitan y para qué sirve?</h2>
+      <p>La calificación industrial es el proceso mediante el cual una empresa o profesional demuestra que cumple con los estándares de calidad, seguridad, medio ambiente y otros requisitos técnicos establecidos por las normativas nacionales o internacionales. Su fin es asegurar que los productos, servicios y procesos sean seguros, eficientes y alineados con las regulaciones locales.</p>
+      <h3>¿Por qué es importante?</h3>
+      <ol>
+        <li><strong style="color:#fff">Cumplimiento normativo:</strong> Esencial para operar legalmente y evitar sanciones.</li>
+        <li><strong style="color:#fff">Seguridad y salud laboral:</strong> Protege a los trabajadores y minimiza riesgos de accidentes.</li>
+        <li><strong style="color:#fff">Acceso a mercados internacionales:</strong> Requerida para exportar productos a mercados exigentes como la Unión Europea o EE.UU.</li>
+        <li><strong style="color:#fff">Confianza del consumidor:</strong> Las empresas calificadas son percibidas como más confiables y competentes.</li>
+        <li><strong style="color:#fff">Mejora continua:</strong> Las auditorías regulares permiten identificar áreas de mejora y optimizar procesos.</li>
+      </ol>
+      <h3>¿Quiénes la necesitan?</h3>
+      <ol>
+        <li><strong style="color:#fff">Industria minera:</strong> Normativas de seguridad laboral y medio ambiente muy estrictas. Certificaciones ISO 14001 e ISO 45001.</li>
+        <li><strong style="color:#fff">Industria alimentaria:</strong> Calificación HACCP y normativa del Ministerio de Salud y SAG.</li>
+        <li><strong style="color:#fff">Industria energética:</strong> Normativas ambientales y de seguridad para sostenibilidad de operaciones.</li>
+        <li><strong style="color:#fff">Construcción y obras civiles:</strong> Seguridad laboral y estándares de la Ley General de Urbanismo y Construcción.</li>
+        <li><strong style="color:#fff">Industria automotriz:</strong> Certificaciones como ISO 9001 de gestión de calidad.</li>
+      </ol>
+      <h3>¿Cómo son los procesos de calificación?</h3>
+      <ol>
+        <li><strong style="color:#fff">Evaluación inicial:</strong> La empresa presenta documentación relevante: procedimientos internos, reportes de seguridad, informes de auditorías anteriores.</li>
+        <li><strong style="color:#fff">Auditoría:</strong> Un organismo acreditado realiza una auditoría en el lugar de trabajo, incluyendo entrevistas, inspecciones de equipos y revisión de procedimientos.</li>
+        <li><strong style="color:#fff">Certificación:</strong> Si cumple los requisitos, se emite el certificado de calificación o conformidad.</li>
+        <li><strong style="color:#fff">Monitoreo y recalificación:</strong> Las empresas deben someterse a auditorías periódicas, anuales o bienales, para mantener su certificación.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="bg-zinc-950 px-5 py-10 md:py-16">
+    <div class="mx-auto max-w-7xl md:px-6">
+    <div class="md:grid md:grid-cols-4 md:gap-12">
+    <div class="mb-8 md:mb-0 md:col-span-1">
+      <img src="assets/logo-white.png" alt="AXYZ" class="h-[51px] w-auto"/>
+    </div>
+
+    <div class="mb-8 md:mb-0">
+      <p class="mb-3 text-sm font-bold uppercase tracking-widest text-white/40">Servicios</p>
+      <a href="#nosotros" class="mb-2 block text-sm text-white/60 hover:text-white">Confianza en axyz</a>
+      <a href="#servicios" class="mb-2 block text-sm text-white/60 hover:text-white">Regulación</a>
+      <a href="#arquitectura" class="mb-2 block text-sm text-white/60 hover:text-white">Arquitectura</a>
+      <a href="Paginas/blog.html" class="mb-2 block text-sm text-white/60 hover:text-white">Blog</a>
+    </div>
+
+    <div class="mb-8 md:mb-0">
+      <p class="mb-3 text-sm font-bold uppercase tracking-widest text-white/40">Contacto</p>
+      <p class="mb-2 text-sm text-white/60 whitespace-nowrap">Ramón Carnicer 65, Of. 11, Providencia, Santiago</p>
+      <a href="tel:+56932994825" class="mb-2 block text-sm text-white/60">+56 9 3299 4825</a>
+      <a href="mailto:hola@axyz.cl" class="mb-4 block text-sm text-white/60">hola@axyz.cl</a>
+      <div class="flex gap-4">
+        <!-- LinkedIn -->
+        <a href="https://cl.linkedin.com/company/axyz-arq" target="_blank" rel="noopener" aria-label="LinkedIn" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.12 20.45H3.56V9h3.56v11.45zM5.34 7.58a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67h-3.56V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29z"/>
+          </svg>
+        </a>
+        <!-- Facebook -->
+        <a href="https://www.facebook.com/people/axyzarq/100053673380029" target="_blank" rel="noopener" aria-label="Facebook" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M22.68 0H1.32C.59 0 0 .59 0 1.32v21.36C0 23.41.59 24 1.32 24H12.82v-9.29H9.69V11.08h3.13V8.41c0-3.1 1.89-4.79 4.66-4.79 1.32 0 2.46.1 2.79.14v3.24h-1.91c-1.5 0-1.79.71-1.79 1.76v2.31h3.58l-.47 3.63h-3.11V24h6.1c.73 0 1.32-.59 1.32-1.32V1.32C24 .59 23.41 0 22.68 0z"/>
+          </svg>
+        </a>
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/axyz.arq/" target="_blank" rel="noopener" aria-label="Instagram" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85 0 3.2-.01 3.58-.07 4.85-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07-3.2 0-3.58-.01-4.85-.07-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12c0-3.2.01-3.58.07-4.85C2.38 3.86 3.9 2.31 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12c0 3.26.01 3.67.07 4.95.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24c3.26 0 3.67-.01 4.95-.07 4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95 0-3.26-.01-3.67-.07-4.95C23.73 2.71 21.31.27 16.95.07 15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32A6.16 6.16 0 0 0 12 5.84zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    </div><!-- end grid -->
+    <p class="mt-10 text-sm text-white/20 md:border-t md:border-white/10 md:pt-8">
+      &copy; <span id="year"></span> AXYZ. Todos los derechos reservados.
+    </p>
+    </div><!-- end max-w -->
+  </footer>
+
+</div><!-- end bg-zinc-900 -->
+
+<!-- Scroll to top -->
+<button id="scroll-top" aria-label="Volver arriba"
+  class="fixed bottom-24 right-6 z-50 hidden h-12 w-12 items-center justify-center bg-[#EE7D65] text-white shadow-lg hover:bg-[#F19582] btn-cta transition-colors">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <path stroke-linecap="square" stroke-linejoin="miter" d="M5 16l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  function openModal(id) {
+    const m = document.getElementById(id);
+    m.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    m.scrollTop = 0;
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Cerrar modal al tocar el fondo oscuro
+  document.querySelectorAll('.blog-modal').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+  });
+
+  // Reveal text on scroll (Nuestros pilares)
+  const revealTexts = document.querySelectorAll('.reveal-text');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 150);
+      }
+    });
+  }, { threshold: 0.4 });
+  revealTexts.forEach(el => revealObserver.observe(el));
+
+  // Vertical stepper lines scroll animation (mobile)
+  const stepLines = document.querySelectorAll('.step-line');
+  const stepObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('animate'), 100);
+      }
+    });
+  }, { threshold: 0.3 });
+  stepLines.forEach(line => stepObserver.observe(line));
+
+  // Horizontal stepper lines animation (desktop: 1→2 then 2→3)
+  const procesoDesktop = document.getElementById('proceso-desktop');
+  if (procesoDesktop) {
+    const hObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(() => document.getElementById('step-h-1-2').classList.add('animate'), 300);
+          setTimeout(() => document.getElementById('step-h-2-3').classList.add('animate'), 1100);
+          hObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    hObserver.observe(procesoDesktop);
+  }
+
+
+  // Captcha
+  let captchaRes = 0;
+  function genCaptcha() {
+    const a = Math.floor(Math.random() * 9) + 1;
+    const b = Math.floor(Math.random() * 9) + 1;
+    captchaRes = a + b;
+    document.getElementById('captcha-q').textContent = a + ' + ' + b;
+    document.getElementById('captcha-a').value = '';
+  }
+  genCaptcha();
+
+  document.getElementById('contact-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const answer = parseInt(document.getElementById('captcha-a').value, 10);
+    const errEl = document.getElementById('captcha-err');
+    if (answer !== captchaRes) {
+      errEl.classList.remove('hidden');
+      genCaptcha();
+      return;
+    }
+    errEl.classList.add('hidden');
+    alert('¡Mensaje enviado! Te contactaremos pronto.');
+    this.reset();
+    genCaptcha();
+  });
+
+  // Scroll to top button
+  const scrollTopBtn = document.getElementById('scroll-top');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > window.innerHeight * 0.7) {
+      scrollTopBtn.classList.remove('hidden');
+      scrollTopBtn.classList.add('flex');
+    } else {
+      scrollTopBtn.classList.add('hidden');
+      scrollTopBtn.classList.remove('flex');
+    }
+  });
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+<script>
+  // Reveal animation al hacer scroll
+  (() => {
+    const els = document.querySelectorAll('.reveal-img, .reveal-card');
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    els.forEach(el => io.observe(el));
+  })();
+</script>
+
+<!-- ══════════════ CHAT WIDGET ══════════════ -->
+<div id="chat-widget" class="fixed bottom-6 right-4 z-50 flex flex-col items-end md:flex-row md:right-6">
+
+  <!-- Ventana del chat -->
+  <div id="chat-window" class="mb-3 hidden overflow-hidden shadow-2xl md:mb-0 md:mr-3 md:w-80"
+       style="border:1px solid rgba(255,255,255,0.12); width: min(320px, calc(100vw - 2rem));">
+    <!-- Header -->
+    <div class="flex items-center gap-3 bg-zinc-950 px-4 py-3">
+      <img src="assets/logo-white.png" alt="AXYZ" class="h-[26px] w-auto object-contain"/>
+      <button id="chat-close" class="ml-auto text-xl leading-none text-white/50 hover:text-white">&times;</button>
+    </div>
+    <!-- Mensajes -->
+    <div id="chat-messages" class="space-y-3 overflow-y-auto bg-zinc-800 px-4 py-3" style="height:240px;"></div>
+    <!-- Opciones rápidas -->
+    <div id="chat-options" class="flex flex-wrap gap-2 border-t border-white/10 bg-zinc-800 px-4 pb-3 pt-3"></div>
+    <!-- Input -->
+    <div class="flex items-center gap-2 border-t border-white/10 bg-zinc-950 px-3 py-2">
+      <input type="text" id="chat-input" placeholder="Escribe tu consulta..."
+        class="flex-1 border border-white/10 bg-zinc-700 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#EE7D65]"/>
+      <button id="chat-send" class="bg-[#EE7D65] px-3 py-1.5 text-white hover:bg-[#F19582] btn-cta transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Botón toggle -->
+  <button id="chat-toggle" class="flex flex-shrink-0 items-center justify-center bg-[#EE7D65] shadow-lg hover:bg-[#F19582] btn-cta transition-colors" style="width:47.6px;height:47.6px;">
+    <svg id="chat-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+  </button>
+
+</div>
+
+<script>
+  /* ── Accordion global (Confianza en AXYZ, mobile) ── */
+  function toggleAccordion(btn) {
+    var item = btn.closest('.accordion-item');
+    var body = item.querySelector('.accordion-body');
+    var icon = btn.querySelector('.accordion-icon');
+    var wasOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+    document.querySelectorAll('.accordion-body').forEach(function(b) {
+      b.style.maxHeight = '0px';
+    });
+    document.querySelectorAll('.accordion-icon').forEach(function(i) {
+      i.style.transform = 'rotate(0deg)';
+      i.textContent = '+';
+    });
+    if (!wasOpen) {
+      body.style.maxHeight = body.scrollHeight + 'px';
+      icon.style.transform = 'rotate(45deg)';
+    }
+  }
+
+(function () {
+  var toggle   = document.getElementById('chat-toggle');
+  var win      = document.getElementById('chat-window');
+  var closeBtn = document.getElementById('chat-close');
+  var msgs     = document.getElementById('chat-messages');
+  var optsCnt  = document.getElementById('chat-options');
+  var input    = document.getElementById('chat-input');
+  var sendBtn  = document.getElementById('chat-send');
+  var iconOpen = document.getElementById('chat-icon-open');
+  var isOpen   = false;
+  var greeted  = false;
+
+  var INITIAL_OPTS = ['Servicios', 'Contacto'];
+
+  var RESPONSES = {
+    servicios:      { text: 'En AXYZ ofrecemos:\n• Regularización de propiedades\n• Diseño arquitectónico\n• Gestión de permisos y patentes\n\n¿Sobre cuál te gustaría saber más?', opts: ['Regularización', 'Arquitectura', 'Contacto'] },
+    regularizacion: { text: 'Somos expertos en regularización de propiedades. El proceso incluye:\n\n1. Evaluación de normativas\n2. Seguimiento riguroso\n3. Documentación completa\n\nResultados seguros, rápidos y rentables.', opts: ['¿Cuánto cuesta?', 'Contacto'] },
+    arquitectura:   { text: 'Nuestros servicios de arquitectura incluyen:\n\n• Diseño residencial\n• Espacios comerciales\n• Diseño urbano\n\nDe la planificación a la ejecución.', opts: ['¿Cuánto cuesta?', 'Contacto'] },
+    ubicacion:      { text: '📍 Ramón Carnicer 65, Of. 11\nProvidencia, Santiago\n\nLunes a viernes, horario de oficina.', opts: ['Contacto'] },
+    costo:          { text: 'El costo varía según el tipo y características de tu proyecto. Te ofrecemos una asesoría gratuita y personalizada.', opts: ['Contacto', 'Servicios'] },
+    default:        { text: 'Gracias por tu mensaje. Para más información, completa el formulario y te contactamos.', opts: ['Contacto', 'Servicios'] }
+  };
+
+  function normalize(s) {
+    return s.toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+      .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+      .replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+  }
+
+  function getResponse(text) {
+    var t = normalize(text);
+    if (/regulariz|propiedad|permiso|patente|terreno/.test(t)) return RESPONSES.regularizacion;
+    if (/arquitect|disen|construc|comercial|residencial/.test(t)) return RESPONSES.arquitectura;
+    if (/donde|ubicacion|direccion|oficina|lugar/.test(t)) return RESPONSES.ubicacion;
+    if (/cuanto|costo|precio|valor|cobr/.test(t)) return RESPONSES.costo;
+    if (/servicio|ayuda|hacen|ofrecen/.test(t)) return RESPONSES.servicios;
+    if (/hola|buenas|buenos|saludos/.test(t)) return { text: '¡Hola! Bienvenido a Axyz.\n¿En qué podemos ayudarte?\nEstamos aquí para asesorarte.', opts: INITIAL_OPTS };
+    return RESPONSES.default;
+  }
+
+  function addMsg(text, isBot) {
+    var wrap = document.createElement('div');
+    wrap.className = isBot ? 'flex items-start gap-2' : 'flex items-start justify-end';
+    if (isBot) {
+      var av = document.createElement('div');
+      av.className = 'flex-shrink-0 h-[19px] w-[19px] overflow-hidden';
+      av.innerHTML = '<img src="assets/logo-white.png" alt="AXYZ" class="h-full w-full object-contain"/>';
+      wrap.appendChild(av);
+    }
+    var bub = document.createElement('div');
+    bub.className = isBot
+      ? 'max-w-[85%] bg-zinc-700 px-3 py-2 text-sm leading-relaxed text-white/90 whitespace-pre-line'
+      : 'max-w-[85%] bg-[#EE7D65] px-3 py-2 text-sm leading-relaxed text-white whitespace-pre-line';
+    bub.textContent = text;
+    wrap.appendChild(bub);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showContactForm() {
+    optsCnt.innerHTML = '';
+    var wrap = document.createElement('div');
+    wrap.className = 'flex items-start gap-2';
+    var av = document.createElement('div');
+    av.className = 'flex-shrink-0 h-[19px] w-[19px] overflow-hidden';
+    av.innerHTML = '<img src="assets/logo-white.png" alt="AXYZ" class="h-full w-full object-contain"/>';
+    wrap.appendChild(av);
+    var bub = document.createElement('div');
+    bub.className = 'flex-1 bg-zinc-700 px-3 py-3 text-sm text-white/90';
+    bub.innerHTML = [
+      '<p class="mb-2 text-xs font-bold uppercase tracking-wide text-[#EE7D65]">Completa tus datos</p>',
+      '<form id="chat-contact-form" class="space-y-2">',
+        '<input name="nombre"  type="text"  placeholder="Nombre"    class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<input name="email"   type="email" placeholder="Email"     class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<input name="telefono" type="tel"  placeholder="Teléfono"  class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<input name="comuna"  type="text"  placeholder="Comuna"    class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<textarea name="mensaje" rows="2"  placeholder="Mensaje"   class="w-full resize-none bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"></textarea>',
+        '<button type="submit" class="w-full bg-[#EE7D65] py-1.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] btn-cta transition-colors">Enviar</button>',
+      '</form>'
+    ].join('');
+    wrap.appendChild(bub);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    document.getElementById('chat-contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      wrap.remove();
+      addMsg('¡Gracias! Recibimos tu mensaje. Te contactaremos pronto.', true);
+      setOpts(INITIAL_OPTS);
+    });
+  }
+
+  function setOpts(list) {
+    optsCnt.innerHTML = '';
+    (list || INITIAL_OPTS).forEach(function(o) {
+      var b = document.createElement('button');
+      b.className = 'border border-[#EE7D65] px-3 py-1 text-xs text-[#EE7D65] hover:bg-[#EE7D65] hover:text-white transition-colors';
+      b.textContent = o;
+      b.addEventListener('click', function() { handleSend(o); });
+      optsCnt.appendChild(b);
+    });
+  }
+
+  function handleSend(text) {
+    if (!text) { text = input.value.trim(); input.value = ''; }
+    if (!text) return;
+    var t = normalize(text);
+    if (/^contacto$/.test(t) || /contact/.test(t)) {
+      addMsg(text, false);
+      setTimeout(showContactForm, 420);
+      return;
+    }
+    addMsg(text, false);
+    var r = getResponse(text);
+    if (!r) return;
+    setTimeout(function() { addMsg(r.text, true); setOpts(r.opts); }, 420);
+  }
+
+  function openChat() {
+    isOpen = true;
+    win.classList.remove('hidden');
+    if (!greeted) {
+      greeted = true;
+      setTimeout(function() {
+        addMsg('¡Hola! Bienvenido a Axyz.\n¿En qué podemos ayudarte?\nEstamos aquí para asesorarte.', true);
+        setOpts(INITIAL_OPTS);
+      }, 350);
+    }
+  }
+
+  function closeChat() {
+    isOpen = false;
+    win.classList.add('hidden');
+  }
+
+  toggle.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+  closeBtn.addEventListener('click', closeChat);
+  sendBtn.addEventListener('click', function() { handleSend(); });
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleSend(); });
+
+  // Auto-abrir al llegar a la página (3 segundos)
+  setTimeout(function() { if (!isOpen) openChat(); }, 500);
+}());
+</script>
+
+
+<script>
+  // CAD wireframe hero — proyección 3D dinámica de 8 volúmenes + 4 edificios de fondo + grilla.
+  // Animación de cámara (cadCameraFly) está en el CSS sobre #cad-scene-g.
+  (function () {
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('cad-svg');
+    if (!svg) return;
+
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.setAttribute('id', 'cad-scene-g');
+    svg.appendChild(g);
+
+    const camera = {
+      pos:  [0, 30, -600],
+      f:    900,
+      cx:   640, cy: 360,
+      rotY: 30 * Math.PI / 180
+    };
+
+    function project([x, y, z]) {
+      const c = Math.cos(camera.rotY), s = Math.sin(camera.rotY);
+      const xr =  x * c + z * s;
+      const zr = -x * s + z * c;
+      const camZ = zr - camera.pos[2];
+      return {
+        x: (xr * camera.f) / camZ + camera.cx,
+        y: ((camera.pos[1] - y) * camera.f) / camZ + camera.cy,
+        d: camZ
+      };
+    }
+
+    function depthOpacity(d, type) {
+      const t = Math.max(0, Math.min(1, (d - 460) / 460));
+      const ranges = {
+        edge:     [0.92, 0.36],
+        slab:     [0.68, 0.22],
+        mullion:  [0.42, 0.10],
+        'cad-bg': [0.24, 0.07],
+        ground:   [0.28, 0.10]
+      };
+      const r = ranges[type] || ranges.edge;
+      return (r[0] - (r[0] - r[1]) * t).toFixed(3);
+    }
+
+    function makeLine(p1, p2, cls, delay, draw) {
+      const ln = document.createElementNS(SVG_NS, 'line');
+      ln.setAttribute('x1', p1.x.toFixed(2));
+      ln.setAttribute('y1', p1.y.toFixed(2));
+      ln.setAttribute('x2', p2.x.toFixed(2));
+      ln.setAttribute('y2', p2.y.toFixed(2));
+      ln.setAttribute('class', cls);
+      ln.style.strokeOpacity = depthOpacity((p1.d + p2.d) / 2, cls);
+      ln.style.opacity = '0';
+      if (draw) {
+        const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        ln.style.strokeDasharray  = len.toFixed(2);
+        ln.style.strokeDashoffset = len.toFixed(2);
+        ln.style.animation =
+          'cadDraw 1.0s ease-out ' + delay.toFixed(2) + 's forwards, ' +
+          'cadFade 0.4s ease-out ' + delay.toFixed(2) + 's forwards';
+      } else {
+        ln.style.animation = 'cadFade 0.5s ease-out ' + delay.toFixed(2) + 's forwards';
+      }
+      g.appendChild(ln);
+    }
+
+    const edgeIdx = [
+      [0,1],[1,2],[2,3],[3,0],
+      [4,5],[5,6],[6,7],[7,4],
+      [0,4],[1,5],[2,6],[3,7]
+    ];
+
+    function makeBox(x0, x1, y0, y1, z0, z1) {
+      return [
+        [x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],
+        [x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]
+      ].map(project);
+    }
+
+    function drawBox(verts, baseDelay, type) {
+      const cls = type || 'edge';
+      edgeIdx.forEach(([i, j], k) => {
+        makeLine(verts[i], verts[j], cls, baseDelay + k * 0.022, true);
+      });
+    }
+
+    function drawSlab(y, xR, zR, baseDelay) {
+      const c = [[xR[0], y, zR[0]], [xR[1], y, zR[0]], [xR[1], y, zR[1]], [xR[0], y, zR[1]]].map(project);
+      for (let i = 0; i < 4; i++) {
+        makeLine(c[i], c[(i + 1) % 4], 'slab', baseDelay + i * 0.018, true);
+      }
+    }
+
+    function drawMullion(x, z, y0, y1, delay) {
+      makeLine(project([x, y0, z]), project([x, y1, z]), 'mullion', delay, true);
+    }
+
+    function drawGround(p1w, p2w, delay) {
+      makeLine(project(p1w), project(p2w), 'ground', delay, true);
+    }
+
+    // Edificios de fondo (contexto urbano)
+    const bgVolumes = [
+      { x:[ 180,  280], y:[0, 100], z:[ 180, 320] },
+      { x:[-260, -180], y:[0,  75], z:[ 200, 340] },
+      { x:[-110,   30], y:[0,  60], z:[ 260, 400] },
+      { x:[ 290,  380], y:[0,  85], z:[ 100, 240] }
+    ];
+    bgVolumes.forEach((v, vi) => {
+      const verts = makeBox(v.x[0], v.x[1], v.y[0], v.y[1], v.z[0], v.z[1]);
+      drawBox(verts, 0.05 + vi * 0.04, 'cad-bg');
+    });
+
+    // Grilla de vereda (Z constante)
+    [-150, -90, -30, 30, 90, 150, 210].forEach((z, i) =>
+      drawGround([-320, 0, z], [320, 0, z], 0.05 + i * 0.02)
+    );
+    // Grilla de vereda (X constante)
+    [-220, -150, -80, -10, 60, 130, 200, 270].forEach((x, i) =>
+      drawGround([x, 0, -260], [x, 0, 320], 0.18 + i * 0.02)
+    );
+
+    // Volúmenes principales — doble ancho, mitad alto
+    const volumes = [
+      { name: 'A', x:[-100,  100], y:[   0,  87.5], z:[ -50,   50], floorStep: 12.5, mullionStep: 14 },
+      { name: 'B', x:[ 100,  280], y:[   0,  37.5], z:[ -30,   60], floorStep: 12.5, mullionStep: 14 },
+      { name: 'C', x:[ -60,   60], y:[37.5,  62.5], z:[-100,  -50], floorStep: 12.5, mullionStep: 13 },
+      { name: 'D', x:[ -70,   70], y:[87.5, 112.5], z:[ -40,   40], floorStep: 12.5, mullionStep: 16 },
+      { name: 'E', x:[ -80,   80], y:[   0,    50], z:[  50,  130], floorStep: 12.5, mullionStep: 16 },
+      { name: 'F', x:[-220, -100], y:[62.5,    75], z:[ -20,   30], floorStep: null, mullionStep: 18 },
+      { name: 'G', x:[ -30,   30], y:[112.5,  125], z:[ -15,   15], floorStep: null, mullionStep: null },
+      { name: 'H', x:[-160,  300], y:[  -4,     0], z:[ -60,  140], floorStep: null, mullionStep: null }
+    ];
+
+    let volDverts = null;
+
+    volumes.forEach((v, vi) => {
+      const base = 0.30 + vi * 0.10;
+      const verts = makeBox(v.x[0], v.x[1], v.y[0], v.y[1], v.z[0], v.z[1]);
+      if (v.name === 'D') volDverts = verts;
+      drawBox(verts, base, 'edge');
+
+      if (v.floorStep) {
+        let fi = 0;
+        for (let y = v.y[0] + v.floorStep; y < v.y[1]; y += v.floorStep) {
+          drawSlab(y, v.x, v.z, base + 1.10 + fi * 0.04);
+          fi++;
+        }
+      }
+
+      if (v.mullionStep) {
+        let mi = 0;
+        const md = base + 1.55;
+        for (let x = v.x[0] + v.mullionStep; x < v.x[1]; x += v.mullionStep) {
+          drawMullion(x, v.z[0], v.y[0], v.y[1], md + mi * 0.012);
+          mi++;
+        }
+        for (let z = v.z[0] + v.mullionStep; z < v.z[1]; z += v.mullionStep) {
+          drawMullion(v.x[1], z, v.y[0], v.y[1], md + mi * 0.012);
+          mi++;
+        }
+      }
+    });
+
+    // Losa superior seleccionada en el penthouse (Vol D)
+    function drawSelectedTop(verts, delay) {
+      const top = [verts[4], verts[5], verts[6], verts[7], verts[4]];
+      const d = top.map((p, i) => (i ? 'L' : 'M') + ' ' + p.x.toFixed(2) + ' ' + p.y.toFixed(2)).join(' ') + ' Z';
+      let perim = 0;
+      for (let i = 1; i < top.length; i++) {
+        perim += Math.hypot(top[i].x - top[i - 1].x, top[i].y - top[i - 1].y);
+      }
+
+      const stat = document.createElementNS(SVG_NS, 'path');
+      stat.setAttribute('d', d);
+      stat.setAttribute('class', 'selected-static');
+      stat.style.opacity = '0';
+      stat.style.strokeDasharray  = perim.toFixed(2);
+      stat.style.strokeDashoffset = perim.toFixed(2);
+      stat.style.animation =
+        'cadDraw 1.4s ease-out ' + delay.toFixed(2) + 's forwards, ' +
+        'cadFade 0.45s ease-out ' + delay.toFixed(2) + 's forwards';
+      g.appendChild(stat);
+
+      const trace = document.createElementNS(SVG_NS, 'path');
+      trace.setAttribute('d', d);
+      trace.setAttribute('class', 'selected-trace');
+      const seg = 42;
+      trace.style.strokeDasharray  = seg + ' ' + (perim - seg).toFixed(2);
+      trace.style.strokeDashoffset = '0';
+      const cycle = (perim / 75).toFixed(2);
+      trace.style.animation =
+        'cadFadeTrace 0.5s ease-out ' + (delay + 1.4).toFixed(2) + 's forwards, ' +
+        'cadTraceTop ' + cycle + 's linear ' + (delay + 1.6).toFixed(2) + 's infinite';
+      g.appendChild(trace);
+
+      const sty = document.createElement('style');
+      sty.textContent = '@keyframes cadTraceTop { to { stroke-dashoffset: -' + perim.toFixed(2) + '; } }';
+      document.head.appendChild(sty);
+    }
+
+    drawSelectedTop(volDverts, 3.30);
+  })();
+</script>
+
+
+<script>
+  // Reveal on scroll genérico — auto-tag de bloques + IntersectionObserver
+  (() => {
+    const skipClasses = ['reveal-text', 'reveal-img', 'reveal-card'];
+    const hasSkip = el => skipClasses.some(c => el.classList.contains(c));
+
+    const tag = (selector) => {
+      document.querySelectorAll(selector).forEach(el => {
+        if (hasSkip(el)) return;
+        if (el.classList.contains('reveal-on-scroll')) return;
+        el.classList.add('reveal-on-scroll');
+      });
+    };
+
+    // Títulos, párrafos intro y CTAs de las secciones (excepto hero h-56)
+    tag('section:not(.h-56):not(.cad-hero) > div > h2');
+    tag('section:not(.h-56):not(.cad-hero) > div > p');
+    tag('section:not(.h-56):not(.cad-hero) > div > a');
+
+    // Carrusel de logos
+    tag('.logos-wrapper');
+
+    // Cards principales del home
+    tag('.tranquilidad-frame');
+    tag('.accordion-item');
+    tag('.flip-card');
+    tag('#arquitectura .overflow-hidden.rounded');
+
+    // Blog cards
+    tag('#blog .space-y-5 > div');
+    tag('#blog [class~="md:grid"] > div');
+
+    // Pilares + Stepper de Regulación
+    tag('#servicios .space-y-2 > div');
+    tag('#servicios [class~="md:grid"] > div');
+    tag('#servicios .text-left > div.flex');
+    tag('#proceso-desktop > div > div');
+
+    // Stats + Mapa
+    tag('#proyectos > div > div > div');
+    tag('#mapa-proyectos');
+
+    // Contacto
+    tag('#contacto > div > h2');
+    tag('#contacto > div > p');
+    tag('#contact-form');
+
+    // Bandas parallax (frases impacto)
+    tag('section.parallax-band > div.content');
+
+    // Footer columns
+    tag('footer > div > div > div');
+
+    // Stagger en hijos de grids y space-y
+    // Scroll-driven: desplaza el animation-range por item (cada uno completa más tarde)
+    // Fallback IO: transition-delay incremental
+    const staggerParents = '.md\\:grid, .grid, .space-y-2, .space-y-3, .space-y-5';
+    document.querySelectorAll(staggerParents).forEach(parent => {
+      Array.from(parent.children).forEach((child, i) => {
+        if (child.classList.contains('reveal-on-scroll')) {
+          const offset = Math.min(i, 4) * 8; // 8% por item (máx 4)
+          child.style.setProperty('--reveal-start', `${offset}%`);
+          child.style.setProperty('--reveal-end', `${60 + offset}%`);
+          child.style.setProperty('--reveal-delay', `${Math.min(i, 4) * 90}ms`);
+        }
+      });
+    });
+
+    // IntersectionObserver
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => obs.observe(el));
+  })();
+</script></body>
+</html>

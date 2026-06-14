@@ -29,43 +29,160 @@
     }
     html, body {
       width: 100%;
-      height: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden;
       background: #000;
+      color: #fff;
+      font-family: 'Mulish', sans-serif;
+      scroll-behavior: smooth;
     }
-    canvas {
+    /* Canvas: fondo fijo a pantalla completa detrás de todo el contenido */
+    #canvas {
       display: block;
-    }
-    .floating-logo {
       position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 9999;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+    /* --- HERO --- */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      /* deja pasar el mouse al canvas para mantener viva la animación */
       pointer-events: none;
     }
-    .floating-logo img {
-      max-width: 100px;
+    .hero img {
+      max-width: 110px;
       height: auto;
-      opacity: 0.9;
+      opacity: 0.95;
       animation: floatLogo 6s ease-in-out infinite;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      margin: 1.2rem 0 0.4rem;
+    }
+    .hero p {
+      font-size: clamp(0.85rem, 2vw, 1.05rem);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      opacity: 0.8;
+      max-width: 28ch;
+    }
+    .scroll-hint {
+      position: absolute;
+      bottom: 5vh;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      animation: bob 2s ease-in-out infinite;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); opacity: 0.6; }
+      50% { transform: translateY(8px); opacity: 1; }
     }
     @keyframes floatLogo {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
+    /* --- SECCIÓN DE PROYECTOS --- */
+    .work {
+      position: relative;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(2px);
+      padding: clamp(3rem, 8vw, 7rem) clamp(1.2rem, 5vw, 5rem);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .work-group + .work-group { margin-top: clamp(3rem, 7vw, 6rem); }
+    .work h2 {
+      font-size: clamp(1rem, 2.2vw, 1.3rem);
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-bottom: 1.8rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.4rem;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      text-decoration: none;
+      color: #fff;
+      transition: transform 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,0,0,0.55);
+      background: rgba(255,255,255,0.06);
+    }
+    .card-thumb {
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      object-fit: cover;
+      background: #111;
+      display: block;
+    }
+    /* placeholder para proyectos sin imagen aún */
+    .card-thumb.placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a1a, #2b0000);
+      color: rgba(255,255,255,0.35);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .card-body { padding: 1.1rem 1.2rem 1.3rem; }
+    .card-tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #ff4d4d;
+      opacity: 0.85;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0.4rem 0 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      font-weight: 300;
+      line-height: 1.5;
+      opacity: 0.75;
+    }
     .footer-contact {
-      position: fixed;
-      bottom: 0;
-      left: 0;
+      position: relative;
+      z-index: 1;
       width: 100%;
       background: rgba(0, 0, 0, 1);
       color: #ffffff;
       font-family: 'Mulish';
       font-size: clamp(10px, 1.5vw, 14px);
-      padding: 10px 20px;
-      z-index: 9999;
+      padding: 16px 20px;
       letter-spacing: 1px;
       display: flex;
       justify-content: space-between;
@@ -103,22 +220,183 @@
   </style>
 </head>
 <body style="background-color: black;">
-  <!-- Logo flotante -->
-  <div class="floating-logo">
-    <img src="img/1x/d10w.png" alt="Logo D10">
-  </div>
-  <!-- Footer con contacto -->
-  <footer class="footer-contact">
-    <div class="footer-left">
-      <a href="mailto:hello@d10.cl">hello@d10.cl</a>
-      <span class="footer-sep" aria-hidden="true">·</span>
-      <a href="3900/display.html">Display Oficina</a>
-    </div>
-    <div class="footer-right">
-      © 2026 D10 SPACE v1.1.0.1
-    </div>
-  </footer>
+  <!-- Canvas de fondo (animación) -->
   <canvas id="canvas"></canvas>
+
+  <div class="page">
+    <!-- HERO -->
+    <section class="hero">
+      <img src="img/1x/d10w.png" alt="D10 SPACE">
+      <h1>D10 SPACE</h1>
+      <p>Estudio creativo de diseño y desarrollo digital.</p>
+      <div class="scroll-hint">Proyectos ↓</div>
+    </section>
+
+    <!-- PROYECTOS -->
+    <section class="work">
+      <div class="work-group">
+        <h2>Trabajos</h2>
+        <div class="grid">
+
+          <a class="card" href="https://nicolasmiranda.cl" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/nicolasmiranda.jpg" alt="Nicolás Miranda" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Arte · Portafolio</span>
+              <h3 class="card-title">Nicolás Miranda</h3>
+              <p class="card-desc">Portafolio del escultor Nicolás Miranda, con galería de su obra.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://e115.org" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/e115.jpg" alt="Element 115" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Agencia · Experiencias</span>
+              <h3 class="card-title">Element 115</h3>
+              <p class="card-desc">Sitio de la agencia de experiencias digitales, gaming y VR.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://mapamapa.cl" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/mapamapa.jpg" alt="MAPA MAPA" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Cultura · Web</span>
+              <h3 class="card-title">MAPA MAPA</h3>
+              <p class="card-desc">Sitio del estudio de gestión y producción cultural, con identidad animada.</p>
+            </div>
+          </a>
+
+          <a class="card" href="jesuitas/" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/jesuitas.jpg" alt="Jesuitas Chile" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Institucional · Web</span>
+              <h3 class="card-title">Jesuitas Chile</h3>
+              <p class="card-desc">Sitio de la Provincia chilena de la Compañía de Jesús.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://dude.cl" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/dude.jpg" alt="RIMAS Booth" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Evento · Interactivo</span>
+              <h3 class="card-title">RIMAS Booth</h3>
+              <p class="card-desc">Fotomatón interactivo con quiz musical para activación de marca.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://m03.cl" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/m03.jpg" alt="RIMAS Quiz" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Evento · Quiz</span>
+              <h3 class="card-title">RIMAS Quiz</h3>
+              <p class="card-desc">Quiz musical animado para el público de RIMAS.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://sorrymom.cl" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/sorrymom.jpg" alt="Sorry Mom" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Marca · Generative</span>
+              <h3 class="card-title">Sorry Mom</h3>
+              <p class="card-desc">Laboratorio web generativo para la marca Sorry Mom.</p>
+            </div>
+          </a>
+
+          <a class="card" href="axyz/" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/axyz.jpg" alt="AXYZ Arquitectura" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Arquitectura · Web</span>
+              <h3 class="card-title">AXYZ</h3>
+              <p class="card-desc">Sitio del estudio de arquitectura y regularización.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://lcconsultores.cl" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/lcconsultores.jpg" alt="LC Consultores" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Corporativo · Web</span>
+              <h3 class="card-title">LC Consultores</h3>
+              <p class="card-desc">Sitio institucional de contabilidad y asesoría tributaria.</p>
+            </div>
+          </a>
+
+          <a class="card" href="https://budgermaker.onrender.com/" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/budgermaker.jpg" alt="BudgerMaker" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">App · Cotizaciones</span>
+              <h3 class="card-title">BudgerMaker</h3>
+              <p class="card-desc">App web para crear y gestionar cotizaciones.</p>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <div class="work-group">
+        <h2>Experimentos</h2>
+        <div class="grid">
+
+          <a class="card" href="https://sorrymom.itch.io/4f" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/racing4f.jpg" alt="Fastest in 2 Four" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Juego · Carreras 3D</span>
+              <h3 class="card-title">Fastest in 2 Four</h3>
+              <p class="card-desc">Minijuego de carreras 3D hecho en Unity, jugable en el navegador.</p>
+            </div>
+          </a>
+
+          <a class="card" href="empanameter/" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/womganiza.jpg" alt="Womganiza" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Juego · Canvas</span>
+              <h3 class="card-title">Womganiza</h3>
+              <p class="card-desc">Mini juego pixelado para WOM, con sonido y lógica propia.</p>
+            </div>
+          </a>
+
+          <a class="card" href="3d/3d.html" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/visor3d.jpg" alt="Visor 3D" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">3D · WebGL</span>
+              <h3 class="card-title">Visor 3D</h3>
+              <p class="card-desc">Visor 3D interactivo con rotación, control de cámara y AR.</p>
+            </div>
+          </a>
+
+          <a class="card" href="indexbrutal.html" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/brutal.jpg" alt="BRUTAL" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Identidad · Animación</span>
+              <h3 class="card-title">BRUTAL</h3>
+              <p class="card-desc">Logotipo flotando sobre un fondo líquido animado.</p>
+            </div>
+          </a>
+
+          <a class="card" href="3900/display.html" target="_blank" rel="noopener">
+            <img class="card-thumb" src="img/work/display.jpg" alt="Display Oficina" loading="lazy">
+            <div class="card-body">
+              <span class="card-tag">Ambiental · Pantalla</span>
+              <h3 class="card-title">Display Oficina</h3>
+              <p class="card-desc">Pantalla ambiental con efecto lava lamp y logos de marcas.</p>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer con contacto -->
+    <footer class="footer-contact">
+      <div class="footer-left">
+        <a href="mailto:hello@d10.cl">hello@d10.cl</a>
+        <span class="footer-sep" aria-hidden="true">·</span>
+        <a href="3900/display.html">Display Oficina</a>
+      </div>
+      <div class="footer-right">
+        © 2026 D10 SPACE v1.2.0
+      </div>
+    </footer>
+  </div>
+
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');

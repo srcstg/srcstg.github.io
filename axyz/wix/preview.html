@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<!--
+  AXYZ — Preview local de los Custom Elements para Wix
+  Carga los 9 CE de wix/ce/ con assets locales del repo.
+  Los H2 / párrafos intro de cada sección simulan el texto NATIVO de Wix
+  (en Wix Studio van como elementos de texto, no dentro de los CE).
+
+  Ver con servidor local desde la RAÍZ del repo:
+    python -m http.server 8000  →  http://localhost:8000/wix/preview.html
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AXYZ — Preview Custom Elements (Wix)</title>
+  <style>
+    * { margin: 0; box-sizing: border-box; font-family: 'Mulish', 'Avenir', 'Avenir Next', 'Avenir Next LT Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { background: #18181b; color: #fff; }
+    .note {
+      background: #EE7D65; color: #fff; text-align: center;
+      padding: 6px 16px; font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    section { padding: 32px 0 40px; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+    @media (min-width: 768px) { .wrap { padding: 0 24px; } section { padding: 48px 0 56px; } }
+    .bg-900 { background: #18181b; }
+    .bg-800 { background: #27272a; }
+    .bg-950 { background: #09090b; }
+    /* Texto "nativo Wix" simulado */
+    h2 { text-align: center; font-size: 24px; font-weight: 700; line-height: 1.375; margin-bottom: 8px; }
+    .intro { text-align: center; font-size: 14px; line-height: 1.625; color: rgba(255,255,255,0.6); margin: 0 auto 20px; max-width: 42rem; }
+    .eyebrow { text-align: center; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #EE7D65; margin-bottom: 8px; }
+    .cta-native {
+      display: inline-block; margin-top: 24px;
+      background: #EE7D65; color: #fff; text-decoration: none;
+      padding: 8px 20px; font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .center { text-align: center; }
+    @media (min-width: 768px) {
+      h2 { font-size: 37.4px; margin-bottom: 12px; }
+      .intro { font-size: 19.2px; margin-bottom: 40px; }
+      .eyebrow { font-size: 25px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="note">Preview local de Custom Elements — los títulos simulan texto nativo Wix</div>
+
+  <!-- 07: Hero CAD -->
+  <axyz-hero-cad></axyz-hero-cad>
+
+  <!-- 02: Marquee -->
+  <section class="bg-900">
+    <div class="wrap">
+      <p class="eyebrow">Empresas que nos respaldan</p>
+      <axyz-marquee logos='["../assets/Logos empresas/1_Siena blanco.jpg","../assets/Logos empresas/2_Brimax.jpg","../assets/Logos empresas/4_Edificapro.jpg","../assets/Logos empresas/5_Etex II.jpg","../assets/Logos empresas/6_Ginebra.jpg","../assets/Logos empresas/7_topk9 blanco.jpg","../assets/Logos empresas/8_Permanit.jpg","../assets/Logos empresas/9_Mi placard.jpg","../assets/Logos empresas/10_Ecopura.jpg","../assets/Logos empresas/11_Doc popcorn.jpg","../assets/Logos empresas/12_Salon kids.jpg"]'></axyz-marquee>
+    </div>
+  </section>
+
+  <!-- 03: Tu tranquilidad -->
+  <section class="bg-800">
+    <div class="wrap">
+      <h2>Tu tranquilidad es nuestra prioridad</h2>
+      <p class="intro">En AXYZ ofrecemos servicio seguro, garantías exclusivas, equipo experto y soluciones rápidas.</p>
+      <axyz-tranquilidad images='["../assets/Respuesta.jpg","../assets/Arquitectura/Equipo.jpg","../assets/planificación.jpg"]'></axyz-tranquilidad>
+      <div class="center"><a class="cta-native" href="#">Contáctanos</a></div>
+    </div>
+  </section>
+
+  <!-- 06: Confianza -->
+  <section class="bg-900">
+    <div class="wrap">
+      <h2>Confianza en AXYZ</h2>
+      <p class="intro">Nuestras tres categorías fundamentales</p>
+      <axyz-confianza></axyz-confianza>
+      <div class="center"><a class="cta-native" href="#">Contáctanos</a></div>
+    </div>
+  </section>
+
+  <!-- 05: Banda parallax 1 -->
+  <axyz-parallax-band image="../assets/Banner home/Banner home.jpg" text="Expertos en regularización y arquitectura"></axyz-parallax-band>
+
+  <!-- 04a: Regulación -->
+  <section class="bg-800">
+    <div class="wrap">
+      <h2>Regulación</h2>
+      <p class="intro">Especialistas en regularización de propiedades. Gestionamos tu proyecto con ética, experiencia y resultados que te dan tranquilidad.</p>
+      <axyz-regulacion></axyz-regulacion>
+      <div class="center"><a class="cta-native" href="#">Contáctanos</a></div>
+    </div>
+  </section>
+
+  <!-- 04b: Arquitectura -->
+  <section class="bg-950">
+    <div class="wrap">
+      <h2>Arquitectura</h2>
+      <p class="intro">Diseño arquitectónico: innovación, funcionalidad y estética. Expertos en regularización y proyectos.</p>
+      <axyz-arquitectura images='["../assets/Arquitectura/Diseño Residencial.jpg","../assets/Arquitectura/Espacios comerciales.jpg","../assets/Arquitectura/Diseño Urbano.jpg"]'></axyz-arquitectura>
+      <div class="center"><a class="cta-native" href="#">Contáctanos</a></div>
+    </div>
+  </section>
+
+  <!-- 05: Banda parallax 2 -->
+  <axyz-parallax-band image="../assets/Banner home/Banner home.jpg" text="Construimos espacios que perduran"></axyz-parallax-band>
+
+  <!-- 09: Blog cards -->
+  <section class="bg-800">
+    <div class="wrap">
+      <h2>Blog</h2>
+      <p class="intro">En nuestro blog encontrarás una amplia variedad de información útil que te ayudará en tu proyecto.</p>
+      <axyz-blog-cards cards='[
+        {"img":"../assets/Blog/habilitación.jpg","date":"Marzo 2025","title":"¿Cómo habilitar un local comercial en Chile?","sub":"Requisitos, plazos y etapas para la apertura de locales.","url":"#"},
+        {"img":"../assets/Blog/patente comercial.jpg","date":"Marzo 2025","title":"¿Qué son y cómo obtener patentes comerciales en Chile?","sub":"Guía de requisitos, plazos y etapas para la apertura de locales","url":"#"},
+        {"img":"../assets/Blog/Guía completa.jpg","date":"Febrero 2025","title":"Guía completa","sub":"Certificaciones de instalaciones domiciliarias interiores en Chile","url":"#"},
+        {"img":"../assets/Blog/Calificación industrial.jpg","date":"Febrero 2025","title":"Calificación industrial: ¿Quiénes la necesitan y para qué sirve?","sub":"Importancia, etapas y sectores que requieren certificación","url":"#"}
+      ]'></axyz-blog-cards>
+      <div class="center"><a class="cta-native" href="#">Ver todas las entradas</a></div>
+    </div>
+  </section>
+
+  <!-- 08: Mapa -->
+  <section class="bg-900">
+    <div class="wrap">
+      <p class="eyebrow">Nuestro alcance</p>
+      <h2>Proyectos en todo Chile</h2>
+      <axyz-mapa></axyz-mapa>
+    </div>
+  </section>
+
+  <!-- 05: Banda parallax 3 (CTA) -->
+  <axyz-parallax-band image="../assets/Banner home/Banner home.jpg" text="¿Listo para regularizar tu propiedad?" cta-text="Contáctanos" cta-link="#" min-height="240"></axyz-parallax-band>
+
+  <!-- 10: Contacto — en Wix va como Wix Forms nativo (no hay CE) -->
+  <section class="bg-800">
+    <div class="wrap center">
+      <h2>Cuéntanos tu proyecto</h2>
+      <p class="intro">[ Aquí va el formulario nativo de Wix Forms — módulo 10 ]</p>
+    </div>
+  </section>
+
+  <!-- 11: Chat (flotante; auto-open desactivado para el preview) -->
+  <axyz-chat logo="../assets/logo-white.png" auto-open="0"></axyz-chat>
+
+  <script src="ce/axyz-hero-cad.js"></script>
+  <script src="ce/axyz-marquee.js"></script>
+  <script src="ce/axyz-tranquilidad.js"></script>
+  <script src="ce/axyz-confianza.js"></script>
+  <script src="ce/axyz-parallax-band.js"></script>
+  <script src="ce/axyz-regulacion.js"></script>
+  <script src="ce/axyz-arquitectura.js"></script>
+  <script src="ce/axyz-blog-cards.js"></script>
+  <script src="ce/axyz-mapa.js"></script>
+  <script src="ce/axyz-chat.js"></script>
+</body>
+</html>

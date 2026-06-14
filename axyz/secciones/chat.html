@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXYZ — Chat widget</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Avenir', 'Avenir Next', 'Avenir Next LT Pro',
+                   -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-zinc-900 text-white min-h-screen">
+
+<!--
+  ============================================================
+  Sección autosuficiente: Chat widget AXYZ
+  Bot scriptado por keywords (sin IA real).
+  Aparece bottom-right; se abre automáticamente a los 500ms.
+  Lista para envolver como Custom Element en Wix Studio,
+  o reemplazar por Wix Chat / Tidio / Crisp.
+  ============================================================
+-->
+
+<div class="p-8 text-center">
+  <p class="text-white/60 mb-2">Vista previa del Chat Widget</p>
+  <p class="text-sm text-white/40">Se abre automáticamente en la esquina inferior derecha.</p>
+</div>
+
+<div id="chat-widget" class="fixed bottom-6 right-4 z-50 flex flex-col items-end md:flex-row md:right-6">
+
+  <div id="chat-window" class="mb-3 hidden overflow-hidden shadow-2xl md:mb-0 md:mr-3 md:w-80"
+       style="border:1px solid rgba(255,255,255,0.12); width: min(320px, calc(100vw - 2rem));">
+    <div class="flex items-center gap-3 bg-zinc-950 px-4 py-3">
+      <img src="../assets/logo-white.png" alt="AXYZ" class="h-[26px] w-auto object-contain"/>
+      <button id="chat-close" class="ml-auto text-xl leading-none text-white/50 hover:text-white">&times;</button>
+    </div>
+    <div id="chat-messages" class="space-y-3 overflow-y-auto bg-zinc-800 px-4 py-3" style="height:240px;"></div>
+    <div id="chat-options" class="flex flex-wrap gap-2 border-t border-white/10 bg-zinc-800 px-4 pb-3 pt-3"></div>
+    <div class="flex items-center gap-2 border-t border-white/10 bg-zinc-950 px-3 py-2">
+      <input type="text" id="chat-input" placeholder="Escribe tu consulta..."
+        class="flex-1 border border-white/10 bg-zinc-700 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#EE7D65]"/>
+      <button id="chat-send" class="bg-[#EE7D65] px-3 py-1.5 text-white hover:bg-[#F19582] transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button id="chat-toggle" class="flex flex-shrink-0 items-center justify-center bg-[#EE7D65] shadow-lg hover:bg-[#F19582] transition-colors" style="width:47.6px;height:47.6px;">
+    <svg id="chat-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+  </button>
+
+</div>
+
+<script>
+(function () {
+  var toggle   = document.getElementById('chat-toggle');
+  var win      = document.getElementById('chat-window');
+  var closeBtn = document.getElementById('chat-close');
+  var msgs     = document.getElementById('chat-messages');
+  var optsCnt  = document.getElementById('chat-options');
+  var input    = document.getElementById('chat-input');
+  var sendBtn  = document.getElementById('chat-send');
+  var isOpen   = false;
+  var greeted  = false;
+
+  var INITIAL_OPTS = ['Servicios', 'Contacto'];
+
+  var RESPONSES = {
+    servicios:      { text: 'En AXYZ ofrecemos:\n• Regularización de propiedades\n• Diseño arquitectónico\n• Gestión de permisos y patentes\n\n¿Sobre cuál te gustaría saber más?', opts: ['Regularización', 'Arquitectura', 'Contacto'] },
+    regularizacion: { text: 'Somos expertos en regularización de propiedades. El proceso incluye:\n\n1. Evaluación de normativas\n2. Seguimiento riguroso\n3. Documentación completa\n\nResultados seguros, rápidos y rentables.', opts: ['¿Cuánto cuesta?', 'Contacto'] },
+    arquitectura:   { text: 'Nuestros servicios de arquitectura incluyen:\n\n• Diseño residencial\n• Espacios comerciales\n• Diseño urbano\n\nDe la planificación a la ejecución.', opts: ['¿Cuánto cuesta?', 'Contacto'] },
+    ubicacion:      { text: '📍 Ramón Carnicer 65, Of. 11\nProvidencia, Santiago\n\nLunes a viernes, horario de oficina.', opts: ['Contacto'] },
+    costo:          { text: 'El costo varía según el tipo y características de tu proyecto. Te ofrecemos una asesoría gratuita y personalizada.', opts: ['Contacto', 'Servicios'] },
+    default:        { text: 'Gracias por tu mensaje. Para más información, completa el formulario y te contactamos.', opts: ['Contacto', 'Servicios'] }
+  };
+
+  function normalize(s) {
+    return s.toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+      .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+      .replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+  }
+
+  function getResponse(text) {
+    var t = normalize(text);
+    if (/regulariz|propiedad|permiso|patente|terreno/.test(t)) return RESPONSES.regularizacion;
+    if (/arquitect|disen|construc|comercial|residencial/.test(t)) return RESPONSES.arquitectura;
+    if (/donde|ubicacion|direccion|oficina|lugar/.test(t)) return RESPONSES.ubicacion;
+    if (/cuanto|costo|precio|valor|cobr/.test(t)) return RESPONSES.costo;
+    if (/servicio|ayuda|hacen|ofrecen/.test(t)) return RESPONSES.servicios;
+    if (/hola|buenas|buenos|saludos/.test(t)) return { text: '¡Hola! Bienvenido a Axyz.\n¿En qué podemos ayudarte?\nEstamos aquí para asesorarte.', opts: INITIAL_OPTS };
+    return RESPONSES.default;
+  }
+
+  function addMsg(text, isBot) {
+    var wrap = document.createElement('div');
+    wrap.className = isBot ? 'flex items-start gap-2' : 'flex items-start justify-end';
+    if (isBot) {
+      var av = document.createElement('div');
+      av.className = 'flex-shrink-0 h-[19px] w-[19px] overflow-hidden';
+      av.innerHTML = '<img src="../assets/logo-white.png" alt="AXYZ" class="h-full w-full object-contain"/>';
+      wrap.appendChild(av);
+    }
+    var bub = document.createElement('div');
+    bub.className = isBot
+      ? 'max-w-[85%] bg-zinc-700 px-3 py-2 text-sm leading-relaxed text-white/90 whitespace-pre-line'
+      : 'max-w-[85%] bg-[#EE7D65] px-3 py-2 text-sm leading-relaxed text-white whitespace-pre-line';
+    bub.textContent = text;
+    wrap.appendChild(bub);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showContactForm() {
+    optsCnt.innerHTML = '';
+    var wrap = document.createElement('div');
+    wrap.className = 'flex items-start gap-2';
+    var av = document.createElement('div');
+    av.className = 'flex-shrink-0 h-[19px] w-[19px] overflow-hidden';
+    av.innerHTML = '<img src="../assets/logo-white.png" alt="AXYZ" class="h-full w-full object-contain"/>';
+    wrap.appendChild(av);
+    var bub = document.createElement('div');
+    bub.className = 'flex-1 bg-zinc-700 px-3 py-3 text-sm text-white/90';
+    bub.innerHTML = [
+      '<p class="mb-2 text-xs font-bold uppercase tracking-wide text-[#EE7D65]">Completa tus datos</p>',
+      '<form id="chat-contact-form" class="space-y-2">',
+        '<input name="nombre"  type="text"  placeholder="Nombre"    class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<input name="email"   type="email" placeholder="Email"     class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<input name="telefono" type="tel"  placeholder="Teléfono"  class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<input name="comuna"  type="text"  placeholder="Comuna"    class="w-full bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"/>',
+        '<textarea name="mensaje" rows="2"  placeholder="Mensaje"   class="w-full resize-none bg-zinc-600 border border-white/10 px-2 py-1.5 text-xs text-white placeholder-white/30 focus:border-[#EE7D65] outline-none"></textarea>',
+        '<button type="submit" class="w-full bg-[#EE7D65] py-1.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-[#F19582] transition-colors">Enviar</button>',
+      '</form>'
+    ].join('');
+    wrap.appendChild(bub);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    document.getElementById('chat-contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      wrap.remove();
+      addMsg('¡Gracias! Recibimos tu mensaje. Te contactaremos pronto.', true);
+      setOpts(INITIAL_OPTS);
+    });
+  }
+
+  function setOpts(list) {
+    optsCnt.innerHTML = '';
+    (list || INITIAL_OPTS).forEach(function(o) {
+      var b = document.createElement('button');
+      b.className = 'border border-[#EE7D65] px-3 py-1 text-xs text-[#EE7D65] hover:bg-[#EE7D65] hover:text-white transition-colors';
+      b.textContent = o;
+      b.addEventListener('click', function() { handleSend(o); });
+      optsCnt.appendChild(b);
+    });
+  }
+
+  function handleSend(text) {
+    if (!text) { text = input.value.trim(); input.value = ''; }
+    if (!text) return;
+    var t = normalize(text);
+    if (/^contacto$/.test(t) || /contact/.test(t)) {
+      addMsg(text, false);
+      setTimeout(showContactForm, 420);
+      return;
+    }
+    addMsg(text, false);
+    var r = getResponse(text);
+    if (!r) return;
+    setTimeout(function() { addMsg(r.text, true); setOpts(r.opts); }, 420);
+  }
+
+  function openChat() {
+    isOpen = true;
+    win.classList.remove('hidden');
+    if (!greeted) {
+      greeted = true;
+      setTimeout(function() {
+        addMsg('¡Hola! Bienvenido a Axyz.\n¿En qué podemos ayudarte?\nEstamos aquí para asesorarte.', true);
+        setOpts(INITIAL_OPTS);
+      }, 350);
+    }
+  }
+
+  function closeChat() {
+    isOpen = false;
+    win.classList.add('hidden');
+  }
+
+  toggle.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+  closeBtn.addEventListener('click', closeChat);
+  sendBtn.addEventListener('click', function() { handleSend(); });
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleSend(); });
+
+  setTimeout(function() { if (!isOpen) openChat(); }, 500);
+}());
+</script>
+
+</body>
+</html>

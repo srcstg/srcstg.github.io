@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jesuitas Chile · Compañía de Jesús</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- TOP UTILITY BAR -->
+<!-- CAMBIO Bárbara 1: se quitaron "Suscríbete al boletín" y "Colabora"; "Sitios SJ" → "Jesuitas Global" -->
+<div class="utility-bar">
+  <div class="container utility-inner">
+    <div class="utility-left">
+      <a href="https://jesuitas.cl/la-compania-de-jesus/nuestra-presencia-en-chile/">Provincia Chilena</a>
+      <span class="dot"></span>
+      <a href="https://www.cpalsj.org/" target="_blank" rel="noopener">CPAL</a>
+      <span class="dot"></span>
+      <a href="https://www.jesuits.global/" target="_blank" rel="noopener">Jesuitas Global</a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<!-- CAMBIO Bárbara 1: "Espiritualidad" → "Transparencia"; mega-menú desplegable con imágenes en items con subsecciones -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <img src="assets/logo.png" alt="Jesuitas Chile">
+    </a>
+    <nav class="main-nav">
+
+      <div class="nav-item has-mega">
+        <a href="compania.html">La Compañía de Jesús</a>
+        <div class="mega">
+          <div class="mega-links">
+            <a href="compania.html">Quiénes somos</a>
+            <a href="compania.html">Historia</a>
+            <a href="compania.html">Nuestra presencia en Chile</a>
+            <a href="compania.html">Provincial y consejo</a>
+            <a href="compania.html">Comunidades</a>
+          </div>
+          <a href="#" class="mega-feature">
+            <img src="assets/card-3.jpg" alt="">
+            <span class="mega-feature-label">Conoce la historia y misión de la Compañía</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-item has-mega">
+        <a href="#">Áreas y Obras</a>
+        <div class="mega">
+          <div class="mega-links">
+            <a href="#">Educación</a>
+            <a href="#">Acción Social</a>
+            <a href="#">Iglesia y Parroquias</a>
+            <a href="#">Espiritualidad</a>
+            <a href="#">Vocaciones</a>
+          </div>
+          <a href="#" class="mega-feature">
+            <img src="assets/area-educacion2.jpg" alt="">
+            <span class="mega-feature-label">Nuestras obras a lo largo de Chile</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-item"><a href="#">Vocaciones</a></div>
+      <!-- Nombre por confirmar: "Transparencia" o "Dirección de Ética y Buen Gobierno" (este último iría en 2 líneas) -->
+      <div class="nav-item"><a href="#">Transparencia</a></div>
+      <div class="nav-item"><a href="#">Prevención de Abusos</a></div>
+      <div class="nav-item"><a href="#">Noticias</a></div>
+
+    </nav>
+    <button class="search-btn" aria-label="Buscar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- HERO — CARRUSEL DE 3 SLIDES -->
+<!-- CAMBIO Bárbara 2: banner home como carrusel de 3 diapositivas (imágenes son placeholders) -->
+<section class="hero-carousel" aria-roledescription="carrusel" aria-label="Destacados principales">
+  <div class="hero-slides">
+
+    <article class="hero hero-slide is-active">
+      <div class="hero-media">
+        <img src="assets/news-4.jpg" alt="">
+        <div class="hero-video"><div id="heroVideo"></div></div>
+      </div>
+      <div class="hero-content container">
+        <div class="hero-text">
+          <span class="eyebrow">Educación</span>
+          <h1 class="hero-title">Una red educativa al servicio de Chile</h1>
+          <p class="hero-excerpt">Colegios, universidades y centros de formación que acompañan a miles de jóvenes a lo largo de todo el país.</p>
+          <a href="compania.html" class="cta-link">Conoce la Compañía
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article class="hero hero-slide">
+      <div class="hero-media"><img src="assets/hero.jpg" alt=""></div>
+      <div class="hero-content container">
+        <div class="hero-text">
+          <span class="eyebrow">Comunicado oficial</span>
+          <h2 class="hero-title">Comunicado de la Compañía de Jesús en Chile</h2>
+          <p class="hero-excerpt">Una declaración pública sobre los procesos de discernimiento, transparencia y compromiso con las víctimas que la Provincia chilena ha asumido en este tiempo.</p>
+          <a href="noticia.html" class="cta-link">Leer comunicado completo
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <article class="hero hero-slide">
+      <div class="hero-media"><img src="assets/card-2.jpg" alt=""></div>
+      <div class="hero-content container">
+        <div class="hero-text">
+          <span class="eyebrow">Acción social</span>
+          <h2 class="hero-title">Construyendo el futuro Barrio 100 junto a las familias</h2>
+          <p class="hero-excerpt">El compromiso de la Provincia Chilena con quienes más lo necesitan se hace presente en cada territorio.</p>
+          <a href="#" class="cta-link">Conocer el proyecto
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <button class="hero-arrow hero-prev" aria-label="Destacado anterior">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="hero-arrow hero-next" aria-label="Destacado siguiente">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+
+  <div class="hero-dots">
+    <button class="hero-dot is-active" aria-label="Ir al destacado 1"></button>
+    <button class="hero-dot" aria-label="Ir al destacado 2"></button>
+    <button class="hero-dot" aria-label="Ir al destacado 3"></button>
+  </div>
+</section>
+
+<!-- LO ÚLTIMO (OK según Bárbara — se mantiene) -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Lo último</h2>
+      <a href="#" class="section-link">Ver todas las noticias →</a>
+    </div>
+    <div class="cards-grid">
+      <article class="card">
+        <div class="card-media">
+          <img src="assets/card-1.jpg" alt="">
+        </div>
+        <div class="card-body">
+          <!-- CAMBIO Bárbara 3: se quita la etiqueta "Espiritualidad" -->
+          <span class="eyebrow">Comunidad</span>
+          <h3 class="card-title">Fiesta de Santa María Virgen, Madre de la Compañía de Jesús</h3>
+          <p class="card-meta">22 de abril, 2024</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-media">
+          <img src="assets/card-2.jpg" alt="">
+        </div>
+        <div class="card-body">
+          <span class="eyebrow">Acción social</span>
+          <h3 class="card-title">Visita de familias al futuro Barrio 100</h3>
+          <p class="card-meta">17 de abril, 2024</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-media">
+          <img src="assets/card-3.jpg" alt="">
+        </div>
+        <div class="card-body">
+          <span class="eyebrow">Solidaridad</span>
+          <h3 class="card-title">Gestión de campañas de emergencia</h3>
+          <p class="card-meta">3 de abril, 2024</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ÁREAS -->
+<!-- CAMBIO Bárbara 4: diseño sin recuadros; elementos diferenciados con acento dorado -->
+<section class="section section-areas">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Áreas de la Compañía</h2>
+      <p class="section-sub">El compromiso de la Provincia Chilena se despliega en cinco frentes complementarios.</p>
+    </div>
+    <div class="areas-grid">
+      <a href="#" class="area-tile">
+        <div class="area-media"><img src="assets/area-educacion2.jpg" alt=""></div>
+        <div class="area-body">
+          <h3>Educación</h3>
+          <p>Colegios, universidades, formación técnica</p>
+        </div>
+      </a>
+      <a href="#" class="area-tile">
+        <div class="area-media"><img src="assets/area-espiritualidad.jpg" alt=""></div>
+        <div class="area-body">
+          <h3>Espiritualidad</h3>
+          <p>Ejercicios, retiros, acompañamiento</p>
+        </div>
+      </a>
+      <a href="#" class="area-tile">
+        <div class="area-media"><img src="assets/area-social.jpg" alt=""></div>
+        <div class="area-body">
+          <h3>Acción Social</h3>
+          <p>Red de centros sociales, migrantes, pobreza</p>
+        </div>
+      </a>
+      <a href="#" class="area-tile">
+        <div class="area-media"><img src="assets/area-iglesia.jpg" alt=""></div>
+        <div class="area-body">
+          <h3>Iglesia</h3>
+          <p>Parroquias, comunidades, sacerdocio</p>
+        </div>
+      </a>
+      <!-- Vocaciones: mismo diseño que las demás áreas (enlace por confirmar) -->
+      <a href="#" class="area-tile">
+        <div class="area-media"><img src="assets/area-vocaciones.jpg" alt=""></div>
+        <div class="area-body">
+          <h3>Vocaciones</h3>
+          <p>Llamado, formación y discernimiento</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- REFLECTION / QUOTE — separador con frase (Bárbara 4 y 5) -->
+<section class="quote-band">
+  <div class="container">
+    <blockquote class="quote">
+      <p>En todo amar y servir.</p>
+      <footer>— San Ignacio de Loyola</footer>
+    </blockquote>
+  </div>
+</section>
+
+<!-- DESTACADOS (antes "Noticias recientes") -->
+<!-- CAMBIO Bárbara 3: título → "Destacados"; 2 filas de 3 = 6 noticias visibles -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title">Destacados</h2>
+      <a href="#" class="section-link">Archivo completo →</a>
+    </div>
+    <div class="news-grid">
+      <article class="news-item">
+        <a href="noticia.html"><div class="news-media"><img src="assets/news-1.jpg" alt=""></div></a>
+        <span class="eyebrow">Comunidad</span>
+        <h3><a href="noticia.html">Inauguración del Jardín Jesuita en Valparaíso y Restauración de la Virgen</a></h3>
+        <p class="news-meta">9 de abril, 2024</p>
+      </article>
+      <article class="news-item">
+        <a href="#"><div class="news-media"><img src="assets/news-2.jpg" alt=""></div></a>
+        <span class="eyebrow">Liturgia</span>
+        <h3><a href="#">¡Celebramos la Resurrección de Jesús!</a></h3>
+        <p class="news-meta">30 de marzo, 2024</p>
+      </article>
+      <article class="news-item">
+        <a href="#"><div class="news-media"><img src="assets/news-3.jpg" alt=""></div></a>
+        <span class="eyebrow">Especial</span>
+        <h3><a href="#">Especial Navidad 2023</a></h3>
+        <p class="news-meta">14 de diciembre, 2023</p>
+      </article>
+      <article class="news-item">
+        <a href="#"><div class="news-media"><img src="assets/news-4.jpg" alt=""></div></a>
+        <span class="eyebrow">Universidad</span>
+        <h3><a href="#">Cristián del Campo SJ. fue investido como nuevo Rector de la UAH</a></h3>
+        <p class="news-meta">5 de marzo, 2024</p>
+      </article>
+      <article class="news-item">
+        <a href="#"><div class="news-media"><img src="assets/news-5.jpg" alt=""></div></a>
+        <span class="eyebrow">Cultura</span>
+        <h3><a href="#">Ignacio el buscador de Dios: la nueva película sobre ejercicios espirituales</a></h3>
+        <p class="news-meta">30 de enero, 2024</p>
+      </article>
+      <article class="news-item">
+        <a href="#"><div class="news-media"><img src="assets/news-6.jpg" alt=""></div></a>
+        <span class="eyebrow">Entrevista</span>
+        <h3><a href="#">Carlos Bresciani SJ: "En los Pueblos Originarios hay una respuesta y salida a nuestra crisis"</a></h3>
+        <p class="news-meta">23 de abril, 2024</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CALUGAS / ACCESOS — Bárbara 5 (contenido por migrar desde el sitio actual) -->
+<section class="section section-calugas">
+  <div class="container">
+    <div class="calugas-grid">
+      <a href="#" class="caluga">
+        <span class="caluga-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+        </span>
+        <div>
+          <h3>Proceso Canónico</h3>
+          <p>Preguntas frecuentes e información del proceso.</p>
+        </div>
+      </a>
+      <a href="#" class="caluga">
+        <span class="caluga-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </span>
+        <div>
+          <h3>Revistas Jesuitas</h3>
+          <p>Publicaciones y revistas de la Provincia.</p>
+        </div>
+      </a>
+      <a href="#" class="caluga">
+        <span class="caluga-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        </span>
+        <div>
+          <h3>Llamados y orientaciones</h3>
+          <p>Los que se encuentran hoy en la portada.</p>
+        </div>
+      </a>
+    </div>
+    <p class="placeholder-note">Calugas con contenido por revisar/migrar desde el sitio actual.</p>
+  </div>
+</section>
+
+<!-- VIDEO DEL PAPA — Bárbara 5 (propuesta en formato banner; ubicación y enlace por definir) -->
+<section class="papa-banner">
+  <div class="container">
+    <div class="papa-card">
+      <button class="papa-play" aria-label="Reproducir el Video del Papa">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="papa-copy">
+        <span class="eyebrow">El Video del Papa</span>
+        <h2>Intención de oración del mes</h2>
+        <p>Propuesta de ubicación en formato banner — contenido y enlace por definir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER CTA -->
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div class="cta-text">
+      <h2>Mantente cerca de la Compañía</h2>
+      <p>Recibe noticias, reflexiones e invitaciones de la Provincia Chilena directamente en tu correo.</p>
+    </div>
+    <form class="cta-form" onsubmit="event.preventDefault(); alert('Suscripción simulada — mockup');">
+      <input type="email" placeholder="tu@correo.cl" required>
+      <button type="submit">Suscribirme</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-col footer-brand">
+      <img src="assets/logo.png" alt="Jesuitas Chile" class="footer-logo">
+      <p>Provincia Chilena de la Compañía de Jesús</p>
+      <div class="socials">
+        <a href="#" aria-label="Facebook"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21.58 7.19a2.51 2.51 0 0 0-1.77-1.78C18.25 5 12 5 12 5s-6.25 0-7.81.41A2.51 2.51 0 0 0 2.42 7.2 26.27 26.27 0 0 0 2 12a26.27 26.27 0 0 0 .42 4.81 2.51 2.51 0 0 0 1.77 1.78C5.75 19 12 19 12 19s6.25 0 7.81-.41a2.51 2.51 0 0 0 1.77-1.78A26.27 26.27 0 0 0 22 12a26.27 26.27 0 0 0-.42-4.81zM10 15V9l5.2 3-5.2 3z"/></svg></a>
+        <a href="#" aria-label="X"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>La Compañía</h4>
+      <ul>
+        <li><a href="#">Quiénes somos</a></li>
+        <li><a href="#">Historia</a></li>
+        <li><a href="#">Provincial y consejo</a></li>
+        <li><a href="#">Comunidades</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Áreas y obras</h4>
+      <ul>
+        <li><a href="#">Educación</a></li>
+        <li><a href="#">Acción social</a></li>
+        <li><a href="#">Espiritualidad</a></li>
+        <li><a href="#">Parroquias</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Recursos</h4>
+      <ul>
+        <li><a href="#">Revista Jesuitas Chile</a></li>
+        <li><a href="#">Podcasts</a></li>
+        <li><a href="#">Documentos oficiales</a></li>
+        <li><a href="#">Prevención de abusos</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li>Av. Almirante Barroso 6</li>
+        <li>Santiago, Chile</li>
+        <li>(+56 2) xxxx xxxx</li>
+        <li><a href="#">contacto@jesuitas.cl</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="container footer-base-inner">
+      <p>© 2026 Compañía de Jesús — Provincia Chilena. Todos los derechos reservados.</p>
+      <div class="footer-base-links">
+        <a href="#">Privacidad</a>
+        <a href="#">Términos</a>
+        <a href="#">Política de prevención</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ===== Carrusel del hero (1er slide = video) ===== */
+  (function () {
+    var slides = [].slice.call(document.querySelectorAll('.hero-slide'));
+    var dots = [].slice.call(document.querySelectorAll('.hero-dot'));
+    if (!slides.length) return;
+    var VIDEO_SLIDE = 0;
+    var i = 0, timer;
+
+    function schedule() {
+      clearTimeout(timer);
+      if (i === VIDEO_SLIDE) return;           // en el slide de video NO auto-avanza
+      timer = setTimeout(function () { show(i + 1); }, 6000);
+    }
+    function show(n) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach(function (s, k) { s.classList.toggle('is-active', k === i); });
+      dots.forEach(function (d, k) { d.classList.toggle('is-active', k === i); });
+      window.__heroOnVideo = (i === VIDEO_SLIDE);
+      var p = window.__heroVid;
+      if (p && p.playVideo) {
+        try {
+          if (i === VIDEO_SLIDE) { p.seekTo(182, true); p.playVideo(); }
+          else { p.pauseVideo(); }
+        } catch (e) {}
+      }
+      schedule();
+    }
+    window.__heroShow = show;
+
+    var nx = document.querySelector('.hero-next');
+    var pv = document.querySelector('.hero-prev');
+    if (nx) nx.addEventListener('click', function () { show(i + 1); });
+    if (pv) pv.addEventListener('click', function () { show(i - 1); });
+    dots.forEach(function (d, k) { d.addEventListener('click', function () { show(k); }); });
+
+    var car = document.querySelector('.hero-carousel');
+    if (car) {
+      car.addEventListener('mouseenter', function () { clearTimeout(timer); });
+      car.addEventListener('mouseleave', function () { schedule(); });
+    }
+    show(0);
+  })();
+
+  /* ===== YouTube IFrame API: video de fondo del 1er slide, loop 3:02–3:16 ===== */
+  (function () {
+    var tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  })();
+
+  function sizeHeroVideo() {
+    var wrap = document.querySelector('.hero-video');
+    if (!wrap) return;
+    var iframe = wrap.querySelector('iframe');
+    if (!iframe) return;
+    var w = wrap.offsetWidth, h = wrap.offsetHeight, r = 16 / 9;
+    if (w / h > r) { iframe.style.width = w + 'px'; iframe.style.height = (w / r) + 'px'; }
+    else { iframe.style.height = h + 'px'; iframe.style.width = (h * r) + 'px'; }
+    iframe.style.left = '50%'; iframe.style.top = '50%';
+    iframe.style.transform = 'translate(-50%, -50%)';
+  }
+  window.addEventListener('resize', sizeHeroVideo);
+  window.addEventListener('load', sizeHeroVideo);
+
+  function onYouTubeIframeAPIReady() {
+    window.__heroVid = new YT.Player('heroVideo', {
+      videoId: 'pw0ClB7-kM8',
+      playerVars: {
+        autoplay: 1, mute: 1, controls: 0, start: 182, end: 196,
+        modestbranding: 1, rel: 0, playsinline: 1, disablekb: 1, fs: 0, iv_load_policy: 3
+      },
+      events: {
+        onReady: function (e) { e.target.mute(); sizeHeroVideo(); e.target.playVideo(); },
+        onStateChange: function (e) {
+          if (e.data === YT.PlayerState.ENDED) { e.target.seekTo(182, true); e.target.playVideo(); }
+        }
+      }
+    });
+  }
+
+  /* Loop de respaldo por si el evento ENDED no dispara */
+  setInterval(function () {
+    var p = window.__heroVid;
+    if (!p || !p.getCurrentTime) return;
+    try {
+      var t = p.getCurrentTime();
+      if (t >= 195.8 || t < 181) { p.seekTo(182, true); }
+    } catch (e) {}
+  }, 400);
+</script>
+
+</body>
+</html>

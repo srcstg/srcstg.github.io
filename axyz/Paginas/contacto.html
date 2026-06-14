@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto — AXYZ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Avenir', 'Avenir Next', 'Avenir Next LT Pro',
+                   -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: block; }
+    input:focus, select:focus, textarea:focus { outline: none; }
+  
+    /* Blanco y negro: imagenes excepto el logo AXYZ */
+    img:not([alt="AXYZ"]) {
+      filter: grayscale(1);
+    }
+</style>
+</head>
+<body class="bg-zinc-900 text-white">
+<div class="bg-zinc-900">
+
+  <!-- ══════════════ NAVBAR ══════════════ -->
+  <header class="sticky top-0 z-50 bg-zinc-950" style="-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-backface-visibility:hidden;">
+    <div class="flex items-center justify-between px-5 py-4 md:mx-auto md:max-w-7xl md:px-12">
+      <a href="../index.html"><img src="../assets/logo-white.png" alt="AXYZ" class="h-[34px] w-auto"/></a>
+      <nav class="hidden md:flex md:items-center md:gap-10">
+        <a href="../index.html"              class="text-[0.985rem] font-medium text-white/70 hover:text-white transition-colors">Inicio</a>
+        <a href="../index.html#servicios"    class="text-[0.985rem] font-normal text-white/70 hover:text-white transition-colors">Regulación</a>
+        <a href="../index.html#arquitectura" class="text-[0.985rem] font-normal text-white/70 hover:text-white transition-colors">Arquitectura</a>
+        <a href="contacto.html" class="bg-[#EE7D65] px-5 py-2 text-sm font-bold uppercase tracking-widest text-white hover:bg-[#F19582] transition-colors">Contacto</a>
+      </nav>
+      <button type="button" aria-label="Menú" onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('open');" class="flex flex-col items-center justify-center gap-1.5 p-2 md:hidden" style="min-width:44px;min-height:44px;touch-action:manipulation;cursor:pointer;">
+        <span class="block h-px w-7 bg-white"></span>
+        <span class="block h-px w-7 bg-white"></span>
+        <span class="block h-px w-7 bg-white"></span>
+      </button>
+    </div>
+    <nav id="mobile-menu" class="bg-zinc-950 px-5 pb-4 md:hidden">
+      <a href="../index.html"              onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Inicio</a>
+      <a href="../index.html#servicios"    onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Regulación</a>
+      <a href="../index.html#arquitectura" onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Arquitectura</a>
+      <a href="contacto.html"              onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Contacto</a>
+    </nav>
+  </header>
+
+  <!-- ══════════════ HERO ══════════════ -->
+  <section class="px-5 pt-10 pb-8 text-center md:pt-16 md:pb-10">
+    <div class="mx-auto max-w-2xl">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-[#EE7D65]">Asesoría gratuita</p>
+      <h1 class="mb-4 text-3xl font-bold leading-snug text-white md:text-[2.34rem]">Contáctanos</h1>
+      <p class="text-[1.2rem] leading-relaxed text-white/50">
+        Contáctanos para una asesoría gratis con un arquitecto especializado en regularización. Completa el formulario para recibir orientación de AXYZ.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ FORMULARIO + MAPA ══════════════ -->
+  <section class="mt-3 bg-zinc-800 px-5 py-10 md:py-16">
+    <div class="mx-auto max-w-7xl md:px-12">
+    <div class="md:grid md:grid-cols-2 md:gap-16 md:items-start">
+    <form id="contact-form" class="space-y-3 text-left" novalidate>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Nombre</label>
+        <input type="text" name="nombre" placeholder="Nombre completo"
+          class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Teléfono</label>
+        <input type="tel" name="telefono" placeholder="+569"
+          class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Mail</label>
+        <input type="email" name="email" placeholder="tu@email.com"
+          class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Comuna</label>
+        <input type="text" name="comuna" placeholder="Tu comuna"
+          class="w-full border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"/>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-widest text-white/40">Mensaje</label>
+        <textarea name="mensaje" rows="4" placeholder="Cuéntanos sobre tu proyecto"
+          class="w-full resize-none border border-white/10 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"></textarea>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 pt-1">
+        <div class="flex items-center gap-2 border border-white/10 bg-zinc-700 px-4 py-2">
+          <span class="text-sm text-white/60">¿Cuánto es</span>
+          <span id="captcha-question" class="text-sm font-bold text-white"></span>
+          <span class="text-sm text-white/60">?</span>
+          <input type="text" id="captcha-answer" name="captcha" inputmode="numeric" maxlength="2"
+            class="w-12 border border-white/10 bg-zinc-600 px-2 py-1 text-center text-sm text-white placeholder-white/30 focus:border-[#EE7D65]"
+            placeholder="—"/>
+        </div>
+        <p id="captcha-error" class="hidden text-xs text-red-400">Respuesta incorrecta. Intenta de nuevo.</p>
+      </div>
+
+      <div class="pt-2 text-center">
+        <button type="submit"
+          class="bg-[#EE7D65] px-8 py-3 text-sm font-bold uppercase tracking-widest text-white hover:bg-[#F19582] transition-colors">
+          Enviar mensaje
+        </button>
+      </div>
+
+      <p id="form-success" class="hidden text-center text-sm font-semibold text-[#F19582]">
+        ¡Mensaje enviado! Te responderemos en menos de 24 horas.
+      </p>
+
+    </form>
+
+    <!-- Dirección y mapa (al lado del formulario en desktop) -->
+    <div class="mt-10 md:mt-0">
+    <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-white/40">Dirección</p>
+    <p class="mb-6 text-base text-white/80">Ramón Carnicer 65, Oficina 11. Providencia, Santiago de Chile</p>
+    <div class="overflow-hidden rounded">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3330.3!2d-70.6266!3d-33.4295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c59f2f3b1b1f%3A0x0!2sRam%C3%B3n+Carnicer+65%2C+Providencia%2C+Regi%C3%B3n+Metropolitana%2C+Chile!5e0!3m2!1ses!2scl!4v1"
+        width="100%"
+        height="280"
+        style="border:0; display:block;"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Ubicación AXYZ">
+      </iframe>
+    </div>
+    <div class="mt-4 space-y-2">
+      <a href="tel:+56932994825" class="flex items-center gap-2 text-sm text-white/60">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#EE7D65] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        </svg>
+        +56 9 3299 4825
+      </a>
+      <a href="mailto:hola@axyz.cl" class="flex items-center gap-2 text-sm text-white/60">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#EE7D65] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        hola@axyz.cl
+      </a>
+    </div><!-- end address list -->
+    </div><!-- end map col -->
+    </div><!-- end grid -->
+    </div><!-- end max-w -->
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="bg-zinc-950 px-5 py-10 md:py-16">
+    <div class="mx-auto max-w-7xl md:px-12">
+    <div class="md:grid md:grid-cols-4 md:gap-12">
+    <div class="mb-8 md:mb-0 md:col-span-1">
+      <img src="../assets/logo-white.png" alt="AXYZ" class="h-[51px] w-auto"/>
+    </div>
+
+    <div class="mb-8 md:mb-0">
+      <p class="mb-3 text-sm font-bold uppercase tracking-widest text-white/40">Servicios</p>
+      <a href="../index.html#nosotros"  class="mb-2 block text-sm text-white/60 hover:text-white">Confianza en axyz</a>
+      <a href="../index.html#servicios" class="mb-2 block text-sm text-white/60 hover:text-white">Regulación</a>
+      <a href="../index.html#arquitectura" class="mb-2 block text-sm text-white/60 hover:text-white">Arquitectura</a>
+      <a href="blog.html"            class="mb-2 block text-sm text-white/60 hover:text-white">Blog</a>
+    </div>
+
+    <div class="mb-8 md:mb-0">
+      <p class="mb-3 text-sm font-bold uppercase tracking-widest text-white/40">Contacto</p>
+      <p class="mb-2 text-sm text-white/60 whitespace-nowrap">Ramón Carnicer 65, Of. 11, Providencia, Santiago</p>
+      <a href="tel:+56932994825" class="mb-2 block text-sm text-white/60">+56 9 3299 4825</a>
+      <a href="mailto:hola@axyz.cl" class="mb-4 block text-sm text-white/60">hola@axyz.cl</a>
+      <div class="flex gap-4">
+        <a href="https://cl.linkedin.com/company/axyz-arq" target="_blank" rel="noopener" aria-label="LinkedIn" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.12 20.45H3.56V9h3.56v11.45zM5.34 7.58a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67h-3.56V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29z"/>
+          </svg>
+        </a>
+        <a href="https://www.facebook.com/people/axyzarq/100053673380029" target="_blank" rel="noopener" aria-label="Facebook" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M22.68 0H1.32C.59 0 0 .59 0 1.32v21.36C0 23.41.59 24 1.32 24H12.82v-9.29H9.69V11.08h3.13V8.41c0-3.1 1.89-4.79 4.66-4.79 1.32 0 2.46.1 2.79.14v3.24h-1.91c-1.5 0-1.79.71-1.79 1.76v2.31h3.58l-.47 3.63h-3.11V24h6.1c.73 0 1.32-.59 1.32-1.32V1.32C24 .59 23.41 0 22.68 0z"/>
+          </svg>
+        </a>
+        <a href="https://www.instagram.com/axyz.arq/" target="_blank" rel="noopener" aria-label="Instagram" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85 0 3.2-.01 3.58-.07 4.85-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07-3.2 0-3.58-.01-4.85-.07-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12c0-3.2.01-3.58.07-4.85C2.38 3.86 3.9 2.31 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12c0 3.26.01 3.67.07 4.95.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24c3.26 0 3.67-.01 4.95-.07 4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95 0-3.26-.01-3.67-.07-4.95C23.73 2.71 21.31.27 16.95.07 15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32A6.16 6.16 0 0 0 12 5.84zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+    </div><!-- end grid -->
+
+    <p class="mt-6 text-sm text-white/20">
+      &copy; <span id="year"></span> AXYZ. Todos los derechos reservados.
+    </p>
+  </div><!-- end max-w -->
+  </footer>
+
+</div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Captcha: genera una suma simple
+  let captchaResult = 0;
+  function generateCaptcha() {
+    const a = Math.floor(Math.random() * 9) + 1;
+    const b = Math.floor(Math.random() * 9) + 1;
+    captchaResult = a + b;
+    document.getElementById('captcha-question').textContent = a + ' + ' + b;
+    document.getElementById('captcha-answer').value = '';
+  }
+  generateCaptcha();
+
+  document.getElementById('contact-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const answer = parseInt(document.getElementById('captcha-answer').value, 10);
+    const errorEl = document.getElementById('captcha-error');
+    if (answer !== captchaResult) {
+      errorEl.classList.remove('hidden');
+      generateCaptcha();
+      return;
+    }
+    errorEl.classList.add('hidden');
+    document.getElementById('form-success').classList.remove('hidden');
+    this.reset();
+    generateCaptcha();
+  });
+</script>
+
+<!-- ══════════════ CHAT WIDGET ══════════════ -->
+<div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+
+  <div id="chat-window" class="mb-3 hidden w-80 overflow-hidden shadow-2xl" style="border:1px solid rgba(255,255,255,0.12);">
+    <div class="flex items-center gap-3 bg-zinc-950 px-4 py-3">
+      <img src="../assets/logo-white.png" alt="AXYZ" class="h-[26px] w-auto object-contain"/>
+      <span class="font-bold tracking-wide text-white">AXYZ</span>
+      <button id="chat-close" class="ml-auto text-xl leading-none text-white/50 hover:text-white">&times;</button>
+    </div>
+    <div id="chat-messages" class="space-y-3 overflow-y-auto bg-zinc-800 px-4 py-3" style="height:280px;"></div>
+    <div id="chat-options" class="flex flex-wrap gap-2 border-t border-white/10 bg-zinc-800 px-4 pb-3 pt-3"></div>
+    <div class="flex items-center gap-2 border-t border-white/10 bg-zinc-950 px-3 py-2">
+      <input type="text" id="chat-input" placeholder="Escribe tu consulta..."
+        class="flex-1 border border-white/10 bg-zinc-700 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#EE7D65]"/>
+      <button id="chat-send" class="bg-[#EE7D65] px-3 py-1.5 text-white hover:bg-[#F19582] transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button id="chat-toggle" class="flex h-14 w-14 items-center justify-center bg-[#EE7D65] shadow-lg hover:bg-[#F19582] transition-colors">
+    <svg id="chat-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+  </button>
+
+</div>
+
+<script>
+(function () {
+  var toggle   = document.getElementById('chat-toggle');
+  var win      = document.getElementById('chat-window');
+  var closeBtn = document.getElementById('chat-close');
+  var msgs     = document.getElementById('chat-messages');
+  var optsCnt  = document.getElementById('chat-options');
+  var input    = document.getElementById('chat-input');
+  var sendBtn  = document.getElementById('chat-send');
+  var iconOpen = document.getElementById('chat-icon-open');
+  var isOpen   = false;
+  var greeted  = false;
+
+  var INITIAL_OPTS = ['Servicios','Regularización','Arquitectura','Contacto','Ubicación'];
+
+  var RESPONSES = {
+    servicios:      { text: 'En AXYZ ofrecemos:\n• Regularización de propiedades\n• Diseño arquitectónico\n• Gestión de permisos y patentes\n\n¿Sobre cuál te gustaría saber más?', opts: ['Regularización','Arquitectura','Contacto'] },
+    regularizacion: { text: 'Somos expertos en regularización de propiedades. El proceso incluye:\n\n1. Evaluación de normativas\n2. Seguimiento riguroso\n3. Documentación completa\n\nResultados seguros, rápidos y rentables.', opts: ['¿Cuánto cuesta?','Contactar ahora','Ver servicios'] },
+    arquitectura:   { text: 'Nuestros servicios de arquitectura incluyen:\n\n• Diseño residencial\n• Espacios comerciales\n• Diseño urbano\n\nDe la planificación a la ejecución.', opts: ['¿Cuánto cuesta?','Contactar ahora'] },
+    contacto:       { text: 'Puedes contactarnos:\n\n📞 +56 9 3299 4825\n✉️ hola@axyz.cl\n\nO completa el formulario y te respondemos en menos de 24 horas.', opts: ['Ubicación','Ver servicios'] },
+    ubicacion:      { text: '📍 Ramón Carnicer 65, Of. 11\nProvidencia, Santiago\n\nLunes a viernes, horario de oficina.', opts: ['Contactar ahora','Ver servicios'] },
+    costo:          { text: 'El costo varía según el tipo y características de tu proyecto. Te ofrecemos una asesoría gratuita y personalizada.', opts: ['Contactar ahora','Ver servicios'] },
+    default:        { text: 'Gracias por tu mensaje. Para más información, contáctanos directamente y te ayudamos con gusto.', opts: ['Servicios','Contacto','Ubicación'] }
+  };
+
+  function normalize(s) {
+    return s.toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+      .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+      .replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+  }
+
+  function getResponse(text) {
+    var t = normalize(text);
+    if (/regulariz|propiedad|permiso|patente|terreno/.test(t)) return RESPONSES.regularizacion;
+    if (/arquitect|disen|construc|comercial|residencial/.test(t)) return RESPONSES.arquitectura;
+    if (/contact|telefon|correo|email|llamar|whatsapp/.test(t)) return RESPONSES.contacto;
+    if (/donde|ubicacion|direccion|oficina|lugar/.test(t)) return RESPONSES.ubicacion;
+    if (/cuanto|costo|precio|valor|cobr/.test(t)) return RESPONSES.costo;
+    if (/servicio|ayuda|hacen|ofrecen/.test(t)) return RESPONSES.servicios;
+    if (/hola|buenas|buenos|saludos/.test(t)) return { text: '¡Hola! ¿En qué puedo ayudarte?', opts: INITIAL_OPTS };
+    if (/contactar|contactarahora/.test(t)) return RESPONSES.contacto;
+    if (/verservicio/.test(t)) return RESPONSES.servicios;
+    return RESPONSES.default;
+  }
+
+  function addMsg(text, isBot) {
+    var wrap = document.createElement('div');
+    wrap.className = isBot ? 'flex items-start gap-2' : 'flex items-start justify-end';
+    if (isBot) {
+      var av = document.createElement('div');
+      av.className = 'flex-shrink-0 h-[19px] w-[19px] overflow-hidden';
+      av.innerHTML = '<img src="../assets/logo-white.png" alt="AXYZ" class="h-full w-full object-contain"/>';
+      wrap.appendChild(av);
+    }
+    var bub = document.createElement('div');
+    bub.className = isBot
+      ? 'max-w-[85%] bg-zinc-700 px-3 py-2 text-sm leading-relaxed text-white/90 whitespace-pre-line'
+      : 'max-w-[85%] bg-[#EE7D65] px-3 py-2 text-sm leading-relaxed text-white whitespace-pre-line';
+    bub.textContent = text;
+    wrap.appendChild(bub);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function setOpts(list) {
+    optsCnt.innerHTML = '';
+    (list || INITIAL_OPTS).forEach(function(o) {
+      var b = document.createElement('button');
+      b.className = 'border border-[#EE7D65] px-3 py-1 text-xs text-[#EE7D65] hover:bg-[#EE7D65] hover:text-white transition-colors';
+      b.textContent = o;
+      b.addEventListener('click', function() { handleSend(o); });
+      optsCnt.appendChild(b);
+    });
+  }
+
+  function handleSend(text) {
+    if (!text) { text = input.value.trim(); input.value = ''; }
+    if (!text) return;
+    addMsg(text, false);
+    var r = getResponse(text);
+    if (!r) return;
+    setTimeout(function() { addMsg(r.text, true); setOpts(r.opts); }, 420);
+  }
+
+  function openChat() {
+    isOpen = true;
+    win.classList.remove('hidden');
+    if (!greeted) {
+      greeted = true;
+      setTimeout(function() {
+        addMsg('¡Hola! Soy el asistente de AXYZ. ¿En qué puedo ayudarte hoy?', true);
+        setOpts(INITIAL_OPTS);
+      }, 350);
+    }
+  }
+
+  function closeChat() {
+    isOpen = false;
+    win.classList.add('hidden');
+  }
+
+  toggle.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+  closeBtn.addEventListener('click', closeChat);
+  sendBtn.addEventListener('click', function() { handleSend(); });
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleSend(); });
+
+}());
+</script>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXYZ — Marquee de logos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Avenir', 'Avenir Next', 'Avenir Next LT Pro',
+                   -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .logos-wrapper { overflow: hidden; }
+    .logos-track {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+      animation: marquee 50s linear infinite;
+    }
+    .logos-track:hover { animation-play-state: paused; }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+  
+    /* Blanco y negro: imagenes excepto el logo AXYZ */
+    img:not([alt="AXYZ"]) {
+      filter: grayscale(1);
+    }
+    /* Excepción: logos de clientes en el marquee se ven a color */
+    .logos-track img {
+      filter: none;
+    }
+</style>
+</head>
+<body class="bg-zinc-900 text-white">
+
+<!--
+  ============================================================
+  Sección autosuficiente: Marquee "Empresas que nos respaldan"
+  Lista para envolver como Custom Element en Wix Studio.
+
+  Conversión a Custom Element:
+    class AxyzMarquee extends HTMLElement {
+      connectedCallback() {
+        this.innerHTML = `<style>...</style><section>...</section>`;
+      }
+    }
+    customElements.define('axyz-marquee', AxyzMarquee);
+  ============================================================
+-->
+
+<section class="px-5 py-6 text-center md:py-14">
+  <div class="mx-auto max-w-7xl md:px-12">
+    <p class="mb-4 text-lg md:text-[1.5625rem] font-semibold uppercase tracking-widest text-[#EE7D65]">
+      Empresas que nos respaldan
+    </p>
+    <div class="logos-wrapper">
+      <div class="logos-track">
+        <!-- Set 1 -->
+        <img src="../assets/Logos empresas/1_Siena blanco.jpg"   alt="Siena"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/2_Brimax.jpg"          alt="Brimax"      class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/4_Edificapro.jpg"      alt="Edificapro"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/5_Etex II.jpg"         alt="Etex"        class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/6_Ginebra.jpg"         alt="Ginebra"     class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/7_topk9 blanco.jpg"    alt="Topk9"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/8_Permanit.jpg"        alt="Permanit"    class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/9_Mi placard.jpg"      alt="Mi Placard"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/10_Ecopura.jpg"        alt="Ecopura"     class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/11_Doc popcorn.jpg"    alt="Doc Popcorn" class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/12_Salon kids.jpg"     alt="Salon Kids"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <!-- Set 2 (duplicado para loop continuo) -->
+        <img src="../assets/Logos empresas/1_Siena blanco.jpg"   alt="Siena"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/2_Brimax.jpg"          alt="Brimax"      class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/4_Edificapro.jpg"      alt="Edificapro"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/5_Etex II.jpg"         alt="Etex"        class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/6_Ginebra.jpg"         alt="Ginebra"     class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/7_topk9 blanco.jpg"    alt="Topk9"       class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/8_Permanit.jpg"        alt="Permanit"    class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/9_Mi placard.jpg"      alt="Mi Placard"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/10_Ecopura.jpg"        alt="Ecopura"     class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/11_Doc popcorn.jpg"    alt="Doc Popcorn" class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+        <img src="../assets/Logos empresas/12_Salon kids.jpg"     alt="Salon Kids"  class="h-[94px] w-[94px] flex-shrink-0 object-contain"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

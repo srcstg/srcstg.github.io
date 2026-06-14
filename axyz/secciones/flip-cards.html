@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXYZ — Flip Cards "Confianza en AXYZ"</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Avenir', 'Avenir Next', 'Avenir Next LT Pro',
+                   -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .flip-card { perspective: 1000px; }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-card-front,
+    .flip-card-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 0.25rem;
+    }
+    .flip-card-back { transform: rotateY(180deg); }
+  </style>
+</head>
+<body class="bg-zinc-800 text-white">
+
+<!--
+  ============================================================
+  Sección autosuficiente: Flip Cards "Confianza en AXYZ" (desktop)
+  Para mobile, en el repo principal se usa un acordeón (ver index.html).
+  Lista para envolver como Custom Element en Wix Studio.
+  ============================================================
+-->
+
+<section class="pt-4 pb-8 text-center md:pt-8 md:pb-20">
+  <div class="mx-auto max-w-7xl px-5 md:px-12">
+    <h2 class="mb-2 text-2xl font-bold leading-snug text-white md:mb-3 md:text-[2.34rem]">Confianza en AXYZ</h2>
+    <p class="mb-4 text-sm leading-relaxed text-white/60 md:mb-8 md:mx-auto md:max-w-2xl md:text-[1.2rem]">
+      Nuestras tres categorías fundamentales
+    </p>
+
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-6">
+
+      <!-- Card 1: Respuesta -->
+      <div class="flip-card min-h-[250px] w-full" style="height:250px;" data-card>
+        <div class="flip-card-inner">
+          <div class="flip-card-front flex flex-col items-center justify-center gap-4 bg-zinc-700 px-8 py-6 text-center transition-colors duration-200 hover:bg-zinc-500 cursor-pointer">
+            <p class="text-base md:text-[1.336rem] font-bold uppercase tracking-wide text-white leading-snug">
+              Respuesta ágil en 24 horas
+            </p>
+            <button data-flip class="text-2xl font-light text-[#EE7D65] leading-none">+</button>
+          </div>
+          <div class="flip-card-back flex flex-col bg-zinc-700 px-8 py-6 text-left overflow-y-auto">
+            <button data-unflip class="absolute right-4 top-4 text-xl font-light text-[#EE7D65] leading-none">✕</button>
+            <p class="mt-3 text-[0.831rem] leading-relaxed text-white/80">
+              Porque tu tiempo es valioso, garantizamos que todas tus consultas serán atendidas en menos de 24 horas. Ya sea por WhatsApp, llamada o correo electrónico, obtendrás respuestas rápidas y efectivas para evitar retrasos innecesarios.
+            </p>
+            <p class="mt-4 text-[0.831rem] font-bold uppercase tracking-wide text-white">¿Por qué es clave para tu proyecto?</p>
+            <ul class="mt-2 space-y-2 text-[0.831rem] leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Resolverás dudas rápidamente sin perder oportunidades ni tiempo en trámites.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Tendrás el respaldo de un equipo profesional en cada paso del proceso.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Equipo -->
+      <div class="flip-card min-h-[250px] w-full" style="height:250px;" data-card>
+        <div class="flip-card-inner">
+          <div class="flip-card-front flex flex-col items-center justify-center gap-4 bg-zinc-700 px-8 py-6 text-center transition-colors duration-200 hover:bg-zinc-500 cursor-pointer">
+            <p class="text-base md:text-[1.336rem] font-bold uppercase tracking-wide text-white leading-snug">
+              Equipo multidisciplinario<br>y patrocinio completo
+            </p>
+            <button data-flip class="text-2xl font-light text-[#EE7D65] leading-none">+</button>
+          </div>
+          <div class="flip-card-back flex flex-col bg-zinc-700 px-8 py-6 text-left overflow-y-auto">
+            <button data-unflip class="absolute right-4 top-4 text-xl font-light text-[#EE7D65] leading-none">✕</button>
+            <p class="mt-3 text-[0.831rem] leading-relaxed text-white/80">
+              Con AXYZ, olvídate de coordinar múltiples profesionales. Nuestro equipo incluye arquitectos, ingenieros y expertos en construcción, trabajando en conjunto para ofrecerte un servicio integral.
+            </p>
+            <p class="mt-4 text-[0.831rem] font-bold uppercase tracking-wide text-white">¿Cómo te beneficia?</p>
+            <ul class="mt-2 space-y-2 text-[0.831rem] leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Evitas errores costosos y retrasos en la gestión de permisos y certificaciones.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Optimizas tiempos al contar con todos los especialistas en un solo lugar.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Asesoría -->
+      <div class="flip-card min-h-[250px] w-full" style="height:250px;" data-card>
+        <div class="flip-card-inner">
+          <div class="flip-card-front flex flex-col items-center justify-center gap-4 bg-zinc-700 px-8 py-6 text-center transition-colors duration-200 hover:bg-zinc-500 cursor-pointer">
+            <p class="text-base md:text-[1.336rem] font-bold uppercase tracking-wide text-white leading-snug">
+              Asesoría personalizada<br>para resultados óptimos
+            </p>
+            <button data-flip class="text-2xl font-light text-[#EE7D65] leading-none">+</button>
+          </div>
+          <div class="flip-card-back flex flex-col bg-zinc-700 px-8 py-6 text-left overflow-y-auto">
+            <button data-unflip class="absolute right-4 top-4 text-xl font-light text-[#EE7D65] leading-none">✕</button>
+            <p class="mt-3 text-[0.831rem] leading-relaxed text-white/80">
+              Te acompañamos desde la planificación hasta la ejecución, asegurándonos de que cada decisión esté alineada con tus objetivos, presupuesto y plazos.
+            </p>
+            <p class="mt-4 text-[0.831rem] font-bold uppercase tracking-wide text-white">¿Por qué es un diferencial?</p>
+            <ul class="mt-2 space-y-2 text-[0.831rem] leading-relaxed text-white/80">
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Más que trámites y planos, te ofrecemos una estrategia adaptada a tus necesidades.</li>
+              <li class="flex gap-2"><span class="text-[#EE7D65] flex-shrink-0">•</span>Evitas imprevistos gracias a nuestro enfoque proactivo y nuestra experiencia en el sector.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('[data-card]').forEach(card => {
+    const flipBtn = card.querySelector('[data-flip]');
+    const unflipBtn = card.querySelector('[data-unflip]');
+    flipBtn.addEventListener('click', () => card.classList.add('flipped'));
+    unflipBtn.addEventListener('click', () => card.classList.remove('flipped'));
+  });
+</script>
+
+</body>
+</html>

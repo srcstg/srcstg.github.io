@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — AXYZ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      font-family: 'Avenir', 'Avenir Next', 'Avenir Next LT Pro',
+                   -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: block; }
+
+    /* Blog modal */
+    .blog-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.85);
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    .blog-modal.open { display: block; }
+    .blog-modal-inner {
+      background: #27272a;
+      min-height: 100vh;
+      padding: 60px 20px calc(120px + env(safe-area-inset-bottom, 0px));
+      max-width: 430px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .blog-modal-close {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 101;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #EE7D65;
+      border-radius: 50%;
+      font-size: 20px;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    .blog-modal h2 { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #fff; margin-bottom: 1rem; line-height: 1.4; }
+    .blog-modal h3 { font-size: .95rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #EE7D65; margin: 1.25rem 0 .4rem; }
+    .blog-modal p  { font-size: .85rem; line-height: 1.65; color: rgba(255,255,255,.7); margin-bottom: .75rem; }
+    .blog-modal ul, .blog-modal ol { padding-left: 1.25rem; margin-bottom: .75rem; }
+    .blog-modal li { font-size: .85rem; line-height: 1.65; color: rgba(255,255,255,.7); margin-bottom: .35rem; }
+    .blog-modal ol li { list-style: decimal; }
+    .blog-modal ul li { list-style: disc; }
+
+    /* Desktop: modal más ancho */
+    @media (min-width: 768px) {
+      .blog-modal-inner { max-width: 720px; padding: 60px 48px 48px; }
+    }
+
+    /* Fade-in cards on scroll */
+    .card-reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .card-reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Print: mostrar solo el modal abierto */
+    @media print {
+      body > * { display: none !important; }
+      .blog-modal.open { display: block !important; position: static !important; background: white !important; overflow: visible !important; }
+      .blog-modal-inner { color: #111 !important; background: white !important; padding: 20px !important; max-width: 100% !important; min-height: auto !important; }
+      .blog-modal-close, #modal-actions, header, footer { display: none !important; }
+      .blog-modal h2, .blog-modal h3 { color: #111 !important; }
+      .blog-modal p, .blog-modal li { color: #333 !important; }
+    }
+  
+    /* Blanco y negro: imagenes excepto el logo AXYZ */
+    img:not([alt="AXYZ"]) {
+      filter: grayscale(1);
+    }
+</style>
+</head>
+<body class="bg-zinc-900 text-white">
+<div class="bg-zinc-900">
+
+  <!-- ══════════════ NAVBAR ══════════════ -->
+  <header class="sticky top-0 z-50 bg-zinc-950" style="-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-backface-visibility:hidden;">
+    <div class="flex items-center justify-between px-5 py-4 md:mx-auto md:max-w-7xl md:px-12">
+      <a href="../index.html"><img src="../assets/logo-white.png" alt="AXYZ" class="h-[34px] w-auto"/></a>
+      <nav class="hidden md:flex md:items-center md:gap-10">
+        <a href="../index.html"              class="text-[0.985rem] font-medium text-white/70 hover:text-white transition-colors">Inicio</a>
+        <a href="../index.html#servicios"    class="text-[0.985rem] font-normal text-white/70 hover:text-white transition-colors">Regulación</a>
+        <a href="../index.html#arquitectura" class="text-[0.985rem] font-normal text-white/70 hover:text-white transition-colors">Arquitectura</a>
+        <a href="contacto.html" class="bg-[#EE7D65] px-5 py-2 text-sm font-bold uppercase tracking-widest text-white hover:bg-[#F19582] transition-colors">Contacto</a>
+      </nav>
+      <button type="button" aria-label="Menú" onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('open');" class="flex flex-col items-center justify-center gap-1.5 p-2 md:hidden" style="min-width:44px;min-height:44px;touch-action:manipulation;cursor:pointer;">
+        <span class="block h-px w-7 bg-white"></span>
+        <span class="block h-px w-7 bg-white"></span>
+        <span class="block h-px w-7 bg-white"></span>
+      </button>
+    </div>
+    <nav id="mobile-menu" class="bg-zinc-950 px-5 pb-4 md:hidden">
+      <a href="../index.html"              onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Inicio</a>
+      <a href="../index.html#servicios"    onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Regulación</a>
+      <a href="../index.html#arquitectura" onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Arquitectura</a>
+      <a href="contacto.html"              onclick="document.getElementById('mobile-menu').classList.remove('open');" class="block border-b border-white/10 py-4 text-base text-white/80">Contacto</a>
+    </nav>
+  </header>
+
+  <!-- ══════════════ HERO BLOG ══════════════ -->
+  <section class="px-5 pt-10 pb-6 text-center md:pt-16 md:pb-10">
+    <div class="mx-auto max-w-5xl md:px-12">
+      <h1 class="mb-3 text-3xl font-bold leading-snug text-white md:text-[2.34rem]">Blog</h1>
+      <p class="text-sm leading-relaxed text-white/60 md:text-[1.05rem]">
+        En nuestro blog de www.axyz.cl encontrarás una amplia variedad de información útil que te ayudará en tu proyecto o te permitirá profundizar en temas específicos. Explora nuestros artículos y recursos para aprender de manera sencilla y efectiva. ¡Sumérgete en nuestro contenido y descubre todo lo que tenemos para ofrecerte!
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════ ENTRADAS ══════════════ -->
+  <section class="mt-3 bg-zinc-800 px-5 py-8 md:py-16">
+    <div class="mx-auto max-w-7xl md:px-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+      <!-- 1. Regularizar antes de patente -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/antes de.png"
+            alt="¿Por qué es importante regularizar tu propiedad antes de solicitar la patente?"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">5 de marzo de 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">¿Por qué es importante regularizar tu propiedad antes de solicitar la patente?</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">En Chile, la regularización de propiedades es un proceso fundamental para garantizar que los bienes raíces cumplan con la normativa vigente.</p>
+          <button onclick="openModal('modal-regularizar-patente')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 2. 10 documentos esenciales -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/10 documentos esenciales.png"
+            alt="Conoce los 10 documentos esenciales para obtener tu patente comercial"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">5 de marzo de 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Conoce los 10 documentos esenciales para obtener tu patente comercial</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">La obtención de una patente comercial es un paso fundamental para quienes desean iniciar o formalizar un negocio en Chile.</p>
+          <button onclick="openModal('modal-10-documentos')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 3. Cómo habilitar un local comercial -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/habilitación.jpg" alt="¿Cómo habilitar un local comercial en Chile?" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">Marzo 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">¿Cómo habilitar un local comercial en Chile?</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Requisitos, plazos y etapas para la apertura de locales. La habilitación corresponde al conjunto de autorizaciones municipales, sanitarias y técnicas para operar legalmente.</p>
+          <button onclick="openModal('modal-habilitacion')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 4. Patentes comerciales -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/patente comercial.jpg" alt="¿Qué son y cómo obtener patentes comerciales en Chile?" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">Marzo 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">¿Qué son y cómo obtener patentes comerciales en Chile?</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Guía de requisitos, plazos y etapas para la apertura de locales. Todo lo que necesitas saber para formalizar tu actividad comercial.</p>
+          <button onclick="openModal('modal-patentes')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 5. Guía completa certificaciones -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/Guía completa.jpg" alt="Guía completa: Certificaciones de instalaciones domiciliarias" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">Febrero 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Guía completa: Certificaciones de instalaciones domiciliarias interiores en Chile</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Todo lo que necesitas saber sobre certificaciones de electricidad, gas, agua potable y calefacción en viviendas y edificios.</p>
+          <button onclick="openModal('modal-guia')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 6. Calificación industrial -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/Calificación industrial.jpg" alt="Calificación industrial" class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">Febrero 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Calificación industrial: ¿Quiénes la necesitan y para qué sirve?</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Importancia, etapas y sectores que requieren certificación. Proceso para demostrar cumplimiento con estándares de calidad y seguridad.</p>
+          <button onclick="openModal('modal-calificacion')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 7. Paso a paso local comercial -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/paso a paso .png"
+            alt="Conoce el paso a paso para habilitar un local comercial en Chile"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">15 de enero de 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Conoce el paso a paso para habilitar un local comercial en Chile</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">La habilitación es uno de los pasos esenciales para iniciar un negocio, e implica obtener autorizaciones y cumplir regulaciones legales y municipales.</p>
+          <button onclick="openModal('modal-paso-a-paso')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 8. Guía completa patentes -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/Guía completa sobre patentes .png"
+            alt="Guía completa sobre patentes comerciales en Chile"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">15 de enero de 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Guía completa sobre patentes comerciales en Chile</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Las patentes comerciales son parte fundamental del marco regulatorio para el ejercicio del comercio. Permiso obligatorio para todas las actividades comerciales en un municipio.</p>
+          <button onclick="openModal('modal-guia-patentes')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 9. Ley Agua Potable Rural -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/Ley N° 20.998.png"
+            alt="Ley de Agua Potable Rural"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">2 de enero de 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Guía esencial sobre el Proyecto Rural de Agua Potable y Alcantarillado. Ley N° 20.998</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">El acceso a agua potable y alcantarillado es un derecho fundamental. Las zonas rurales de Chile enfrentan desafíos significativos en este aspecto.</p>
+          <button onclick="openModal('modal-ley-agua')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 10. Parcelas rurales -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/regularización de parcelas.png"
+            alt="Regularización de parcelas rurales en Chile"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">2 de enero de 2025</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Guía completa sobre la regularización de parcelas rurales en Chile</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">La regularización de terrenos rurales es esencial para garantizar la seguridad jurídica de los propietarios y mejorar el acceso a financiamiento.</p>
+          <button onclick="openModal('modal-parcelas-rurales')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 11. Causas viviendas irregulares -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/Causas y soluciones.png"
+            alt="Causas y soluciones de viviendas irregulares en Chile"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">4 de noviembre de 2024</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Causas y soluciones de viviendas irregulares en Chile</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Las viviendas irregulares representan un desafío para el desarrollo urbano. Exploramos las principales causas y alternativas disponibles para su regularización.</p>
+          <button onclick="openModal('modal-viviendas-irregulares')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 12. Permisos de construcción -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/permisos de construcción antes.png"
+            alt="¿Por qué es importante obtener permisos de construcción?"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">4 de noviembre de 2024</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">¿Por qué es importante obtener los permisos de construcción antes de iniciar la obra?</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">Obtener los permisos adecuados garantiza el cumplimiento normativo y una construcción segura, eficiente y ambientalmente responsable.</p>
+          <button onclick="openModal('modal-permisos-construccion')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 13. Incremento comercial -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/incremento comercial.png"
+            alt="¿Por qué es importante el incremento comercial de propiedades regularizadas?"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">4 de noviembre de 2024</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">¿Por qué es importante el incremento comercial de propiedades regularizadas?</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">La regularización impacta significativamente el valor comercial de las propiedades y se convierte en un factor crucial para atraer inversores.</p>
+          <button onclick="openModal('modal-incremento-comercial')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 14. Ley del Mono -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/Ex Ley del Mono.png"
+            alt='Ley 20.898 "Ex Ley del Mono"'
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">4 de noviembre de 2024</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Ley 20.898 de Chile "Ex Ley del Mono": todo lo que necesitas saber</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">La Ley 20.898 ha sido una herramienta clave para la regularización de propiedades informales, ofreciendo una solución para legalizar inmuebles en Chile.</p>
+          <button onclick="openModal('modal-ley-mono')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+      <!-- 15. Beneficios de regularizar -->
+      <article class="card-reveal flex flex-col">
+        <div class="w-full overflow-hidden rounded bg-zinc-700" style="aspect-ratio:1250/700">
+          <img src="../assets/Blog/beneficios de regularizar.png"
+            alt="Conoce los beneficios de regularizar una propiedad"
+            class="h-full w-full object-cover"/>
+        </div>
+        <div class="mt-3 flex flex-col flex-1">
+          <p class="text-xs text-white/40">29 de octubre de 2024</p>
+          <h2 class="mt-1 text-xl font-bold uppercase leading-snug text-white">Conoce los beneficios de regularizar una propiedad</h2>
+          <p class="mt-1 text-[1.05rem] leading-relaxed text-white/60">La regularización ofrece una serie de beneficios que van más allá de tener un documento legal, cumpliendo con los estándares urbanísticos establecidos.</p>
+          <button onclick="openModal('modal-beneficios-regularizar')" class="mt-auto pt-3 inline-flex items-center gap-1 py-2 text-sm font-semibold text-[#EE7D65]">Ver más <span>→</span></button>
+        </div>
+      </article>
+
+    </div>
+    </div><!-- end max-w -->
+  </section>
+
+
+  <!-- Modal action bar (share + print) -->
+  <div id="modal-actions" style="display:none;" class="fixed bottom-0 left-0 right-0 z-[102] bg-zinc-900 border-t border-white/10 flex items-center justify-center gap-6 py-3 px-5">
+    <button id="btn-share" class="flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+      Compartir
+    </button>
+    <span class="text-white/20 text-lg">|</span>
+    <button id="btn-print" class="flex items-center gap-2 text-sm font-medium text-white/70 hover:text-white transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Imprimir
+    </button>
+  </div>
+
+  <!-- ══════════════ MODALES BLOG ══════════════ -->
+
+  <!-- Modal 1: Habilitación local comercial -->
+  <div id="modal-habilitacion" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-habilitacion')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Cómo habilitar un local comercial en Chile?</h2>
+      <p>Conoce los requisitos y el proceso</p>
+      <p>La habilitación de un local comercial corresponde al conjunto de autorizaciones municipales, sanitarias y técnicas que permiten operar legalmente un local destinado a atención al público, venta de productos o prestación de servicios. Su propósito principal es asegurar que cumpla con las normativas de uso de suelo, seguridad, higiene, accesibilidad y urbanos.</p>
+      <p>Para realizar un proceso de habilitación de local comercial, el cual demora tiempo y requiere de diversos especialistas, debes tener en consideración los siguientes pasos:</p>
+      <ul>
+        <li>Selección del local → Uso de suelo</li>
+        <li>Certificado de informaciones previas → Zonificación y restricciones</li>
+        <li>Proyectos y planos DOM → Arquitectura, electricidad, entre otros</li>
+        <li>Permisos DOM → Excavación, obras, entre otros</li>
+        <li>Factibilidad de servicios → Agua, electricidad, gas, entre otros</li>
+        <li>Permisos especiales → Sanitaria, alcohol, ocupación de la vía, entre otros</li>
+        <li>Inspección municipal → Seguridad, uso de suelo, entre otros</li>
+        <li>Emisión de la habilitación → Permiso municipal que permite operar legalmente</li>
+      </ul>
+      <p>Para que el proceso se realice de la mejor manera posible, se debe tener en consideración:</p>
+      <ul>
+        <li><strong style="color:#fff">Uso de suelo y zonificación:</strong> Revisa el Plan Regulador Comunal para confirmar si la comuna permite tu rubro. Luego, solicita un Certificado de Informaciones Previas y de zonificación al DOM.</li>
+        <li><strong style="color:#fff">Proyecto y planos técnicos (DOM):</strong> Debes contar con planos arquitectónicos y de instalaciones (eléctricas, ventilación, contra incendios, baños, accesibilidad universal conforme Ley 20.422). Si no cuentas con los planos, en AXYZ los podemos confeccionar para ti.</li>
+        <li><strong style="color:#fff">Permisos municipales y de obra:</strong> Presenta el proyecto y paga aranceles. En caso de obras mayores, necesitas Permiso de Edificación y luego Recepción Final de Obra.</li>
+        <li><strong style="color:#fff">Factibilidad de servicios:</strong> Obtén certificados de conexión de agua, electricidad, alcantarillado y gas. Si no los tienes, en AXYZ tenemos a los profesionales que pueden hacerlo por ti.</li>
+        <li><strong style="color:#fff">Permisos especiales según el rubro:</strong> Sanitarios por venta o manipulación de alimentos, alcoholes, ocupación de la vía pública con terrazas o toldos, publicidad exterior, elementos de seguridad como alarmas, extintores, cámaras.</li>
+        <li><strong style="color:#fff">Inclusión universal:</strong> baños, rampas, señalética.</li>
+        <li><strong style="color:#fff">Inspección municipal</strong> de verificación de condiciones constructivas, higiene, electricidad, entre otros.</li>
+        <li><strong style="color:#fff">Emisión de la habilitación:</strong> Finalizado el proceso, el municipio otorga el certificado o resolución que autoriza operar.</li>
+      </ul>
+      <h3>Costos y tiempo estimados</h3>
+      <ul>
+        <li>Arancel de inspección que varía por comuna, según capital asignado y uso.</li>
+        <li>Permiso de edificación según superficie y complejidad.</li>
+        <li>Permisos sanitarios de dominio urbano.</li>
+        <li>Tiempo: una habilitación simple sin planos puede demorar un día hábil; con planos y obras puede demorar varias semanas o meses.</li>
+      </ul>
+      <h3>¿Qué se necesita presentar?</h3>
+      <ol>
+        <li>Certificados iniciales: Informaciones previas, zonificación, DOM, entre otros</li>
+        <li>Planos técnicos: Arquitectónicos, eléctricos, ventilación, fachadas, accesos, entre otros</li>
+        <li>Permisos municipales: Permiso de edificación y recepción final</li>
+        <li>Servicios: Factibilidad de agua, electricidad, gas, alcantarillado, entre otros</li>
+        <li>Permisos adicionales: Sanitarios, alcoholes, ocupación de la vía pública, letreros, seguridad y accesibilidad, entre otros</li>
+        <li>Inspección y aranceles: Pago de tasas municipales</li>
+        <li>Resolución de la habilitación: Certificado o permiso emitido por la municipalidad</li>
+      </ol>
+      <p>Si requieres habilitar tu local comercial, en AXYZ contamos con los mejores profesionales y expertos para ayudarte. ¡Te invitamos a dejar esta responsabilidad en nuestras manos!</p>
+    </div>
+  </div>
+
+  <!-- Modal 2: Patentes comerciales -->
+  <div id="modal-patentes" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-patentes')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Qué son y cómo obtener patentes comerciales en Chile?</h2>
+      <p>Una patente comercial o también llamada patente municipal, es un permiso legal otorgado por la municipalidad para ejercer actividades comerciales, profesionales, industriales o de expendio de alcoholes en un local con uso de suelo autorizado.</p>
+      <h3>Existen diversos tipos</h3>
+      <ul>
+        <li><strong style="color:#fff">Comercial general:</strong> venta de productos o servicios en local físico como tiendas, cafetería, e-commerce con showroom, entre otros.</li>
+        <li><strong style="color:#fff">Industrial:</strong> manufactura y procesamiento de bienes como panaderías y laboratorios pequeños, entre otros.</li>
+        <li><strong style="color:#fff">Profesional:</strong> estudios de contadores, arquitectos, consultorías con local.</li>
+        <li><strong style="color:#fff">Alcoholes:</strong> bares, restaurantes y botillerías, que requieren autorizaciones adicionales del SAG, Seremi de Salud, entre otros.</li>
+        <li><strong style="color:#fff">Microempresa familiar:</strong> para pequeños emprendimientos domésticos con menos de 5 trabajadores.</li>
+      </ul>
+      <p>Tener una patente vigente no solo es obligatorio por ley, sino que garantiza un respaldo legal, evita multas o clausuras e incluso facilita el acceso a arriendos comerciales o acuerdos con proveedores.</p>
+      <h3>Normativa legal municipal</h3>
+      <p>Las patentes se rigen principalmente por el Decreto Ley 3.063 de 1979, Ley de Rentas Municipales. Cada municipalidad puede exigir normas adicionales relativas a uso de suelo, seguridad, medio ambiente o imagen urbana.</p>
+      <ul>
+        <li><strong style="color:#fff">Las Condes:</strong> priman las patentes definitiva, provisoria, domicilio tributario y microempresa familiar.</li>
+        <li><strong style="color:#fff">Providencia:</strong> exige permisos de obras, factibilidad municipal y cumplir normativa de seguridad e impacto urbano.</li>
+        <li><strong style="color:#fff">Vitacura y Ñuñoa:</strong> similares exigencias en uso de suelo, retiro de basura, estacionamientos, niveles de ruido o emisiones.</li>
+      </ul>
+      <h3>Pasos para obtener una patente comercial</h3>
+      <ol>
+        <li><strong style="color:#fff">Revisión de uso de suelo:</strong> Verificar en la DOM que el local esté permitido para actividad comercial o profesional.</li>
+        <li><strong style="color:#fff">Solicitud ante la municipalidad:</strong> Presenta formulario, cédula, RUT, contrato o título de propiedad, escritura, certificado de inicio de actividades SII, informe de factibilidad de obras, permisos sanitarios, SAG, SEC, u otros requeridos.</li>
+        <li><strong style="color:#fff">Pago de derecho municipal:</strong> Las comunas cobran una tarifa fija por iniciar el trámite.</li>
+        <li><strong style="color:#fff">Inspección municipal:</strong> DOM verifica factibilidad y compatibilidad con ordenanzas urbanas.</li>
+        <li><strong style="color:#fff">Aprobación y pago de la patente:</strong> Se paga anualmente, en dos cuotas: enero y julio.</li>
+        <li><strong style="color:#fff">Recepción del certificado:</strong> La municipalidad emite el certificado físico o digital.</li>
+      </ol>
+      <h3>Costos y plazos estimados</h3>
+      <p>El costo anual se calcula sobre el capital propio declarado al SII, con una tasa de entre 2,5% y 5%, con límites entre 1 UTM y 8.000 UTM.</p>
+      <h3>Requisitos y documentos</h3>
+      <ul>
+        <li>Formulario y cédula de identidad</li>
+        <li>Inicio de actividades en el SII</li>
+        <li>Documento del local: contrato de arriendo, escritura o dominio vigente</li>
+        <li>Factibilidad DOM</li>
+        <li>Permisos específicos: sanitarios, alcohol, gas, según rubro</li>
+        <li>Representación notarial para trámites por apoderado</li>
+        <li>Microempresa familiar: declaración jurada, máximo 5 trabajadores</li>
+      </ul>
+      <h3>Renovación y multa por no pago</h3>
+      <ul>
+        <li>La patente es vitalicia siempre que esté vigente y pagada.</li>
+        <li>Se puede renovar o modificar el giro presentando documentación actualizada.</li>
+        <li>El impago conlleva multas, intereses y puede ser causal de clausura o cierre forzado.</li>
+      </ul>
+      <p>¿Quieres obtener tu patente comercial sin trámites engorrosos? En AXYZ Arquitectos nos ocupamos de todo el proceso. ¡Agenda una asesoría gratuita!</p>
+    </div>
+  </div>
+
+  <!-- Modal 3: Guía completa certificaciones -->
+  <div id="modal-guia" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-guia')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Guía completa: Certificaciones de instalaciones domiciliarias interiores en Chile</h2>
+      <p>Las instalaciones domiciliarias interiores en Chile deben cumplir con una serie de normativas y certificaciones para garantizar que sean seguras, funcionales y respetuosas con el medio ambiente. Estas certificaciones son necesarias tanto para nuevas construcciones como para remodelaciones.</p>
+      <p>"Las certificaciones no sólo son esenciales para prevenir accidentes y garantizar el bienestar de los residentes, sino que también son un requisito legal en muchos casos", explica Sebastián Pinto, arquitecto y socio de AXYZ.</p>
+      <h3>Certificación de instalaciones eléctricas</h3>
+      <p>Las instalaciones eléctricas deben cumplir con la norma chilena NCh4/2003, que establece los requisitos mínimos de seguridad en baja tensión.</p>
+      <ul>
+        <li><strong style="color:#fff">¿Qué se certifica?</strong> Desde el cuadro eléctrico hasta cada uno de los circuitos: interruptores, tomas de corriente y cableado.</li>
+        <li><strong style="color:#fff">Proceso:</strong> Un electricista autorizado realiza una revisión exhaustiva y emite el certificado de cumplimiento NCh4/2003.</li>
+      </ul>
+      <h3>Certificación de instalaciones de gas</h3>
+      <p>Las instalaciones de gas siguen el Proceso CIIGe, que establece los requisitos técnicos para sistemas de gas domiciliarios.</p>
+      <ul>
+        <li><strong style="color:#fff">¿Qué se certifica?</strong> Tuberías, gasodomésticos (calderas, cocinas, calefones) y sistemas de ventilación.</li>
+        <li><strong style="color:#fff">Proceso:</strong> Un instalador de gas autorizado verifica estanqueidad, puntos de conexión y válvulas de seguridad.</li>
+      </ul>
+      <h3>Certificación de agua potable y saneamiento</h3>
+      <p>Deben cumplir con el Decreto 50, que regula el diseño, construcción y mantenimiento de sistemas de distribución de agua potable y evacuación de aguas servidas.</p>
+      <ul>
+        <li><strong style="color:#fff">¿Qué se certifica?</strong> Tuberías de distribución, ausencia de filtraciones y correcta conexión del alcantarillado.</li>
+        <li><strong style="color:#fff">Proceso:</strong> Un profesional certificado revisa que las instalaciones cumplan con las especificaciones técnicas.</li>
+      </ul>
+      <h3>Certificación de calefacción</h3>
+      <p>Estufas a gas o eléctricas requieren certificación regida por la NCh 4/2003, verificando ventilación y conexiones a gas o electricidad.</p>
+      <h3>Certificación de seguridad contra incendios</h3>
+      <p>Alarmas, rociadores automáticos y salidas de emergencia deben instalarse según normativa específica. Un especialista inspecciona y prueba los equipos para verificar que estén operativos.</p>
+      <p>Si requieres de una certificación para instalaciones domiciliarias interiores, en AXYZ contamos con los profesionales adecuados. ¡Te invitamos a dejar esta responsabilidad en nuestras manos!</p>
+    </div>
+  </div>
+
+  <!-- Modal 4: Calificación industrial -->
+  <div id="modal-calificacion" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-calificacion')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Calificación industrial: ¿Quiénes la necesitan y para qué sirve?</h2>
+      <p>La calificación industrial es el proceso mediante el cual una empresa o profesional demuestra que cumple con los estándares de calidad, seguridad, medio ambiente y otros requisitos técnicos. Su fin es asegurar que los productos, servicios y procesos sean seguros, eficientes y alineados con las regulaciones locales.</p>
+      <h3>¿Por qué es importante?</h3>
+      <ol>
+        <li><strong style="color:#fff">Cumplimiento normativo:</strong> Esencial para operar legalmente y evitar sanciones.</li>
+        <li><strong style="color:#fff">Seguridad y salud laboral:</strong> Protege a los trabajadores y minimiza riesgos de accidentes.</li>
+        <li><strong style="color:#fff">Acceso a mercados internacionales:</strong> Requerida para exportar productos a mercados exigentes como la Unión Europea o EE.UU.</li>
+        <li><strong style="color:#fff">Confianza del consumidor:</strong> Las empresas calificadas son percibidas como más confiables y competentes.</li>
+        <li><strong style="color:#fff">Mejora continua:</strong> Las auditorías regulares permiten identificar áreas de mejora y optimizar procesos.</li>
+      </ol>
+      <h3>¿Quiénes la necesitan?</h3>
+      <ol>
+        <li><strong style="color:#fff">Industria minera:</strong> Normativas de seguridad laboral y medio ambiente muy estrictas. Certificaciones ISO 14001 e ISO 45001.</li>
+        <li><strong style="color:#fff">Industria alimentaria:</strong> Calificación HACCP y normativa del Ministerio de Salud y SAG.</li>
+        <li><strong style="color:#fff">Industria energética:</strong> Normativas ambientales y de seguridad para sostenibilidad de operaciones.</li>
+        <li><strong style="color:#fff">Construcción y obras civiles:</strong> Seguridad laboral y estándares de la Ley General de Urbanismo y Construcción.</li>
+        <li><strong style="color:#fff">Industria automotriz:</strong> Certificaciones como ISO 9001 de gestión de calidad.</li>
+      </ol>
+      <h3>¿Cómo son los procesos de calificación?</h3>
+      <ol>
+        <li><strong style="color:#fff">Evaluación inicial:</strong> La empresa presenta documentación relevante: procedimientos internos, reportes de seguridad, informes de auditorías anteriores.</li>
+        <li><strong style="color:#fff">Auditoría:</strong> Un organismo acreditado realiza una auditoría en el lugar de trabajo, incluyendo entrevistas, inspecciones de equipos y revisión de procedimientos.</li>
+        <li><strong style="color:#fff">Certificación:</strong> Si cumple los requisitos, se emite el certificado de calificación o conformidad.</li>
+        <li><strong style="color:#fff">Monitoreo y recalificación:</strong> Las empresas deben someterse a auditorías periódicas, anuales o bienales, para mantener su certificación.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Modal 5: Regularizar antes de patente -->
+  <div id="modal-regularizar-patente" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-regularizar-patente')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Por qué es importante regularizar tu propiedad antes de solicitar la patente?</h2>
+      <p>En Chile, la regularización de propiedades es un proceso fundamental para garantizar que los bienes raíces cumplan con la normativa vigente y sean plenamente funcionales dentro del marco legal. La regularización no solo permite a los propietarios evitar complicaciones legales, sino que también les abre las puertas a la obtención de diversas licencias y permisos, entre ellos, las patentes municipales.</p>
+      <h3>¿Qué significa regularizar una propiedad?</h3>
+      <p>Regularizar una propiedad consiste en adecuarla a las normativas urbanísticas y legales vigentes, especialmente en cuanto a su construcción y uso. El procedimiento puede variar según el tipo de propiedad y la comuna, pero generalmente involucra:</p>
+      <ul>
+        <li><strong style="color:#fff">Revisión de la propiedad:</strong> Inspección técnica para evaluar el estado de la propiedad y cumplimiento de normativas aplicables.</li>
+        <li><strong style="color:#fff">Regularización de la escritura:</strong> En muchos casos, las propiedades no están inscritas correctamente en el Conservador de Bienes Raíces o no tienen los permisos de construcción necesarios.</li>
+        <li><strong style="color:#fff">Permisos de edificación:</strong> Si la propiedad tiene modificaciones no autorizadas, se debe solicitar una regularización ante la Dirección de Obras Municipales (DOM).</li>
+        <li><strong style="color:#fff">Cambio de uso de suelo:</strong> En algunas propiedades, se deberá modificar el destino según lo permita el plano regulador de la comuna.</li>
+      </ul>
+      <h3>Tipos de patentes según la propiedad</h3>
+      <ul>
+        <li><strong style="color:#fff">Patente comercial:</strong> Para actividades comerciales como tiendas, restaurantes, entre otros.</li>
+        <li><strong style="color:#fff">Patente industrial:</strong> Para fábricas o plantas de producción.</li>
+        <li><strong style="color:#fff">Patente profesional:</strong> Para abogados, médicos, arquitectos, entre otros.</li>
+        <li><strong style="color:#fff">Patente de Alcoholes:</strong> Regulada por la Ley de Alcoholes, requiere autorizaciones especiales.</li>
+        <li><strong style="color:#fff">Patente de Microempresa Familiar (MEF):</strong> Para negocios pequeños operados desde el domicilio.</li>
+      </ul>
+      <h3>¿Qué pasa si no se regulariza antes de solicitar la patente?</h3>
+      <ul>
+        <li><strong style="color:#fff">Problemas legales:</strong> La municipalidad no podrá emitir la patente, impidiendo operar legalmente.</li>
+        <li><strong style="color:#fff">Incumplimiento normativo:</strong> Puede derivar en clausura del negocio o exigencia de costosas modificaciones.</li>
+        <li><strong style="color:#fff">Multas y sanciones:</strong> La no regularización puede generar multas económicas considerables.</li>
+      </ul>
+      <p>La regularización no solo es una obligación legal, sino también una inversión que puede traer importantes beneficios a largo plazo: seguridad jurídica, acceso a financiamiento y aumento del valor de la propiedad.</p>
+    </div>
+  </div>
+
+  <!-- Modal 6: 10 documentos esenciales -->
+  <div id="modal-10-documentos" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-10-documentos')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Conoce los 10 documentos esenciales para obtener tu patente comercial</h2>
+      <p>En Chile, la obtención de una patente comercial requiere presentar una serie de documentos que acrediten que la propiedad y la actividad cumplen con todas las normativas del municipio correspondiente.</p>
+      <ol>
+        <li><strong style="color:#fff">Formulario de Solicitud de Patente Comercial:</strong> Documento inicial con información sobre la empresa, razón social, tipo de actividad y dirección. Se obtiene en la municipalidad o en su sitio web.</li>
+        <li><strong style="color:#fff">Cédula de Identidad del solicitante:</strong> Para personas jurídicas se requiere la cédula del representante legal. Se obtiene en el Registro Civil.</li>
+        <li><strong style="color:#fff">Escritura de Constitución de la Empresa (si aplica):</strong> Necesaria si la patente se solicita a nombre de una persona jurídica. Debe estar otorgada por notario e inscrita en el Conservador de Bienes Raíces.</li>
+        <li><strong style="color:#fff">RUT de la empresa o del solicitante:</strong> Número único asignado por el SII, necesario para personas naturales y jurídicas.</li>
+        <li><strong style="color:#fff">Certificado de Inicio de Actividades ante el SII:</strong> Demuestra que el solicitante ha registrado su actividad económica. Se obtiene en el portal del SII sin costo.</li>
+        <li><strong style="color:#fff">Permiso o modificación de Obras (si aplica):</strong> Necesario si se construye o modifica el local. Se solicita a la Dirección de Obras Municipales (DOM).</li>
+        <li><strong style="color:#fff">Recepción Final de Obras (si aplica):</strong> Acredita que la construcción o modificación finalizó conforme a los planos aprobados. La entrega la DOM tras inspección.</li>
+        <li><strong style="color:#fff">Acreditación de uso de suelo:</strong> Certifica que el terreno tiene uso permitido para la actividad comercial. Se consulta en el Plan Regulador de la comuna.</li>
+        <li><strong style="color:#fff">Certificado de no expropiación:</strong> Algunas comunas lo requieren. Confirma que el inmueble no está en proceso de expropiación. Se solicita en la municipalidad.</li>
+        <li><strong style="color:#fff">Padrón de Propiedad o Contrato de Arriendo:</strong> Si no eres dueño, presenta el contrato de arriendo; si eres propietario, el padrón de la propiedad. Ambos deben estar actualizados.</li>
+      </ol>
+      <h3>Consejos importantes</h3>
+      <ul>
+        <li>Verifica que todos los documentos estén actualizados y completos antes de presentarlos.</li>
+        <li>Consulta la normativa local de tu municipalidad, ya que pueden exigir requisitos adicionales específicos.</li>
+        <li>Prepara los pagos con anticipación: algunos documentos tienen costos asociados.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal 7: Paso a paso habilitar local -->
+  <div id="modal-paso-a-paso" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-paso-a-paso')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Conoce el paso a paso para habilitar un local comercial en Chile</h2>
+      <p>La habilitación de un local comercial es el conjunto de procedimientos administrativos, técnicos y legales necesarios para que un inmueble destinado a actividad comercial cumpla con los estándares requeridos por las autoridades municipales. Es obligatoria para todo negocio que implique atención al público, venta de productos o prestación de servicios en local físico.</p>
+      <h3>Tipos de patentes comerciales</h3>
+      <ul>
+        <li><strong style="color:#fff">Patente de Comercio General:</strong> Tiendas de ropa, restaurantes, cafeterías, peluquerías, ferreterías.</li>
+        <li><strong style="color:#fff">Patente Industrial:</strong> Manufactura, producción o procesamiento de bienes.</li>
+        <li><strong style="color:#fff">Patente de Servicios:</strong> Estudios de abogados, contadores, consultoras.</li>
+        <li><strong style="color:#fff">Patente de Alcoholes:</strong> Bares, discotecas, restaurantes, licorerías, supermercados.</li>
+      </ul>
+      <h3>Pasos para habilitar un local comercial</h3>
+      <ol>
+        <li><strong style="color:#fff">Revisión de la Zonificación del Local:</strong> Asegurarse de que el local esté en zona permitida para la actividad, revisando el Plan Regulador Comunal.</li>
+        <li><strong style="color:#fff">Solicitar Permisos de Obras y Aprobación de Planos:</strong> Si el local necesita modificaciones estructurales, solicitar habilitación de obras en la municipalidad con planos arquitectónicos.</li>
+        <li><strong style="color:#fff">Certificado de Factibilidad de Servicios Básicos:</strong> El local debe conectarse a agua potable, electricidad, alcantarillado y gas.</li>
+        <li><strong style="color:#fff">Autorización Sanitaria:</strong> Para negocios que afecten la salud pública (alimentos, farmacéuticos), se requiere autorización de la Seremi de Salud.</li>
+        <li><strong style="color:#fff">Cumplimiento de Normas de Seguridad:</strong> Extintores, rutas de evacuación, salidas de emergencia y señalización. Puede requerirse sistema de alarma contra incendios.</li>
+        <li><strong style="color:#fff">Accesibilidad Universal:</strong> Conforme a la Ley 20.422: rampas de acceso, baños adecuados y señalización en braille.</li>
+        <li><strong style="color:#fff">Registro de la Actividad Comercial:</strong> Inscribir el giro en el Registro de Empresas del SII para obtener el RUT.</li>
+      </ol>
+      <p>Habilitar un local comercial en Chile requiere cumplir con varias normativas. Cada paso es esencial para garantizar que el negocio opere legalmente y en condiciones adecuadas para clientes y trabajadores.</p>
+    </div>
+  </div>
+
+  <!-- Modal 8: Guía completa patentes comerciales -->
+  <div id="modal-guia-patentes" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-guia-patentes')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Guía completa sobre patentes comerciales en Chile</h2>
+      <p>Las patentes comerciales son el permiso obligatorio para todas las personas naturales o jurídicas que deseen realizar actividades comerciales dentro de un municipio en Chile. Obtener una patente permite operar legalmente y asegurar el cumplimiento de normativas locales, evitando sanciones.</p>
+      <h3>Tipos de patentes comerciales</h3>
+      <ul>
+        <li><strong style="color:#fff">Patente de Comercio General:</strong> Tiendas de ropa, restaurantes, cafeterías, peluquerías, e-commerce, ferreterías.</li>
+        <li><strong style="color:#fff">Patente Industrial:</strong> Manufactura, producción o procesamiento de bienes, minería, energías renovables.</li>
+        <li><strong style="color:#fff">Patente de Servicios:</strong> Estudios de abogados, contadores, consultoras.</li>
+        <li><strong style="color:#fff">Patente de Alcoholes:</strong> Bares, discotecas, restaurantes, licorerías, supermercados.</li>
+      </ul>
+      <h3>Proceso para obtener una patente comercial</h3>
+      <ol>
+        <li><strong style="color:#fff">Revisión del tipo de actividad:</strong> Identificar el tipo de actividad y la patente correspondiente.</li>
+        <li><strong style="color:#fff">Trámite en la municipalidad:</strong> Solicitud formal en la Dirección de Rentas Municipales, revisión de requisitos, pago de derechos y posible fiscalización.</li>
+        <li><strong style="color:#fff">Inscripción en el Registro de Empresas:</strong> Obligatorio para algunas empresas, facilita otros trámites.</li>
+        <li><strong style="color:#fff">Cumplir normativa local y nacional:</strong> Zonificación, habilitación de obras si aplica, seguridad y salud.</li>
+      </ol>
+      <h3>Puntos clave para cumplir normativas</h3>
+      <ul>
+        <li><strong style="color:#fff">Plan Regulador:</strong> Verificar que la actividad esté permitida en la zona elegida.</li>
+        <li><strong style="color:#fff">Autorización sanitaria:</strong> Requerida si hay manipulación de alimentos o servicios de salud.</li>
+        <li><strong style="color:#fff">Normas de seguridad laboral:</strong> Extintores, salidas de emergencia, cumplimiento de la Ley 16.744.</li>
+        <li><strong style="color:#fff">Renovación semestral:</strong> Las patentes comerciales deben renovarse semestralmente dentro de los plazos municipales.</li>
+      </ul>
+      <p>Aunque el proceso puede parecer complejo, es manejable siguiendo los pasos adecuados y cumpliendo las normativas municipales. Conocer el tipo de patente necesario y los requisitos específicos de tu comuna permite operar sin problemas legales.</p>
+    </div>
+  </div>
+
+  <!-- Modal 9: Ley Agua Potable Rural -->
+  <div id="modal-ley-agua" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-ley-agua')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Guía esencial sobre el Proyecto Rural de Agua Potable y Alcantarillado. Ley N° 20.998</h2>
+      <p>El acceso a agua potable y alcantarillado es un derecho fundamental. En Chile, los barrios asentados en zonas rurales enfrentan serios desafíos en este aspecto, lo que ha llevado al gobierno a implementar proyectos destinados a mejorar el acceso, siendo uno de los principales la Ley N° 20.998.</p>
+      <h3>¿Por qué es necesario?</h3>
+      <p>La falta de acceso a agua potable y saneamiento adecuado está directamente relacionada con enfermedades transmitidas por esta vía. En comunidades rurales, donde el acceso a servicios básicos es limitado, el riesgo de brotes de enfermedades aumenta. Además, los proyectos de agua y alcantarillado son fundamentales para el desarrollo económico rural, mejorando la productividad y calidad de vida.</p>
+      <h3>¿Quiénes lo necesitan?</h3>
+      <ol>
+        <li>Nuevos barrios residenciales asentándose en zonas rurales en desarrollo.</li>
+        <li>Negocios y empresas industriales instaladas en zonas rurales.</li>
+        <li>Colegios e instalaciones educativas.</li>
+        <li>Pequeños agricultores que dependen de la agricultura y la ganadería.</li>
+      </ol>
+      <h3>Etapas de un proyecto rural de agua y alcantarillado</h3>
+      <ol>
+        <li><strong style="color:#fff">Diagnóstico y planificación:</strong> Identificación de necesidades específicas mediante encuestas, reuniones con líderes locales y evaluación de recursos hídricos.</li>
+        <li><strong style="color:#fff">Diseño del proyecto:</strong> Ingenieros diseñan un sistema adaptado a condiciones locales considerando topografía y disponibilidad de agua.</li>
+        <li><strong style="color:#fff">Financiación:</strong> Fondos gubernamentales, donaciones internacionales y asociaciones con ONGs. El Programa de Inversión en Agua Potable Rural proporciona financiamiento y apoyo técnico.</li>
+        <li><strong style="color:#fff">Implementación:</strong> Construcción de pozos y sistemas de captación, instalación de red de distribución con tuberías y construcción de sistemas de alcantarillado.</li>
+        <li><strong style="color:#fff">Capacitación y mantenimiento:</strong> Capacitación a quienes viven y trabajan en zonas rurales para garantizar la sostenibilidad del sistema.</li>
+      </ol>
+      <p>El abastecimiento de agua potable y alcantarillado es un prerrequisito para abordar cualquier tipo de proyecto rural en la municipalidad o en el Servicio Agrícola y Ganadero.</p>
+    </div>
+  </div>
+
+  <!-- Modal 10: Regularización parcelas rurales -->
+  <div id="modal-parcelas-rurales" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-parcelas-rurales')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Guía completa sobre la regularización de parcelas rurales en Chile</h2>
+      <p>La regularización de parcelas rurales es el proceso mediante el cual se otorgan títulos de propiedad formal a terrenos que, por diversas razones, no han sido legalmente reconocidos. Este proceso es fundamental en Chile, donde los terrenos tienen potencialmente un alto valor y representan grandes oportunidades de inversión.</p>
+      <h3>¿En qué consiste el proceso?</h3>
+      <p>Antes de iniciar, es importante reunir la documentación necesaria: identificación del propietario, comprobante de ocupación del terreno (como recibos de servicios básicos) y planos que delimiten la parcela.</p>
+      <p>El proceso generalmente consiste en:</p>
+      <ol>
+        <li>Solicitud presentada ante la autoridad o municipalidad correspondiente.</li>
+        <li>Una vez aprobada la solicitud, inscripción de la propiedad en el Conservador de Bienes Raíces para obtener el título de propiedad.</li>
+        <li>En algunos casos pueden requerirse permisos especiales, certificaciones adicionales o la intervención del Ministerio de Bienes Nacionales.</li>
+      </ol>
+      <h3>Beneficios de regularizar una parcela rural</h3>
+      <ul>
+        <li><strong style="color:#fff">Incremento de valor:</strong> Puede aumentar significativamente el valor en el mercado inmobiliario.</li>
+        <li><strong style="color:#fff">Seguridad jurídica:</strong> Proporciona certeza legal que permite demostrar legalmente la propiedad.</li>
+        <li><strong style="color:#fff">Acceso a financiamiento:</strong> Un título de propiedad permite acceder a créditos bancarios e hipotecarios con mejores tasas.</li>
+        <li><strong style="color:#fff">Desarrollo de negocios:</strong> Facilita la inversión en mejoras o desarrollo de nuevos negocios en zonas de alta plusvalía.</li>
+      </ul>
+      <h3>Desafíos a considerar</h3>
+      <ul>
+        <li>Implica una inversión económica: tarifas de inscripción y posibles gastos legales.</li>
+        <li>El tiempo requerido puede ser variable, especialmente sin asesoría legal.</li>
+        <li>La asesoría legal es fundamental para un proceso eficiente.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal 11: Causas y soluciones viviendas irregulares -->
+  <div id="modal-viviendas-irregulares" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-viviendas-irregulares')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Causas y soluciones de viviendas irregulares en Chile</h2>
+      <p>Las viviendas irregulares representan un desafío significativo para el desarrollo urbano y la calidad de vida de muchas familias. Estas viviendas, que a menudo no cumplen con las normativas de construcción, pueden enfrentar problemas de legalidad y habitabilidad.</p>
+      <h3>Causas principales</h3>
+      <ul>
+        <li><strong style="color:#fff">Construcción informal:</strong> Muchas viviendas se construyen sin los permisos adecuados por falta de conocimiento o acceso a servicios de planificación. Esto es común en construcciones desde cero o ampliaciones realizadas sin seguir el proceso de permisos.</li>
+        <li><strong style="color:#fff">Desviación de planes reguladores:</strong> Modificaciones no autorizadas como ampliaciones o remodelaciones sin ajustar los permisos de construcción originales.</li>
+        <li><strong style="color:#fff">Ubicación en zonas de riesgo:</strong> Viviendas en áreas propensas a desastres naturales que no cumplen con los requisitos de seguridad.</li>
+        <li><strong style="color:#fff">Violación de normativas urbanísticas:</strong> Construcciones sin respetar distancias mínimas, alturas o usos permitidos por el Plan Regulador Comunal (PRC).</li>
+        <li><strong style="color:#fff">Problemas con la documentación:</strong> Falta de documentación adecuada o problemas con el título de propiedad.</li>
+      </ul>
+      <h3>Preguntas frecuentes</h3>
+      <ul>
+        <li><strong style="color:#fff">¿Por qué algunas viviendas no son regularizables?</strong> Por su ubicación en zonas de riesgo, violación de normativas urbanísticas o problemas con la documentación que hacen imposible cumplir los requisitos.</li>
+        <li><strong style="color:#fff">¿Qué hacer si mi vivienda no cumple con las normativas?</strong> Consultar con un arquitecto o ingeniero especializado para evaluar posibles modificaciones y solicitar asesoría en la municipalidad local.</li>
+        <li><strong style="color:#fff">¿Cómo solucionar problemas de documentación?</strong> Trabajar con un abogado especializado en temas inmobiliarios que ayude a resolver problemas con el título de propiedad.</li>
+        <li><strong style="color:#fff">¿Qué pasos seguir para regularizar una vivienda sin permisos?</strong> Obtener una evaluación de un profesional, identificar las modificaciones necesarias, y presentar una solicitud de regularización a la municipalidad con la documentación requerida y planos actualizados.</li>
+      </ul>
+      <p>Las normativas cambian constantemente, por lo que es importante asesorarse con un experto. En AXYZ te guiamos en el proceso de regularización, desde la instalación sanitaria y construcción hasta la recepción final.</p>
+    </div>
+  </div>
+
+  <!-- Modal 12: Permisos de construcción -->
+  <div id="modal-permisos-construccion" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-permisos-construccion')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Por qué es importante obtener los permisos de construcción antes de iniciar la obra?</h2>
+      <p>Los permisos de construcción son autorizaciones legales emitidas por las municipalidades que permiten ejecutar proyectos de construcción, renovación o demolición. Aseguran que los proyectos cumplan con el Plan Regulador Comunal (PRC) y otras normativas urbanísticas, ambientales y de seguridad.</p>
+      <h3>¿Por qué son tan importantes?</h3>
+      <ul>
+        <li><strong style="color:#fff">Cumplimiento normativo:</strong> Garantiza cumplimiento de la Ley General de Urbanismo y Construcción (LGUC) y la Ordenanza General (OGUC), evitando problemas legales y sanciones.</li>
+        <li><strong style="color:#fff">Valor de la propiedad:</strong> Las propiedades construidas con permisos tienen mayor valor de mercado. Los compradores prefieren propiedades con toda la documentación en orden.</li>
+        <li><strong style="color:#fff">Seguridad y calidad:</strong> Los permisos garantizan que los planes sean revisados por profesionales y que la construcción siga estándares de integridad estructural.</li>
+        <li><strong style="color:#fff">Acceso a servicios públicos:</strong> Una construcción sin permisos puede tener dificultades para conectarse a agua, electricidad y alcantarillado.</li>
+      </ul>
+      <h3>Lista de control para obtener permisos</h3>
+      <ol>
+        <li>Consultar el Plan Regulador Comunal (PRC) para verificar normativas locales.</li>
+        <li>Preparar documentación: planos arquitectónicos, estudios de impacto ambiental y pruebas de propiedad.</li>
+        <li>Asegurar que el diseño sea realizado por un arquitecto o ingeniero certificado.</li>
+        <li>Presentar la solicitud completa en la municipalidad correspondiente.</li>
+        <li>Realizar modificaciones si la municipalidad las requiere y volver a presentar.</li>
+        <li>Obtener el permiso e iniciar la obra conforme a los planos aprobados.</li>
+        <li>Al finalizar, solicitar inspección municipal para obtener el certificado de Recepción Definitiva.</li>
+      </ol>
+      <p>Las normativas cambian constantemente. En AXYZ te guiamos en el proceso de regularización de propiedades para cumplir con todas las normativas, desde la instalación sanitaria y construcción hasta la recepción final.</p>
+    </div>
+  </div>
+
+  <!-- Modal 13: Incremento comercial propiedades regularizadas -->
+  <div id="modal-incremento-comercial" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-incremento-comercial')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>¿Por qué es importante el incremento comercial de propiedades regularizadas?</h2>
+      <p>La regularización de propiedades impacta significativamente el valor comercial de los inmuebles. En un mercado inmobiliario competitivo, la regularización se ha convertido en un factor crucial para atraer inversores y aumentar el valor de las propiedades.</p>
+      <h3>Casos de éxito</h3>
+      <ul>
+        <li><strong style="color:#fff">César Salinas (Pudahuel):</strong> Valor inicial $121.563.137 → Valor final $148.763.234. Incremento de $25.200.097 con costo de regularización de solo $2.000.000.</li>
+        <li><strong style="color:#fff">Carmen Escobedo (Quilpué):</strong> Valor inicial $119.781.594 → Valor final $206.907.968. Incremento neto de $66.347.374.</li>
+      </ul>
+      <h3>¿Cómo aumenta el valor la regularización?</h3>
+      <ul>
+        <li><strong style="color:#fff">Cumplimiento normativo y seguridad jurídica:</strong> Las propiedades regularizadas cumplen con la LGUC y la OGUC, ofreciendo certeza legal a compradores e inversores. Los compradores están dispuestos a pagar más por propiedades sin problemas legales.</li>
+        <li><strong style="color:#fff">Acceso a financiamiento:</strong> Las instituciones financieras prefieren financiar propiedades con documentación en orden, lo que significa mejores condiciones de crédito para los propietarios.</li>
+        <li><strong style="color:#fff">Mayor atractivo para inversores:</strong> La conformidad con regulaciones y ausencia de problemas legales crea mayor demanda en el mercado, traduciendo en mejor retorno de inversión.</li>
+        <li><strong style="color:#fff">Mayor valor de reventa:</strong> Las propiedades que cumplen con regulaciones y tienen permisos en orden típicamente alcanzan precios más altos al momento de vender.</li>
+      </ul>
+      <h3>Importancia para el mercado inmobiliario</h3>
+      <ul>
+        <li><strong style="color:#fff">Desarrollo urbano sostenible:</strong> La regularización contribuye al crecimiento urbano ordenado y respetuoso del entorno, mejorando la calidad de vida y creando un entorno atractivo para inversores.</li>
+        <li><strong style="color:#fff">Mayor confianza en el mercado:</strong> Cuando compradores e inversores saben que las propiedades cumplen con regulaciones, se fomenta un mercado más estable y confiable.</li>
+      </ul>
+      <p>Una propiedad regularizada puede aumentar su valor comercial entre un 20% y 50% dependiendo del alcance y características. En AXYZ te guiamos en todo el proceso.</p>
+    </div>
+  </div>
+
+  <!-- Modal 14: Ley del Mono -->
+  <div id="modal-ley-mono" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-ley-mono')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Ley 20.898 de Chile "Ex Ley del Mono": todo lo que necesitas saber</h2>
+      <p>La Ley 20.898, promulgada en 2016, establece un procedimiento simplificado para la regularización de propiedades informales, específicamente aquellas construidas en terrenos urbanizables pero que no cuentan con permisos de construcción adecuados. Busca solucionar la situación de miles de familias que viven en viviendas construidas sin la debida autorización.</p>
+      <h3>¿Cómo funciona?</h3>
+      <h3>Requisitos iniciales</h3>
+      <ul>
+        <li>Construcciones habitacionales destinadas a ser viviendas (no aplica para comerciales o industriales).</li>
+        <li>La propiedad debe haber sido construida antes del 04 de febrero de 2016.</li>
+        <li>Debe estar en zona urbanizable y cumplir con estándares básicos de seguridad, habitabilidad y estabilidad.</li>
+        <li>Excepciones: construcciones en zonas de riesgo o que infrinjan normativas ambientales específicas.</li>
+      </ul>
+      <h3>Proceso paso a paso</h3>
+      <ol>
+        <li><strong style="color:#fff">Solicitud de regularización:</strong> Presentar solicitud ante la Municipalidad con documentos y planos que demuestren la existencia de la construcción y su adecuación a los requisitos mínimos.</li>
+        <li><strong style="color:#fff">Evaluación Municipal:</strong> La municipalidad verifica que la propiedad cumpla con los criterios. Puede otorgar un plazo para realizar modificaciones o rechazar el expediente.</li>
+        <li><strong style="color:#fff">Emisión del Certificado:</strong> Si se aprueba la solicitud, la municipalidad emite un certificado de regularización, permitiendo registrar la propiedad en el Conservador de Bienes Raíces.</li>
+      </ol>
+      <h3>Beneficios de regularizar tu propiedad</h3>
+      <ul>
+        <li><strong style="color:#fff">Valorización:</strong> Una propiedad regularizada tiene mayor valor en el mercado. Regularizar antes de vender siempre es un buen negocio.</li>
+        <li><strong style="color:#fff">Seguridad jurídica:</strong> Título de propiedad claro, facilita venta, transferencia o herencia.</li>
+        <li><strong style="color:#fff">Acceso a servicios públicos:</strong> Agua, electricidad, alcantarillado, y también beneficios sociales como subsidios y programas de vivienda.</li>
+        <li><strong style="color:#fff">Mejora de la calidad de vida:</strong> Las viviendas regularizadas deben cumplir con estándares de seguridad, estabilidad y habitabilidad.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal 15: Beneficios de regularizar -->
+  <div id="modal-beneficios-regularizar" class="blog-modal">
+    <button class="blog-modal-close" onclick="closeModal('modal-beneficios-regularizar')">✕</button>
+    <div class="blog-modal-inner">
+      <h2>Conoce los beneficios de regularizar una propiedad</h2>
+      <p>La regularización de propiedades implica cumplir con las normas urbanísticas y legales establecidas por las autoridades locales: obtener permisos de construcción, adaptarse a planes reguladores y asegurar que la propiedad cumpla con requisitos de estabilidad, habitabilidad y seguridad.</p>
+      <h3>Los 6 beneficios principales</h3>
+      <ol>
+        <li><strong style="color:#fff">Valorización en el mercado inmobiliario:</strong> Las propiedades regularizadas tienen mayor valor que las no regularizadas. Una vivienda regularizada puede aumentar su valor comercial entre un 20% y 50%, dependiendo del alcance y características como materiales y metros cuadrados.</li>
+        <li><strong style="color:#fff">Seguridad jurídica:</strong> Proporciona certeza legal a través de títulos claros y válidos. Facilita ventas, transferencias y herencias, reduciendo riesgos de disputas.</li>
+        <li><strong style="color:#fff">Acceso a crédito hipotecario:</strong> Los bancos prefieren financiar propiedades con documentación en regla, lo que permite obtener mejores condiciones de financiamiento, tasas más bajas y mayor probabilidad de aprobación. Nota: la cobertura hipotecaria aplica solo a los metros cuadrados regularizados.</li>
+        <li><strong style="color:#fff">Acceso a servicios públicos:</strong> Las propiedades regularizadas califican para agua, electricidad, gas y alcantarillado, mejorando la calidad de vida y garantizando cumplimiento de normas de seguridad y salud.</li>
+        <li><strong style="color:#fff">Mejora de la calidad de vida:</strong> Las propiedades regularizadas cumplen con estándares de construcción y seguridad, resultando en hogares más seguros y cómodos.</li>
+        <li><strong style="color:#fff">Acceso a subsidios y programas gubernamentales:</strong> Los propietarios pueden acceder a programas de mejoramiento de infraestructura, subsidios de renovación y asistencia para mantenimiento.</li>
+      </ol>
+      <h3>Recomendaciones</h3>
+      <ul>
+        <li><strong style="color:#fff">Consulta con profesionales:</strong> Arquitectos, abogados y especialistas que guíen el proceso y aseguren el cumplimiento de todos los requisitos.</li>
+        <li><strong style="color:#fff">Revisa la documentación:</strong> Reúne planos existentes, permisos, certificados de recepción y requisitos municipales. En AXYZ podemos ayudarte a localizar la documentación necesaria.</li>
+        <li><strong style="color:#fff">Mantente informado:</strong> Los requisitos varían por región. La Municipalidad y el MINVU tienen información actualizada sobre procesos y beneficios de regularización.</li>
+      </ul>
+      <p>Regularizar tu propiedad asegura tus derechos de propiedad y abre puertas a nuevas oportunidades. En AXYZ te acompañamos en todo el proceso, desde el registro municipal hasta la recepción final.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="bg-zinc-950 px-5 py-10 md:py-16">
+    <div class="mx-auto max-w-7xl md:px-12">
+    <div class="md:grid md:grid-cols-4 md:gap-12">
+    <div class="mb-8 md:mb-0 md:col-span-1">
+      <img src="../assets/logo-white.png" alt="AXYZ" class="h-[51px] w-auto"/>
+    </div>
+
+    <div class="mb-8 md:mb-0">
+      <p class="mb-3 text-sm font-bold uppercase tracking-widest text-white/40">Servicios</p>
+      <a href="../index.html#nosotros"  class="mb-2 block text-sm text-white/60 hover:text-white">Confianza en axyz</a>
+      <a href="../index.html#servicios" class="mb-2 block text-sm text-white/60 hover:text-white">Regulación</a>
+      <a href="../index.html#arquitectura" class="mb-2 block text-sm text-white/60 hover:text-white">Arquitectura</a>
+      <a href="blog.html"            class="mb-2 block text-sm text-white/60 hover:text-white">Blog</a>
+    </div>
+
+    <div class="mb-8 md:mb-0">
+      <p class="mb-3 text-sm font-bold uppercase tracking-widest text-white/40">Contacto</p>
+      <p class="mb-2 text-sm text-white/60 whitespace-nowrap">Ramón Carnicer 65, Of. 11, Providencia, Santiago</p>
+      <a href="tel:+56932994825" class="mb-2 block text-sm text-white/60">+56 9 3299 4825</a>
+      <a href="mailto:hola@axyz.cl" class="mb-4 block text-sm text-white/60">hola@axyz.cl</a>
+      <div class="flex gap-4">
+        <a href="https://cl.linkedin.com/company/axyz-arq" target="_blank" rel="noopener" aria-label="LinkedIn" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.12 20.45H3.56V9h3.56v11.45zM5.34 7.58a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67h-3.56V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29z"/>
+          </svg>
+        </a>
+        <a href="https://www.facebook.com/people/axyzarq/100053673380029" target="_blank" rel="noopener" aria-label="Facebook" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M22.68 0H1.32C.59 0 0 .59 0 1.32v21.36C0 23.41.59 24 1.32 24H12.82v-9.29H9.69V11.08h3.13V8.41c0-3.1 1.89-4.79 4.66-4.79 1.32 0 2.46.1 2.79.14v3.24h-1.91c-1.5 0-1.79.71-1.79 1.76v2.31h3.58l-.47 3.63h-3.11V24h6.1c.73 0 1.32-.59 1.32-1.32V1.32C24 .59 23.41 0 22.68 0z"/>
+          </svg>
+        </a>
+        <a href="https://www.instagram.com/axyz.arq/" target="_blank" rel="noopener" aria-label="Instagram" class="text-white/60 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85 0 3.2-.01 3.58-.07 4.85-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07-3.2 0-3.58-.01-4.85-.07-3.26-.15-4.77-1.7-4.92-4.92C2.17 15.58 2.16 15.2 2.16 12c0-3.2.01-3.58.07-4.85C2.38 3.86 3.9 2.31 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12c0 3.26.01 3.67.07 4.95.2 4.36 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24c3.26 0 3.67-.01 4.95-.07 4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95 0-3.26-.01-3.67-.07-4.95C23.73 2.71 21.31.27 16.95.07 15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32A6.16 6.16 0 0 0 12 5.84zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    </div><!-- end grid -->
+    <p class="mt-10 text-sm text-white/20 md:border-t md:border-white/10 md:pt-8">
+      &copy; <span id="year"></span> AXYZ. Todos los derechos reservados.
+    </p>
+    </div><!-- end max-w -->
+  </footer>
+
+</div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  var _currentModalId = null;
+  var _modalActions = null;
+  function openModal(id) {
+    var m = document.getElementById(id);
+    m.classList.add('open');
+    m.scrollTop = 0;
+    _currentModalId = id;
+    if (!_modalActions) _modalActions = document.getElementById('modal-actions');
+    _modalActions.style.display = 'flex';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    if (_modalActions) _modalActions.style.display = 'none';
+    _currentModalId = null;
+  }
+  document.querySelectorAll('.blog-modal').forEach(function(m) {
+    m.addEventListener('click', function(e) { if (e.target === m) closeModal(m.id); });
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    _modalActions = document.getElementById('modal-actions');
+    document.getElementById('btn-share').addEventListener('click', function() {
+      var modal = _currentModalId ? document.getElementById(_currentModalId) : null;
+      var title = modal && modal.querySelector('h2') ? modal.querySelector('h2').textContent : document.title;
+      if (navigator.share) {
+        navigator.share({ title: title, url: window.location.href });
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+          alert('Link copiado al portapapeles');
+        }).catch(function() {
+          prompt('Copia este link:', window.location.href);
+        });
+      }
+    });
+    document.getElementById('btn-print').addEventListener('click', function() {
+      window.print();
+    });
+  });
+
+  // Fade-in cards on scroll
+  const cards = document.querySelectorAll('.card-reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
+  cards.forEach(c => observer.observe(c));
+</script>
+
+<!-- ══════════════ CHAT WIDGET ══════════════ -->
+<div id="chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+
+  <div id="chat-window" class="mb-3 hidden w-80 overflow-hidden shadow-2xl" style="border:1px solid rgba(255,255,255,0.12);">
+    <div class="flex items-center gap-3 bg-zinc-950 px-4 py-3">
+      <img src="../assets/logo-white.png" alt="AXYZ" class="h-[26px] w-auto object-contain"/>
+      <span class="font-bold tracking-wide text-white">AXYZ</span>
+      <button id="chat-close" class="ml-auto text-xl leading-none text-white/50 hover:text-white">&times;</button>
+    </div>
+    <div id="chat-messages" class="space-y-3 overflow-y-auto bg-zinc-800 px-4 py-3" style="height:280px;"></div>
+    <div id="chat-options" class="flex flex-wrap gap-2 border-t border-white/10 bg-zinc-800 px-4 pb-3 pt-3"></div>
+    <div class="flex items-center gap-2 border-t border-white/10 bg-zinc-950 px-3 py-2">
+      <input type="text" id="chat-input" placeholder="Escribe tu consulta..."
+        class="flex-1 border border-white/10 bg-zinc-700 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-[#EE7D65]"/>
+      <button id="chat-send" class="bg-[#EE7D65] px-3 py-1.5 text-white hover:bg-[#F19582] transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <button id="chat-toggle" class="flex h-14 w-14 items-center justify-center bg-[#EE7D65] shadow-lg hover:bg-[#F19582] transition-colors">
+    <svg id="chat-icon-open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+  </button>
+
+</div>
+
+<script>
+(function () {
+  var toggle   = document.getElementById('chat-toggle');
+  var win      = document.getElementById('chat-window');
+  var closeBtn = document.getElementById('chat-close');
+  var msgs     = document.getElementById('chat-messages');
+  var optsCnt  = document.getElementById('chat-options');
+  var input    = document.getElementById('chat-input');
+  var sendBtn  = document.getElementById('chat-send');
+  var iconOpen = document.getElementById('chat-icon-open');
+  var isOpen   = false;
+  var greeted  = false;
+
+  var INITIAL_OPTS = ['Servicios','Regularización','Arquitectura','Contacto','Ubicación'];
+
+  var RESPONSES = {
+    servicios:      { text: 'En AXYZ ofrecemos:\n• Regularización de propiedades\n• Diseño arquitectónico\n• Gestión de permisos y patentes\n\n¿Sobre cuál te gustaría saber más?', opts: ['Regularización','Arquitectura','Contacto'] },
+    regularizacion: { text: 'Somos expertos en regularización de propiedades. El proceso incluye:\n\n1. Evaluación de normativas\n2. Seguimiento riguroso\n3. Documentación completa\n\nResultados seguros, rápidos y rentables.', opts: ['¿Cuánto cuesta?','Contactar ahora','Ver servicios'] },
+    arquitectura:   { text: 'Nuestros servicios de arquitectura incluyen:\n\n• Diseño residencial\n• Espacios comerciales\n• Diseño urbano\n\nDe la planificación a la ejecución.', opts: ['¿Cuánto cuesta?','Contactar ahora'] },
+    contacto:       { text: 'Puedes contactarnos:\n\n📞 +56 9 3299 4825\n✉️ hola@axyz.cl\n\nO completa el formulario y te respondemos en menos de 24 horas.', opts: ['Ir al formulario','Ubicación'] },
+    ubicacion:      { text: '📍 Ramón Carnicer 65, Of. 11\nProvidencia, Santiago\n\nLunes a viernes, horario de oficina.', opts: ['Contactar ahora','Ver servicios'] },
+    costo:          { text: 'El costo varía según el tipo y características de tu proyecto. Te ofrecemos una asesoría gratuita y personalizada.', opts: ['Contactar ahora','Ver servicios'] },
+    default:        { text: 'Gracias por tu mensaje. Para más información, contáctanos directamente y te ayudamos con gusto.', opts: ['Servicios','Contacto','Ubicación'] }
+  };
+
+  function normalize(s) {
+    return s.toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+      .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o')
+      .replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+  }
+
+  function getResponse(text) {
+    var t = normalize(text);
+    if (/regulariz|propiedad|permiso|patente|terreno/.test(t)) return RESPONSES.regularizacion;
+    if (/arquitect|disen|construc|comercial|residencial/.test(t)) return RESPONSES.arquitectura;
+    if (/contact|telefon|correo|email|llamar|whatsapp/.test(t)) return RESPONSES.contacto;
+    if (/donde|ubicacion|direccion|oficina|lugar/.test(t)) return RESPONSES.ubicacion;
+    if (/cuanto|costo|precio|valor|cobr/.test(t)) return RESPONSES.costo;
+    if (/servicio|ayuda|hacen|ofrecen/.test(t)) return RESPONSES.servicios;
+    if (/hola|buenas|buenos|saludos/.test(t)) return { text: '¡Hola! ¿En qué puedo ayudarte?', opts: INITIAL_OPTS };
+    if (/formulario|iralformulario/.test(t)) { window.location.href='contacto.html'; return null; }
+    if (/contactar|contactarahora/.test(t)) return RESPONSES.contacto;
+    if (/verservicio/.test(t)) return RESPONSES.servicios;
+    return RESPONSES.default;
+  }
+
+  function addMsg(text, isBot) {
+    var wrap = document.createElement('div');
+    wrap.className = isBot ? 'flex items-start gap-2' : 'flex items-start justify-end';
+    if (isBot) {
+      var av = document.createElement('div');
+      av.className = 'flex-shrink-0 h-[19px] w-[19px] overflow-hidden';
+      av.innerHTML = '<img src="../assets/logo-white.png" alt="AXYZ" class="h-full w-full object-contain"/>';
+      wrap.appendChild(av);
+    }
+    var bub = document.createElement('div');
+    bub.className = isBot
+      ? 'max-w-[85%] bg-zinc-700 px-3 py-2 text-sm leading-relaxed text-white/90 whitespace-pre-line'
+      : 'max-w-[85%] bg-[#EE7D65] px-3 py-2 text-sm leading-relaxed text-white whitespace-pre-line';
+    bub.textContent = text;
+    wrap.appendChild(bub);
+    msgs.appendChild(wrap);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function setOpts(list) {
+    optsCnt.innerHTML = '';
+    (list || INITIAL_OPTS).forEach(function(o) {
+      var b = document.createElement('button');
+      b.className = 'border border-[#EE7D65] px-3 py-1 text-xs text-[#EE7D65] hover:bg-[#EE7D65] hover:text-white transition-colors';
+      b.textContent = o;
+      b.addEventListener('click', function() { handleSend(o); });
+      optsCnt.appendChild(b);
+    });
+  }
+
+  function handleSend(text) {
+    if (!text) { text = input.value.trim(); input.value = ''; }
+    if (!text) return;
+    addMsg(text, false);
+    var r = getResponse(text);
+    if (!r) return;
+    setTimeout(function() { addMsg(r.text, true); setOpts(r.opts); }, 420);
+  }
+
+  function openChat() {
+    isOpen = true;
+    win.classList.remove('hidden');
+    if (!greeted) {
+      greeted = true;
+      setTimeout(function() {
+        addMsg('¡Hola! Soy el asistente de AXYZ. ¿En qué puedo ayudarte hoy?', true);
+        setOpts(INITIAL_OPTS);
+      }, 350);
+    }
+  }
+
+  function closeChat() {
+    isOpen = false;
+    win.classList.add('hidden');
+  }
+
+  toggle.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+  closeBtn.addEventListener('click', closeChat);
+  sendBtn.addEventListener('click', function() { handleSend(); });
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleSend(); });
+
+}());
+</script>
+
+</body>
+</html>
