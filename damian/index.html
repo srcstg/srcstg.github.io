@@ -317,22 +317,19 @@ textarea{resize:none;min-height:42px}
   <!-- ── ESCENA 1 · PORTADA ──────────────────────────────────── -->
   <section class="card" id="portada">
     <div class="inner">
-      <p class="kicker">Barbi y David te invitan</p>
+      <p class="kicker" style="color: var(--red); font-size: 16.8px;">¡Atención!</p>
       <h1>
-        <span class="l1">El Baby Shower</span>
-        <span class="l2">· de ·</span>
-        <span class="l3">Damián</span>
+        <span class="l1">Baby Shower</span>
+        <span class="l2" style="font-size: 0.75em; margin: 8px 0;">· reprogramado ·</span>
+        <span class="l3" style="margin-top: 24px;">Damián</span>
       </h1>
-      <p class="tagline">«Nos atrasamos, pero ya era hora.»</p>
-      <p class="sub">Sábado 27 de junio</p>
-      <div class="chip" id="countdown">Faltan — días</div>
-      <br>
-      <button class="next" data-next>Comenzar<span class="chev">▾</span></button>
+      <p class="sub" style="font-size: 14px; font-weight: 500;">Fecha y lugar por confirmar</p>
+      <button class="next" data-next>Confirmación asistencia<span class="chev">▾</span></button>
     </div>
   </section>
 
   <!-- ── ESCENA 2 · FICHA TÉCNICA ────────────────────────────── -->
-  <section class="card" id="ficha">
+  <section class="card" id="ficha" style="display:none">
     <div class="inner">
       <h2>Los datos</h2>
       <div class="ficha">
@@ -392,7 +389,7 @@ textarea{resize:none;min-height:42px}
 
         <div class="submitwrap">
           <button type="submit" class="btn" id="submitBtn">Confirmar asistencia →</button>
-          <p class="plazo" id="plazo">Confirma antes del viernes 20 de junio</p>
+          <p class="plazo" id="plazo" style="display:none">Confirma antes del viernes 20 de junio</p>
         </div>
       </form>
 
