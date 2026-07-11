@@ -76,7 +76,7 @@ main{position:relative;z-index:2}
   padding:88px clamp(16px,5vw,64px) 88px clamp(116px,34vw,360px);
 }
 .wrap{
-  max-width:520px;margin-left:auto;text-align:right;width:100%;
+  max-width:520px;margin-left:auto;text-align:center;width:100%;
   opacity:0;transform:translateY(34px);
   transition:opacity .8s ease,transform .8s ease;
 }
@@ -91,13 +91,13 @@ h1 .l3{display:block;font-size:clamp(46px,12.5vw,104px);letter-spacing:.04em}
 .tagline{font-family:'Courier Prime',monospace;font-style:italic;font-size:clamp(15px,4vw,19px);margin:22px 0 30px}
 .datos{font-family:'Courier Prime',monospace;margin:0}
 .datos .d1{font-size:clamp(17px,4.4vw,21px);font-weight:700;margin:0}
-.datos .d2{font-size:clamp(14px,3.6vw,17px);margin:8px 0 0}
+.datos .d2{font-size:clamp(15px,3.8vw,18px);margin:8px 0 0}
 .chip{
   display:inline-block;margin-top:26px;padding:9px 20px;border:2px solid var(--ink);
-  border-radius:999px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;
+  border-radius:999px;font-size:13px;letter-spacing:.26em;text-transform:uppercase;font-weight:600;
   background:rgba(251,247,238,.55);
 }
-.cue{margin-top:40px;font-size:11px;letter-spacing:.34em;text-transform:uppercase;font-weight:600;opacity:.75}
+.cue{margin-top:40px;font-size:13px;letter-spacing:.32em;text-transform:uppercase;font-weight:600;opacity:.75}
 .cue span{display:block;font-size:17px;margin-top:5px;animation:bob 1.7s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
@@ -108,67 +108,66 @@ h2{font-size:clamp(20px,5.5vw,30px);letter-spacing:.08em;text-transform:uppercas
 .panel{
   background:rgba(255,255,255,.93);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
-  border-radius:22px;padding:26px 22px;text-align:left;
+  border-radius:22px;padding:26px 22px;text-align:center;
   box-shadow:0 22px 50px rgba(47,74,68,.2);
 }
 
 /* ── Formulario ── */
-label.lbl{display:block;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;margin:18px 0 4px}
+label.lbl{display:block;font-size:13px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;margin:20px 0 5px}
 label.lbl:first-of-type{margin-top:0}
 label.lbl .opt{color:var(--red)}
-.hint{font-family:'Courier Prime',monospace;font-style:italic;font-size:12px;opacity:.7;margin:2px 0 0}
+.hint{font-family:'Courier Prime',monospace;font-style:italic;font-size:13.5px;opacity:.72;margin:3px 0 0}
 input[type=text],input[type=tel],textarea{
   width:100%;border:0;border-bottom:2px solid var(--ink);background:transparent;
-  font-family:'Courier Prime',monospace;font-size:17px;padding:8px 2px;color:var(--ink);border-radius:0;
+  font-family:'Courier Prime',monospace;font-size:17px;padding:8px 2px;color:var(--ink);border-radius:0;text-align:center;
 }
 input:focus,textarea:focus{outline:none;border-bottom-color:var(--red)}
 textarea{resize:none;min-height:44px}
-.telrow{display:flex;align-items:baseline;gap:9px;border-bottom:2px solid var(--ink)}
+.telrow{display:flex;align-items:baseline;gap:9px;border-bottom:2px solid var(--ink);max-width:230px;margin:0 auto}
 .telrow .telprefix{font-family:'Courier Prime',monospace;font-size:17px;font-weight:700;white-space:nowrap}
 .telrow input{border-bottom:0}
 .telrow:focus-within{border-bottom-color:var(--red)}
-.stepper{display:flex;align-items:center;gap:22px;margin-top:8px}
+.stepper{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:8px}
 .stepbtn{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:transparent;font-size:22px;font-weight:600;color:var(--ink);cursor:pointer;line-height:1;font-family:'Jost',sans-serif}
 .stepbtn:active{background:var(--ink);color:var(--cloud)}
 .stepval{font-size:32px;font-weight:700;min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 .choice{position:relative;display:block;cursor:pointer}
 .choice input{position:absolute;opacity:0;inset:0}
-.choice span{display:block;border:2px solid var(--ink);padding:12px 6px;text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.choice span{display:block;border:2px solid var(--ink);padding:13px 6px;text-align:center;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
 .choice input:checked + span{background:var(--ink);color:var(--cloud)}
 .btn{
   display:inline-block;border:2px solid var(--ink);background:var(--ink);color:var(--cloud);
-  font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+  font-family:'Jost',sans-serif;font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
   padding:15px 26px;cursor:pointer;text-decoration:none;border-radius:4px;
 }
 .btn:active{transform:translateY(2px)}
 .btn.ghost{background:transparent;color:var(--ink)}
-.btn.sm{padding:11px 16px;font-size:11px}
+.btn.sm{padding:12px 17px;font-size:12.5px}
 .submitwrap{text-align:center;margin-top:24px}
 .plazo{text-align:center;font-family:'Courier Prime',monospace;font-size:12.5px;margin:12px 0 0;color:var(--red);font-weight:700}
-.censo{font-family:'Courier Prime',monospace;font-size:13px;color:var(--red);font-weight:700;margin:0 0 16px;text-align:right}
 
 /* ── Confirmación (post-envío) ── */
 .confirmed{display:none;text-align:center}
 .stamp{display:inline-block;border:4px double var(--red);color:var(--red);border-radius:8px;padding:9px 22px;font-size:19px;letter-spacing:.36em;font-weight:700;text-transform:uppercase;transform:rotate(-7deg);margin-bottom:18px;animation:stampin .45s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes stampin{from{transform:rotate(-7deg) scale(2.3);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
 .confirmed p{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.65;margin:8px 0}
-.confirmed .exp{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--red);font-weight:600}
+.confirmed .exp{font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--red);font-weight:600}
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
 
 /* ── Regalos ── */
 .gift-intro{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.6;margin:0 0 20px}
-.glabel{font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;color:var(--red);margin:22px 0 8px}
+.glabel{font-size:13px;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:var(--red);margin:24px 0 8px}
 .glist{margin:0;font-size:15.5px;line-height:1.9}
-.gnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:12.5px;opacity:.72;margin:2px 0 10px}
+.gnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:14px;opacity:.72;margin:2px 0 10px}
 .gsep{border:0;border-top:2px solid rgba(47,74,68,.25);margin:22px 0}
-.gclose{font-family:'Courier Prime',monospace;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:13px;margin:22px 0 0;text-align:center}
+.gclose{font-family:'Courier Prime',monospace;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:14px;margin:22px 0 0;text-align:center}
 
 /* ── Cierre ── */
 .cierre .wrap{text-align:center;margin:0 auto}
 .fin{font-size:clamp(44px,12vw,64px);font-weight:700;letter-spacing:.16em;margin:0}
-.finnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:13px;opacity:.8;margin:4px 0 0}
-.dudas{display:inline-block;margin-top:26px;font-family:'Courier Prime',monospace;font-size:13px;color:var(--ink)}
+.finnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:14px;opacity:.8;margin:4px 0 0}
+.dudas{display:inline-block;margin-top:26px;font-family:'Courier Prime',monospace;font-size:15px;color:var(--ink)}
 
 @media (max-width:560px){
   .s{padding-right:16px}
@@ -222,8 +221,6 @@ textarea{resize:none;min-height:44px}
   <section class="s">
     <div class="wrap">
       <h2>La confirmación</h2>
-      <p class="lead">Cuéntanos si vienes y con cuántos — así cuadramos las sillas.</p>
-      <p class="censo" id="censo" hidden></p>
 
       <div class="panel">
         <form id="form" autocomplete="off">
@@ -421,20 +418,6 @@ const configurado = (v) => v && !v.includes("XXXX");
     dias === 0 ? "¡Es hoy!" : "Ya pasó";
 })();
 
-/* ── Censo en vivo (lee el conteo desde Google Sheets) ── */
-function cargarCenso(){
-  if (!configurado(CONFIG.APPS_SCRIPT_URL)) return;
-  fetch(CONFIG.APPS_SCRIPT_URL)
-    .then(r => r.json())
-    .then(d => {
-      if (!d.ok || !d.personas) return;
-      $("censo").hidden = false;
-      $("censo").textContent = `Censo a la fecha: ${d.personas} persona${d.personas === 1 ? "" : "s"} esperando a Damián`;
-    })
-    .catch(() => {});
-}
-cargarCenso();
-
 /* ── Stepper de acompañantes ── */
 let acomp = 0;
 $("minus").addEventListener("click", () => { acomp = Math.max(0, acomp - 1); $("acompVal").textContent = acomp; });
@@ -527,7 +510,6 @@ $("form").addEventListener("submit", (e) => {
       if (!d.ok) throw new Error("respuesta no ok");
       guardarLocal();
       mostrarConfirmado(nombre, total, true);
-      cargarCenso();
     })
     .catch(() => {
       btn.disabled = false;
