@@ -124,7 +124,12 @@ input[type=text],input[type=tel],textarea{
   font-family:'Courier Prime',monospace;font-size:17px;padding:8px 2px;color:var(--ink);border-radius:0;text-align:center;
 }
 input:focus,textarea:focus{outline:none;border-bottom-color:var(--red)}
-textarea{resize:none;min-height:44px}
+textarea{
+  resize:none;min-height:90px;text-align:left;line-height:1.5;
+  border:2px solid var(--ink);border-radius:12px;padding:12px 14px;
+  background:rgba(47,74,68,.04);
+}
+textarea:focus{border-color:var(--red)}
 .telrow{display:flex;align-items:baseline;gap:9px;border-bottom:2px solid var(--ink);max-width:230px;margin:0 auto}
 .telrow .telprefix{font-family:'Courier Prime',monospace;font-size:17px;font-weight:700;white-space:nowrap}
 .telrow input{border-bottom:0}
@@ -255,7 +260,7 @@ textarea{resize:none;min-height:44px}
           </div>
 
           <label class="lbl" for="mensaje">Mensaje <span class="opt">(opcional)</span></label>
-          <textarea id="mensaje" name="mensaje" maxlength="280" rows="1" placeholder="Unas palabras para Damián"></textarea>
+          <textarea id="mensaje" name="mensaje" maxlength="280" rows="2" placeholder="Escríbele a Damián"></textarea>
 
           <div class="submitwrap">
             <button type="submit" class="btn" id="submitBtn">Confirmar asistencia →</button>
