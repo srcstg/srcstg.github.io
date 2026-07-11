@@ -61,10 +61,10 @@ body{
 
 /* ── El bebé: cae siempre, al costado izquierdo ── */
 .baby{
-  position:fixed;left:clamp(-24px,1vw,20px);top:32%;
+  position:fixed;left:clamp(-24px,1vw,20px);top:50%;
   width:clamp(104px,30vw,320px);height:auto;z-index:1;pointer-events:none;
   filter:drop-shadow(0 20px 26px rgba(47,74,68,.28));
-  transform:rotate(-7deg);will-change:transform;
+  opacity:0;transform:translateY(-50%);will-change:transform,opacity;
 }
 
 /* ── Contenido: columna a la derecha, aparece con el scroll ── */
@@ -348,20 +348,35 @@ const configurado = (v) => v && !v.includes("XXXX");
   secs.forEach(s => obs.observe(s));
 })();
 
-/* ── El bebé cae con el scroll y sale de pantalla al final ── */
+/* ── El bebé: aparece al primer scroll cayendo desde arriba, se mantiene
+      centrado a la izquierda, y en el último tramo baja y se desvanece ── */
 (function caida(){
   const baby = $("baby");
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
+  const ENTER_END = 0.10;   // termina de entrar al ~10% del scroll
+  const EXIT_START = 0.85;  // empieza a irse en el último ~15%
+
+  // Sin animación: bebé quieto y visible al centro-izquierda
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    baby.style.opacity = "1";
+    baby.style.transform = "translateY(-50%)";
+    return;
+  }
+
   let ticking = false;
   function onScroll(){
     ticking = false;
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    const p = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
-    // cae de forma pareja durante casi todo el scroll y sale de pantalla ~90% del recorrido
-    const drop = p * (window.innerHeight * 0.78);
-    const sway = Math.sin(p * Math.PI * 3) * 12;              // vaivén al caer
-    const rot  = -7 + p * 16;
-    baby.style.transform = `translate(${sway}px, ${drop}px) rotate(${rot}deg)`;
+    const p = max > 0 ? clamp01(window.scrollY / max) : 0;
+    const ih = window.innerHeight;
+    const e = clamp01(p / ENTER_END);                         // entrada 0→1
+    const x = clamp01((p - EXIT_START) / (1 - EXIT_START));   // salida 0→1
+    const enterOff = (1 - e) * (-0.85 * ih);                  // arranca sobre la pantalla
+    const exitOff  = x * (0.6 * ih);                          // cae al final
+    const sway = Math.sin(p * Math.PI * 4) * 7;               // leve vaivén
+    const rot  = -4 + e * 3 + x * 10;
+    baby.style.opacity = String(e * (1 - x));                 // aparece y se desvanece
+    baby.style.transform = `translate(${sway}px, calc(-50% + ${enterOff + exitOff}px)) rotate(${rot}deg)`;
   }
   window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   window.addEventListener("resize", onScroll, { passive: true });
