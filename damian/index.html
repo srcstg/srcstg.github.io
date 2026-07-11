@@ -33,19 +33,18 @@
   --cloud:  #FBF7EE;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
 body{
   margin:0;
   font-family:'Jost',sans-serif;
   color:var(--ink);
-  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 45%,var(--sky3) 100%);
-  background-attachment:fixed;
+  background:var(--sky2);
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
 
 /* ── Nubes: siempre presentes, meciéndose ── */
-.clouds{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.clouds{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 45%,var(--sky3) 100%)}
 .cloud{position:absolute;background:var(--cloud);border-radius:100px;height:44px;opacity:.9}
 .cloud::before,.cloud::after{content:"";position:absolute;background:var(--cloud);border-radius:50%}
 .cloud::before{width:52%;height:210%;left:14%;bottom:20%}
@@ -61,7 +60,7 @@ body{
 
 /* ── El bebé: cae siempre, al costado izquierdo ── */
 .baby{
-  position:fixed;left:clamp(-24px,1vw,20px);top:50%;
+  position:fixed;left:clamp(0px,2vw,22px);top:50%;
   width:clamp(104px,30vw,320px);height:auto;z-index:1;pointer-events:none;
   filter:drop-shadow(0 20px 26px rgba(47,74,68,.28));
   opacity:0;transform:translateY(-50%);will-change:transform,opacity;
