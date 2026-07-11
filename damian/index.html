@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://d10.cl/damian/">
 <meta property="og:locale" content="es_CL">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#F3EADA">
+<meta name="theme-color" content="#AEC9D1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍼</text></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,311 +25,188 @@
 
 <style>
 :root{
-  --paper:  #F3EADA;
-  --paper2: #EDE0C8;
   --ink:    #2F4A44;
   --mustard:#BE9233;
-  --blush:  #D9A39A;
-  --powder: #A9C4CD;
   --red:    #B5503B;
+  --sky1:   #8FB2C0;
+  --sky2:   #AEC9D1;
+  --sky3:   #CFE0E3;
+  --cloud:  #FBF7EE;
 }
 *{box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
+html{scroll-behavior:smooth}
 body{
   margin:0;
-  background:var(--paper);
-  color:var(--ink);
   font-family:'Jost',sans-serif;
+  color:var(--ink);
+  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 45%,var(--sky3) 100%);
+  background-attachment:fixed;
   -webkit-font-smoothing:antialiased;
-  text-align:center;
+  overflow-x:hidden;
 }
 
-/* ── Marco de afiche (doble línea, fijo sobre todo) ── */
-.frame,.frame::after{position:fixed;pointer-events:none;z-index:50}
-.frame{inset:10px;border:2px solid var(--ink)}
-.frame::after{content:"";inset:4px;border:1px solid var(--ink);position:absolute}
+/* ── Nubes: siempre presentes, meciéndose ── */
+.clouds{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.cloud{position:absolute;background:var(--cloud);border-radius:100px;height:44px;opacity:.9}
+.cloud::before,.cloud::after{content:"";position:absolute;background:var(--cloud);border-radius:50%}
+.cloud::before{width:52%;height:210%;left:14%;bottom:20%}
+.cloud::after{width:40%;height:160%;right:15%;bottom:14%}
+.c1{width:200px;top:10%;left:-4%;animation:sway 13s ease-in-out infinite}
+.c2{width:130px;top:24%;right:-3%;left:auto;opacity:.8;animation:sway 17s ease-in-out infinite reverse}
+.c3{width:150px;top:44%;left:6%;opacity:.7;animation:sway 20s ease-in-out infinite}
+.c4{width:110px;top:62%;right:8%;left:auto;opacity:.85;animation:sway 15s ease-in-out infinite reverse}
+.c5{width:180px;top:78%;left:-2%;opacity:.75;animation:sway 22s ease-in-out infinite}
+.c6{width:120px;top:90%;right:4%;left:auto;opacity:.8;animation:sway 18s ease-in-out infinite reverse}
+.c7{width:90px;top:36%;right:24%;left:auto;opacity:.55;animation:sway 24s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:translateX(-14px)}50%{transform:translateX(14px)}}
 
-/* ── El mazo: una tarjeta por pantalla, paso a paso ── */
-.deck{
-  height:100vh;height:100dvh;
-  overflow-y:auto;
-  scroll-snap-type:y proximity;
-  scroll-behavior:smooth;
-  scrollbar-width:none;
+/* ── El bebé: cae siempre, al costado izquierdo ── */
+.baby{
+  position:fixed;left:clamp(-24px,1vw,20px);top:47%;
+  width:clamp(104px,30vw,320px);height:auto;z-index:1;pointer-events:none;
+  filter:drop-shadow(0 20px 26px rgba(47,74,68,.28));
+  animation:fall 6.5s ease-in-out infinite;
 }
-.deck::-webkit-scrollbar{display:none}
-.card{
+@keyframes fall{
+  0%,100%{transform:translateY(calc(-50% - 12px)) rotate(-7deg)}
+  50%    {transform:translateY(calc(-50% + 14px)) rotate(-2deg)}
+}
+
+/* ── Contenido: columna a la derecha, aparece con el scroll ── */
+main{position:relative;z-index:2}
+.s{
   min-height:100vh;min-height:100dvh;
-  scroll-snap-align:start;
-  scroll-snap-stop:always;
-  display:grid;place-items:center;
-  padding:46px 42px;
+  display:flex;flex-direction:column;justify-content:center;
+  /* la columna izquierda queda reservada para el bebé; el contenido va a la derecha */
+  padding:88px clamp(16px,5vw,64px) 88px clamp(116px,34vw,360px);
 }
-.inner{max-width:560px;width:100%}
+.wrap{
+  max-width:520px;margin-left:auto;text-align:right;width:100%;
+  opacity:0;transform:translateY(34px);
+  transition:opacity .8s ease,transform .8s ease;
+}
+.s.in .wrap{opacity:1;transform:none}
 
-/* ── Puntos de navegación ── */
-.dotnav{
-  position:fixed;right:20px;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;gap:11px;z-index:60;
-}
-.dot{
-  width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);
-  background:transparent;padding:0;cursor:pointer;transition:background .25s;
-}
-.dot.on{background:var(--mustard)}
-
-/* ── Botón continuar ── */
-.next{
-  margin-top:34px;background:none;border:none;cursor:pointer;color:var(--ink);
-  font-family:'Jost',sans-serif;font-size:11px;font-weight:600;
-  letter-spacing:.34em;text-indent:.34em;text-transform:uppercase;
-  display:inline-flex;flex-direction:column;align-items:center;gap:4px;
-}
-.next .chev{font-size:16px;animation:bob 1.6s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-
-/* ── Tipografía base ── */
-.kicker{
-  font-size:12px;letter-spacing:.42em;text-indent:.42em;text-transform:uppercase;
-  color:var(--mustard);font-weight:600;margin:0 0 18px;
-}
-.orn{letter-spacing:.7em;color:var(--mustard);margin:22px 0;font-size:13px;text-indent:.7em}
-h1{margin:0;line-height:1.02;text-transform:uppercase;font-weight:700}
-h1 .l1{display:block;font-size:clamp(26px,6.4vw,40px);letter-spacing:.30em;text-indent:.30em}
-h1 .l2{display:block;font-size:clamp(15px,3vw,18px);letter-spacing:.6em;text-indent:.6em;margin:12px 0;color:var(--red)}
-h1 .l3{display:block;font-size:clamp(56px,14vw,92px);letter-spacing:.06em;text-indent:.06em}
-.tagline{
-  font-family:'Courier Prime',monospace;font-style:italic;
-  font-size:18px;margin:24px auto 4px;max-width:420px;
-}
-.sub{
-  font-size:12px;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;
-  opacity:.75;margin-top:12px;
-}
-.blank2{color:var(--mustard);letter-spacing:.1em}
-
-/* ── Encabezado de sección ── */
-h2{
-  display:flex;align-items:center;gap:16px;justify-content:center;
-  font-size:clamp(17px,4vw,22px);letter-spacing:.24em;text-indent:.24em;
-  text-transform:uppercase;font-weight:600;margin:10px 0 6px;
-}
-h2::before,h2::after{content:"";height:2px;background:var(--ink);flex:1;max-width:70px}
-.lead{font-family:'Courier Prime',monospace;font-size:14.5px;max-width:430px;margin:6px auto 20px}
-
-/* ── Ficha técnica ── */
-.ficha{
-  border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:5px;
-  background:var(--paper2);padding:26px 24px;margin:18px 2px 0;
-  font-family:'Courier Prime',monospace;text-align:left;
-}
-.ficha .row{display:flex;align-items:baseline;gap:10px;margin:12px 0;font-size:15px}
-.ficha .k{letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
-.ficha .dots{flex:1;border-bottom:2px dotted var(--ink);transform:translateY(-4px);min-width:18px}
-.ficha .v{font-weight:700;text-transform:uppercase;text-align:right;letter-spacing:.04em}
-.ficha .v.tbd{color:var(--red)}
-.ficha .note{
-  margin:18px 0 0;font-size:13px;font-style:italic;line-height:1.55;
-  border-top:1px solid var(--ink);padding-top:12px;
-}
-
-/* ── Chips y censo ── */
+/* ── Tipografía ── */
+.kicker{font-size:12px;letter-spacing:.4em;text-transform:uppercase;color:var(--mustard);font-weight:600;margin:0 0 20px}
+h1{margin:0;line-height:1.05;text-transform:uppercase;font-weight:700}
+h1 .l1{display:block;font-size:clamp(28px,7vw,46px);letter-spacing:.14em}
+h1 .l2{display:block;font-size:clamp(14px,3vw,17px);letter-spacing:.5em;margin:10px 0;color:var(--red)}
+h1 .l3{display:block;font-size:clamp(46px,12.5vw,104px);letter-spacing:.04em}
+.tagline{font-family:'Courier Prime',monospace;font-style:italic;font-size:clamp(15px,4vw,19px);margin:22px 0 30px}
+.datos{font-family:'Courier Prime',monospace;margin:0}
+.datos .d1{font-size:clamp(17px,4.4vw,21px);font-weight:700;margin:0}
+.datos .d2{font-size:clamp(14px,3.6vw,17px);margin:8px 0 0}
 .chip{
-  display:inline-block;margin-top:26px;padding:10px 22px;border:2px solid var(--ink);
-  border-radius:999px;font-size:12px;letter-spacing:.3em;text-indent:.3em;
-  text-transform:uppercase;font-weight:600;background:var(--powder);
+  display:inline-block;margin-top:26px;padding:9px 20px;border:2px solid var(--ink);
+  border-radius:999px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;
+  background:rgba(251,247,238,.55);
 }
-.censo{
-  font-family:'Courier Prime',monospace;font-size:13px;color:var(--red);
-  font-weight:700;margin:0 0 16px;letter-spacing:.05em;
-}
+.cue{margin-top:40px;font-size:11px;letter-spacing:.34em;text-transform:uppercase;font-weight:600;opacity:.75}
+.cue span{display:block;font-size:17px;margin-top:5px;animation:bob 1.7s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
-/* ── Guía de regalos ── */
-.gifts{
-  border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:5px;
-  background:var(--paper2);padding:24px 22px;margin:14px 2px 30px;
+h2{font-size:clamp(20px,5.5vw,30px);letter-spacing:.08em;text-transform:uppercase;font-weight:700;margin:0 0 6px}
+.lead{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.6;margin:0 0 22px;opacity:.9}
+
+/* ── Panel tipo nube (formulario y regalos) ── */
+.panel{
+  background:rgba(255,255,255,.93);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  border-radius:22px;padding:26px 22px;text-align:left;
+  box-shadow:0 22px 50px rgba(47,74,68,.2);
 }
-.gifts .glabel{
-  font-size:11px;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase;
-  font-weight:600;color:var(--mustard);margin:14px 0 6px;
-}
-.gifts .glabel:first-child{margin-top:0}
-.gifts .gitems{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.6;margin:0}
 
 /* ── Formulario ── */
-form{
-  border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:5px;
-  background:#fffdf6;padding:24px 22px 28px;text-align:left;margin:0 2px;
-}
-.fhead{
-  text-align:center;font-family:'Courier Prime',monospace;font-size:12px;font-weight:700;
-  letter-spacing:.22em;text-indent:.22em;text-transform:uppercase;
-  border-bottom:2px solid var(--ink);padding-bottom:11px;margin-bottom:14px;
-}
-label.lbl{
-  display:block;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
-  font-weight:600;margin:16px 0 2px;
-}
+label.lbl{display:block;font-size:11px;letter-spacing:.24em;text-transform:uppercase;font-weight:600;margin:18px 0 4px}
+label.lbl:first-of-type{margin-top:0}
 label.lbl .opt{color:var(--mustard)}
-.hint{font-family:'Courier Prime',monospace;font-style:italic;font-size:12px;opacity:.75;margin:2px 0 0}
+.hint{font-family:'Courier Prime',monospace;font-style:italic;font-size:12px;opacity:.7;margin:2px 0 0}
 input[type=text],input[type=tel],textarea{
   width:100%;border:0;border-bottom:2px solid var(--ink);background:transparent;
-  font-family:'Courier Prime',monospace;font-size:17px;padding:7px 2px 6px;
-  text-align:center;color:var(--ink);border-radius:0;
+  font-family:'Courier Prime',monospace;font-size:17px;padding:8px 2px;color:var(--ink);border-radius:0;
 }
-input:focus,textarea:focus{outline:none;border-bottom-color:var(--red);background:var(--paper)}
-textarea{resize:none;min-height:42px}
-
-.telrow{
-  display:flex;align-items:baseline;gap:10px;max-width:240px;margin:0 auto;
-  border-bottom:2px solid var(--ink);
-}
+input:focus,textarea:focus{outline:none;border-bottom-color:var(--red)}
+textarea{resize:none;min-height:44px}
+.telrow{display:flex;align-items:baseline;gap:9px;border-bottom:2px solid var(--ink)}
 .telrow .telprefix{font-family:'Courier Prime',monospace;font-size:17px;font-weight:700;white-space:nowrap}
-.telrow input{border-bottom:0;text-align:left;padding-left:0}
-.telrow:focus-within{border-bottom-color:var(--red);background:var(--paper)}
-
-.stepper{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:8px}
-.stepbtn{
-  width:46px;height:46px;border-radius:50%;border:2px solid var(--ink);
-  background:var(--paper);font-size:22px;font-weight:600;color:var(--ink);
-  cursor:pointer;line-height:1;font-family:'Jost',sans-serif;
-}
+.telrow input{border-bottom:0}
+.telrow:focus-within{border-bottom-color:var(--red)}
+.stepper{display:flex;align-items:center;gap:22px;margin-top:8px}
+.stepbtn{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:transparent;font-size:22px;font-weight:600;color:var(--ink);cursor:pointer;line-height:1;font-family:'Jost',sans-serif}
 .stepbtn:active{background:var(--mustard)}
-.stepval{font-size:34px;font-weight:700;min-width:52px;font-variant-numeric:tabular-nums}
-
+.stepval{font-size:32px;font-weight:700;min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 .choice{position:relative;display:block;cursor:pointer}
 .choice input{position:absolute;opacity:0;inset:0}
-.choice span{
-  display:block;border:2px solid var(--ink);padding:11px 6px;text-align:center;
-  font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
-  background:var(--paper);
-}
-.choice input:checked + span{background:var(--mustard);box-shadow:3px 3px 0 var(--ink)}
-@media (max-width:430px){.choices{grid-template-columns:1fr}}
-
+.choice span{display:block;border:2px solid var(--ink);padding:12px 6px;text-align:center;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.choice input:checked + span{background:var(--mustard)}
 .btn{
   display:inline-block;border:2px solid var(--ink);background:var(--mustard);color:var(--ink);
-  font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.24em;text-indent:.24em;
-  text-transform:uppercase;font-weight:600;padding:15px 26px;cursor:pointer;
-  box-shadow:4px 4px 0 var(--ink);text-decoration:none;
+  font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+  padding:15px 26px;cursor:pointer;text-decoration:none;border-radius:4px;
 }
-.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
-.btn.ghost{background:var(--paper)}
-.btn.sm{padding:11px 16px;font-size:11px;box-shadow:3px 3px 0 var(--ink)}
-.submitwrap{text-align:center;margin-top:22px}
-.plazo{
-  text-align:center;font-family:'Courier Prime',monospace;font-size:12.5px;
-  margin:12px 0 0;color:var(--red);font-weight:700;letter-spacing:.04em;
-}
+.btn:active{transform:translateY(2px)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:11px 16px;font-size:11px}
+.submitwrap{text-align:center;margin-top:24px}
+.plazo{text-align:center;font-family:'Courier Prime',monospace;font-size:12.5px;margin:12px 0 0;color:var(--red);font-weight:700}
+.censo{font-family:'Courier Prime',monospace;font-size:13px;color:var(--red);font-weight:700;margin:0 0 16px;text-align:right}
 
-/* ── Tarjeta de confirmación ── */
-.confirmed{display:none;border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:5px;
-  background:#fffdf6;padding:34px 24px;margin:0 2px}
-.stamp{
-  display:inline-block;border:4px double var(--red);color:var(--red);border-radius:8px;
-  padding:9px 24px;font-size:20px;letter-spacing:.4em;text-indent:.4em;font-weight:700;
-  text-transform:uppercase;transform:rotate(-7deg);margin-bottom:20px;
-  animation:stampin .45s cubic-bezier(.2,1.6,.4,1) both;
-}
-@keyframes stampin{from{transform:rotate(-7deg) scale(2.4);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
-.confirmed p{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.65;max-width:420px;margin:8px auto}
-.confirmed .exp{font-size:11px;letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;color:var(--mustard);font-weight:600}
+/* ── Confirmación (post-envío) ── */
+.confirmed{display:none;text-align:center}
+.stamp{display:inline-block;border:4px double var(--red);color:var(--red);border-radius:8px;padding:9px 22px;font-size:19px;letter-spacing:.36em;font-weight:700;text-transform:uppercase;transform:rotate(-7deg);margin-bottom:18px;animation:stampin .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stampin{from{transform:rotate(-7deg) scale(2.3);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
+.confirmed p{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.65;margin:8px 0}
+.confirmed .exp{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mustard);font-weight:600}
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
 
-/* ── Créditos ── */
-.credits{font-family:'Courier Prime',monospace}
-.credits .row{display:flex;align-items:baseline;gap:10px;max-width:420px;margin:11px auto;font-size:13px;text-align:left}
-.credits .k{letter-spacing:.18em;text-transform:uppercase;white-space:nowrap}
-.credits .dots{flex:1;border-bottom:1px dotted var(--ink);transform:translateY(-3px)}
-.credits .v{font-weight:700;text-transform:uppercase;white-space:nowrap}
-.fin{font-size:52px;font-weight:700;letter-spacing:.18em;text-indent:.18em;margin:34px 0 4px;font-family:'Jost',sans-serif}
-.finnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:13px;opacity:.8;margin:0}
-.dudas{display:inline-block;margin-top:24px;font-family:'Courier Prime',monospace;font-size:13px;color:var(--ink)}
+/* ── Regalos ── */
+.gift-intro{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.6;margin:0 0 20px}
+.glabel{font-size:11px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;color:var(--mustard);margin:22px 0 8px}
+.glist{margin:0;font-size:15.5px;line-height:1.9}
+.gnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:12.5px;opacity:.72;margin:2px 0 10px}
+.gsep{border:0;border-top:2px solid rgba(47,74,68,.25);margin:22px 0}
+.gclose{font-family:'Courier Prime',monospace;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:13px;margin:22px 0 0;text-align:center}
 
-/* ── Datos confirmados en la portada ── */
-.datos{margin:22px auto 4px;font-family:'Courier Prime',monospace}
-.datos-l1{margin:0;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:.02em}
-.datos-l2{margin:5px 0 0;font-size:14px;color:var(--ink);opacity:.85}
+/* ── Cierre ── */
+.cierre .wrap{text-align:center;margin:0 auto}
+.fin{font-size:clamp(44px,12vw,64px);font-weight:700;letter-spacing:.16em;margin:0}
+.finnote{font-family:'Courier Prime',monospace;font-style:italic;font-size:13px;opacity:.8;margin:4px 0 0}
+.dudas{display:inline-block;margin-top:26px;font-family:'Courier Prime',monospace;font-size:13px;color:var(--ink)}
 
-/* ── Cielo: el bebé cae del cielo (parallax de entrada) ── */
-.sky{position:relative;height:185vh}
-.sky-scene{
-  position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;
-  background:linear-gradient(180deg,#8FB2C0 0%,var(--powder) 40%,#D2DFDF 70%,var(--paper) 100%);
-}
-.baby{
-  position:absolute;left:50%;top:34%;width:min(46vw,300px);height:auto;
-  transform:translateX(-50%);
-  filter:drop-shadow(0 16px 20px rgba(47,74,68,.22));
-  will-change:transform;z-index:3;pointer-events:none;
-}
-.cloud{position:absolute;background:var(--paper);border-radius:100px;height:44px;will-change:transform;opacity:.96}
-.cloud::before,.cloud::after{content:"";position:absolute;background:var(--paper);border-radius:50%}
-.cloud::before{width:52%;height:200%;left:15%;bottom:22%}
-.cloud::after{width:38%;height:155%;right:17%;bottom:16%}
-.cloud-a{width:190px;top:22%;left:-6%;z-index:2}
-.cloud-b{width:140px;top:52%;right:-6%;z-index:4}
-.cloud-c{width:110px;top:70%;left:6%;z-index:2}
-.sky-copy{position:absolute;top:12%;left:0;right:0;padding:0 26px;text-align:center;z-index:5;will-change:transform}
-.sky-kicker{font-size:12px;letter-spacing:.42em;text-indent:.42em;text-transform:uppercase;color:var(--mustard);font-weight:600;margin:0 0 12px}
-.sky-title{margin:0;font-weight:700;text-transform:uppercase;line-height:1.05;color:var(--ink);font-size:clamp(28px,8vw,52px);letter-spacing:.05em}
-.sky-title span{color:var(--red)}
-.sky-cue{position:absolute;bottom:5vh;left:0;right:0;text-align:center;z-index:5;font-size:11px;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase;color:var(--ink);font-weight:600}
-.sky-cue span{display:block;font-size:16px;margin-top:4px;animation:bob 1.6s ease-in-out infinite}
-@media (max-width:430px){
-  h1 .l1{font-size:5.6vw;letter-spacing:.24em;text-indent:.24em}
-  .dotnav{right:16px}
-  .dot{width:7px;height:7px}
-  .card{padding-left:36px;padding-right:36px}
-  .ficha,form,.confirmed{outline-offset:3px}
-}
-/* Pantallas bajas: compactar la tarjeta del formulario */
-@media (max-height:900px){
-  #rsvp .lead{display:none}
-  #rsvp .card,#rsvp{padding-top:38px;padding-bottom:38px}
-  #rsvp label[for="telefono"] + .hint,#rsvp label[for="mensaje"] + .hint{display:none}
-  #rsvp form{padding:18px 20px 22px}
-  #rsvp label.lbl{margin:13px 0 2px}
-  #rsvp .stepbtn{width:40px;height:40px;font-size:19px}
-  #rsvp .stepval{font-size:28px}
-  #rsvp textarea{min-height:34px}
-  #rsvp .next{margin-top:20px}
+@media (max-width:560px){
+  .s{padding-right:16px}
+  .panel{padding:22px 18px}
 }
 @media (prefers-reduced-motion:reduce){
-  .stamp{animation:none}
-  .next .chev,.sky-cue span{animation:none}
-  .deck{scroll-behavior:auto}
+  .baby,.cloud,.cue span{animation:none}
+  .wrap{transition:none;opacity:1;transform:none}
+  html{scroll-behavior:auto}
 }
 </style>
 </head>
 <body>
 
-<div class="frame" aria-hidden="true"></div>
+<!-- Cielo: nubes por todos lados -->
+<div class="clouds" aria-hidden="true">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="cloud c4"></div>
+  <div class="cloud c5"></div>
+  <div class="cloud c6"></div>
+  <div class="cloud c7"></div>
+</div>
 
-<!-- Puntos de navegación -->
-<nav class="dotnav" id="dotnav" aria-label="Escenas"></nav>
+<!-- El bebé, cayendo, siempre a la izquierda -->
+<img class="baby" id="baby" src="baby.png" alt="">
 
-<div class="deck" id="deck">
+<main>
 
-  <!-- ── CIELO · el bebé cae del cielo (parallax de entrada) ──── -->
-  <section class="sky" id="sky" aria-hidden="true">
-    <div class="sky-scene">
-      <div class="cloud cloud-a" data-par="0.6"></div>
-      <div class="cloud cloud-b" data-par="0.9"></div>
-      <div class="cloud cloud-c" data-par="0.45"></div>
-      <img class="baby" id="baby" src="baby.png" alt="">
-      <div class="sky-copy" id="skyCopy">
-        <p class="sky-kicker">Es oficial</p>
-        <p class="sky-title">¡Baby Shower<br>de Damián<br><span>confirmado!</span></p>
-      </div>
-      <div class="sky-cue" id="skyCue">baja<span>▾</span></div>
-    </div>
-  </section>
-
-  <!-- ── ESCENA 1 · PORTADA (aterrizaje) ─────────────────────── -->
-  <section class="card" id="portada">
-    <div class="inner">
+  <!-- ── HERO ─────────────────────────────────────────────── -->
+  <section class="s hero">
+    <div class="wrap">
       <p class="kicker">Barbi y David te invitan</p>
       <h1>
         <span class="l1">El Baby Shower</span>
@@ -338,209 +215,126 @@ textarea{resize:none;min-height:42px}
       </h1>
       <p class="tagline">«Nos atrasamos, pero ya era hora.»</p>
       <div class="datos">
-        <p class="datos-l1">Sábado 25 de julio · 17:00 hrs</p>
-        <p class="datos-l2">Restaurante El Ancla · La Cisterna</p>
+        <p class="d1">Sábado 25 de julio · 17:00 hrs</p>
+        <p class="d2">Restaurante El Ancla · La Cisterna</p>
       </div>
       <div class="chip" id="countdown">Faltan — días</div>
-      <br>
-      <button class="next" data-next>Confirmar asistencia<span class="chev">▾</span></button>
+      <p class="cue">Baja<span>▾</span></p>
     </div>
   </section>
 
-  <!-- ── ESCENA 2 · FICHA TÉCNICA ────────────────────────────── -->
-  <section class="card" id="ficha" style="display:none">
-    <div class="inner">
-      <h2>Los datos</h2>
-      <div class="ficha">
-        <div class="row"><span class="k">Protagonista</span><span class="dots"></span><span class="v">Damián</span></div>
-        <div class="row"><span class="k">Fecha</span><span class="dots"></span><span class="v">Sábado 25 de julio</span></div>
-        <div class="row"><span class="k">Hora</span><span class="dots"></span><span class="v tbd" id="horaV">Por confirmar*</span></div>
-        <div class="row"><span class="k">Lugar</span><span class="dots"></span><span class="v tbd" id="lugarV">Por confirmar*</span></div>
-        <p class="note" id="fichaNote">* El lugar y la hora dependen de cuántos seamos.
-        Por eso, confirma. <br>— Barbi &amp; David</p>
-      </div>
-      <button class="next" data-next>Continuar<span class="chev">▾</span></button>
-    </div>
-  </section>
-
-  <!-- ── ESCENA 3 · CONFIRMACIÓN ─────────────────────────────── -->
-  <section class="card" id="rsvp">
-    <div class="inner">
+  <!-- ── CONFIRMACIÓN ─────────────────────────────────────── -->
+  <section class="s">
+    <div class="wrap">
       <h2>La confirmación</h2>
       <p class="lead">Cuéntanos si vienes y con cuántos — así cuadramos las sillas.</p>
       <p class="censo" id="censo" hidden></p>
 
-      <form id="form" autocomplete="off">
-        <p class="fhead">Confirmación de asistencia</p>
+      <div class="panel">
+        <form id="form" autocomplete="off">
+          <label class="lbl" for="nombre">Nombre y apellido</label>
+          <input type="text" id="nombre" name="nombre" required maxlength="80" placeholder="________________">
 
-        <label class="lbl" for="nombre">Nombre y apellido</label>
-        <input type="text" id="nombre" name="nombre" required maxlength="80" placeholder="________________">
-
-        <label class="lbl">¿Te sumas?</label>
-        <div class="choices">
-          <label class="choice"><input type="radio" name="actitud" value="Sí, voy" checked><span>Sí, voy</span></label>
-          <label class="choice"><input type="radio" name="actitud" value="No puedo"><span>No puedo</span></label>
-        </div>
-
-        <div id="acompBlock">
-          <label class="lbl">¿Cuántos van contigo?</label>
-          <p class="hint">(sin contarte a ti — el comité de sillas lo agradece)</p>
-          <div class="stepper">
-            <button type="button" class="stepbtn" id="minus" aria-label="menos">−</button>
-            <span class="stepval" id="acompVal">0</span>
-            <button type="button" class="stepbtn" id="plus" aria-label="más">+</button>
+          <label class="lbl">¿Te sumas?</label>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="actitud" value="Sí, voy" checked><span>Sí, voy</span></label>
+            <label class="choice"><input type="radio" name="actitud" value="No puedo"><span>No puedo</span></label>
           </div>
-          <p class="hint" style="text-align:center;margin-top:8px">Si cuentas a tu pareja, avísale — así no confirma por su cuenta.</p>
-        </div>
 
-        <div id="telBlock">
-          <label class="lbl" for="telefono">Teléfono <span class="opt">(opcional)</span></label>
-          <p class="hint">para avisarte el lugar apenas exista</p>
-          <div class="telrow">
-            <span class="telprefix">+56 9</span>
-            <input type="tel" id="telefono" name="telefono" maxlength="9" inputmode="numeric" placeholder="____ ____">
+          <div id="acompBlock">
+            <label class="lbl">¿Cuántos van contigo?</label>
+            <p class="hint">(sin contarte a ti)</p>
+            <div class="stepper">
+              <button type="button" class="stepbtn" id="minus" aria-label="menos">−</button>
+              <span class="stepval" id="acompVal">0</span>
+              <button type="button" class="stepbtn" id="plus" aria-label="más">+</button>
+            </div>
+            <p class="hint" style="margin-top:10px">Si cuentas a tu pareja, avísale — así no confirma por su cuenta.</p>
           </div>
-        </div>
 
-        <label class="lbl" for="mensaje">Mensaje <span class="opt">(opcional)</span></label>
-        <p class="hint">déjale unas palabras a Damián</p>
-        <textarea id="mensaje" name="mensaje" maxlength="280" rows="1"></textarea>
+          <div id="telBlock">
+            <label class="lbl" for="telefono">Teléfono <span class="opt">(opcional)</span></label>
+            <div class="telrow">
+              <span class="telprefix">+56 9</span>
+              <input type="tel" id="telefono" name="telefono" maxlength="9" inputmode="numeric" placeholder="____ ____">
+            </div>
+          </div>
 
-        <div class="submitwrap">
-          <button type="submit" class="btn" id="submitBtn">Confirmar asistencia →</button>
-          <p class="plazo" id="plazo" style="display:none">Confirma antes del viernes 20 de junio</p>
-        </div>
-      </form>
+          <label class="lbl" for="mensaje">Mensaje <span class="opt">(opcional)</span></label>
+          <textarea id="mensaje" name="mensaje" maxlength="280" rows="1" placeholder="Unas palabras para Damián"></textarea>
 
-      <!-- Tarjeta post-confirmación -->
-      <div class="confirmed" id="confirmed">
-        <div class="stamp" id="stampTxt">Confirmado</div>
-        <p class="exp" id="expediente">Expediente Nº 0000</p>
-        <p id="confText">Quedaste adentro.</p>
-        <p id="confSub">El lugar lo revelamos en cuanto terminemos de contar las sillas.
-        Te avisamos por WhatsApp.</p>
-        <div class="actions">
-          <a class="btn sm ghost" id="icsBtn" href="#" download="baby-shower-damian.ics">+ Agendar el 25</a>
-          <a class="btn sm ghost" id="shareBtn" href="#" target="_blank" rel="noopener">Reenviar invitación</a>
+          <div class="submitwrap">
+            <button type="submit" class="btn" id="submitBtn">Confirmar asistencia →</button>
+            <p class="plazo" id="plazo" style="display:none">Confirma antes del viernes 17 de julio</p>
+          </div>
+        </form>
+
+        <div class="confirmed" id="confirmed">
+          <div class="stamp" id="stampTxt">Confirmado</div>
+          <p class="exp" id="expediente">Expediente Nº 0000</p>
+          <p id="confText">Quedaste adentro.</p>
+          <p id="confSub"></p>
+          <div class="actions">
+            <a class="btn sm ghost" id="icsBtn" href="#" download="baby-shower-damian.ics">+ Agendar el 25</a>
+            <a class="btn sm ghost" id="shareBtn" href="#" target="_blank" rel="noopener">Reenviar invitación</a>
+          </div>
+          <p class="hint" style="text-align:center;margin-top:18px">¿Cambio de planes? <a id="fixLink" href="#" target="_blank" rel="noopener" style="color:var(--red)">escríbenos</a>.</p>
         </div>
-        <p class="hint" style="text-align:center;margin-top:18px">¿Cambio de planes? <a id="fixLink" href="#" target="_blank" rel="noopener" style="color:var(--red)">escríbenos</a>.</p>
       </div>
-
-      <button class="next" data-next>Continuar<span class="chev">▾</span></button>
     </div>
   </section>
 
-  <!-- ── ESCENA 4 · REGALOS ──────────────────────────────────── -->
-  <section class="card" id="regalos">
-    <div class="inner">
-     <!-- TÍTULO PRINCIPAL ENTRE LÍNEAS CON FUENTE JOST -->
-<div style="text-align: center; margin-top: 50px; margin-bottom: 10px;">
-    <h2 style="font-family: 'Jost', sans-serif; letter-spacing: 4px; color: #2c4a3e; margin: 0; font-size: 1.9em; font-weight: 700; text-transform: uppercase;">LA GUÍA DE REGALOS</h2>
-    
-    <!-- SUBTÍTULO EN EL TERRACOTA EXACTO DE LA CONFIRMACIÓN -->
-    <p style="font-family: 'Courier Prime', monospace; color: #b84343; font-size: 1em; margin-top: 15px; letter-spacing: 1px; font-weight: bold;">
-    
-    </p>
-</div>
+  <!-- ── REGALOS ──────────────────────────────────────────── -->
+  <section class="s">
+    <div class="wrap">
+      <h2>La guía de regalos</h2>
+      <div class="panel">
+        <p class="gift-intro">Si quieren regalarle algo a Damián, ¡se los agradecemos desde ya!</p>
+        <a id="giftBtn" class="btn" href="#" target="_blank" rel="noopener">Ver la lista completa →</a>
 
-<!-- CONTENEDOR PRINCIPAL -->
-<div style="padding: 20px; max-width: 600px; margin: 0 auto 50px auto;">
+        <p class="glabel">Lo que ya tenemos</p>
+        <p class="glist">Ropa recién nacido · Cuna · Coche · Pañalera · Sábanas</p>
 
-    <!-- CAJA INTERNA CON EL COLOR DE FONDO DE LA CONFIRMACIÓN (#FFFDF4) Y DOBLE LÍNEA -->
-    <div style="background-color: #fffdf4; padding: 35px; border: 1px solid #2c4a3e; outline: 3px solid #2c4a3e; outline-offset: 4px; text-align: center; margin: 6px;">
+        <hr class="gsep">
 
-        <!-- PÁRRAFO INICIAL -->
-        <p style="font-family: 'Jost', sans-serif; color: #2c4a3e; font-size: 1.1em; line-height: 1.3; margin-bottom: 20px; font-weight: 300;">
-            Si quieren regalarle algo a Damián, ¡se los agradecemos desde ya!
+        <p class="glabel">¿Qué talla comprar?</p>
+        <p class="gnote">Damián nace en agosto, así que dejamos una guía por temporada:</p>
+        <p class="glist">
+          Verano 2026-2027 — 4 a 7 meses<br>
+          Otoño 2027 — 7 a 10 meses<br>
+          Invierno 2027 — 10 a 13 meses<br>
+          Primavera 2027 — 13 a 16 meses
         </p>
 
-        <!-- BOTÓN A LA LISTA (Google Drive) -->
-        <a id="giftBtn" href="#" target="_blank" rel="noopener" style="display:inline-block;font-family:'Jost',sans-serif;font-size:0.8em;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#fffdf4;background:#2c4a3e;border:2px solid #2c4a3e;padding:13px 24px;text-decoration:none;margin:0 0 28px;">Ver la lista completa →</a>
+        <hr class="gsep">
 
-        <!-- SECCIÓN 1: LO QUE YA TENEMOS -->
-        <h3 style="font-family: 'Courier Prime', monospace; letter-spacing: 3px; color: #2c4a3e; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; font-size: 1.1em;">LO QUE YA TENEMOS</h3>
-        <p style="font-family: 'Jost', sans-serif; line-height: 2; color: #2c4a3e; font-size: 1.1em; margin-bottom: 30px; font-weight: 300;">
-            Ropa recién nacido<br>
-            Cuna<br>
-            Coche<br>
-            Pañalera<br>
-            Sábanas
-        </p>
+        <p class="glabel">Algunas ideas</p>
+        <p class="glist">Mantas · Libros · Juguetes · Pañales o higiene · Un mensaje, dibujo o foto</p>
 
-        <hr style="border: 0; border-top: 2px solid #2c4a3e; width: 100%; margin: 30px 0;">
-
-        <!-- SECCIÓN 2: ¿QUÉ TALLA COMPRAR? -->
-        <h3 style="font-family: 'Courier Prime', monospace; letter-spacing: 3px; color: #2c4a3e; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; font-size: 1.1em;">¿QUÉ TALLA COMPRAR?</h3>
-        
-        <p style="font-family: 'Jost', sans-serif; font-style: italic; color: #555; font-size: 0.9em; margin-bottom: 20px; padding: 0 10px; font-weight: 500;">
-            (Damián nace en agosto, así que les dejamos una guía de tallas por temporada)
-        </p>
-        
-        <p style="font-family: 'Jost', sans-serif; line-height: 2; color: #2c4a3e; font-size: 1.1em; margin-bottom: 30px; font-weight: 300;">
-            VERANO 2026-2027: 4-7 meses<br>
-            OTOÑO 2027: 7-10 meses<br>
-            INVIERNO 2027: 10-13 meses<br>
-            PRIMAVERA 2027: 13-16 meses
-        </p>
-
-        <hr style="border: 0; border-top: 2px solid #2c4a3e; width: 100%; margin: 30px 0;">
-
-        <!-- SECCIÓN 3: ALGUNAS IDEAS DE REGALO -->
-        <h3 style="font-family: 'Courier Prime', monospace; letter-spacing: 3px; color: #2c4a3e; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; font-size: 1.1em;">ALGUNAS IDEAS DE REGALO</h3>
-        <p style="font-family: 'Jost', sans-serif; line-height: 2; color: #2c4a3e; font-size: 1.1em; margin-bottom: 35px; font-weight: 300;">
-            Mantas<br>
-            Libros<br>
-            Juguetes<br>
-            Pañales o productos de higiene<br>
-            Un mensaje, dibujo o foto
-        </p>
-
-        <!-- NOTA FINAL EN EL MISMO TERRACOTA -->
-        <p style="font-family: 'Courier Prime', monospace; color: #b84343; font-size: 1.1em; font-weight: 700; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase;">
-            Cualquier cosa es bienvenida.
-        </p>
-
-        </div>
+        <p class="gclose">Cualquier cosa es bienvenida.</p>
       </div>
-      <button class="next" data-next style="display:none">Continuar<span class="chev">▾</span></button>
     </div>
   </section>
 
-  <!-- ── ESCENA 5 · CRÉDITOS ─────────────────────────────────── -->
-  <section class="card" id="fin">
-    <div class="inner credits">
-      <div class="orn">✦ ✦ ✦</div>
-      <div class="row"><span class="k">Protagonista</span><span class="dots"></span><span class="v">Damián</span></div>
-      <div class="row"><span class="k">Mamá</span><span class="dots"></span><span class="v" id="mama"><span class="blank2">______</span></span></div>
-      <div class="row"><span class="k">Papá</span><span class="dots"></span><span class="v" id="papa"><span class="blank2">______</span></span></div>
-      <div class="row"><span class="k">Lugar</span><span class="dots"></span><span class="v">El Ancla · La Cisterna</span></div>
-      <div class="row"><span class="k">Fecha</span><span class="dots"></span><span class="v">25 · 07 · 2026</span></div>
-      <p class="fin">FIN<span style="color:var(--red)">*</span></p>
-      <p class="finnote">* en realidad, el comienzo.</p>
-      <br>
+  <!-- ── CIERRE ───────────────────────────────────────────── -->
+  <section class="s cierre">
+    <div class="wrap">
+      <p class="fin">Te esperamos</p>
+      <p class="finnote">— Barbi &amp; David</p>
       <a class="dudas" id="dudasLink" href="#" target="_blank" rel="noopener">¿Dudas? Escríbenos →</a>
-      <br>
-      <button class="next" id="backTop">Volver al inicio<span class="chev" style="animation:none">▴</span></button>
     </div>
   </section>
 
-</div>
+</main>
 
 <script>
 /* ════════════════════════════════════════════════════════════════
    ✏️  CONFIGURACIÓN — RELLENA AQUÍ (y solo aquí)
    ════════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  MAMA:     "Barbi",       // créditos: fila "Mamá"
-  PAPA:     "David",       // créditos: fila "Papá"
-
-  HORA:     "17:00 hrs",   // vacío = "POR CONFIRMAR*"
-  LUGAR:    "Restaurante El Ancla · La Cisterna",  // vacío = "POR CONFIRMAR*"
-  PLAZO:    "viernes 17 de julio",   // ✏️ fecha límite para confirmar
-
+  PLAZO:    "viernes 17 de julio",   // fecha límite para confirmar
   LISTA_REGALOS_URL: "",   // ✏️ pega el link de la lista de regalos (Google Drive)
-
-  WHATSAPP: "56993592888", // número de David — botón de dudas y avisos de "No puedo"
+  WHATSAPP: "56993592888", // número de David — dudas y avisos de "No puedo"
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzeEJq_uFZp8MiMaa4CorXCE7bheLLkcpT_n_uNfn1nozGiBcRYyeVzg1AAx0F3-AtB/exec",
 };
 /* ════════════════════════════════════════════════════════════════ */
@@ -550,110 +344,31 @@ const FECHA_EVENTO = new Date(2026, 6, 25); // 25 de julio de 2026
 const URL_INVITACION = "https://d10.cl/damian";
 const configurado = (v) => v && !v.includes("XXXX");
 
-/* ── Cielo: parallax del bebé cayendo ── */
-(function cielo(){
-  const scroller = $("deck");
-  const sky = $("sky"), baby = $("baby"), copy = $("skyCopy"), cue = $("skyCue");
-  const clouds = Array.from(document.querySelectorAll(".cloud"));
-
-  // ?nointro: saltar el cielo y partir en la portada
-  if (location.search.includes("nointro")) {
-    requestAnimationFrame(() => $("portada").scrollIntoView());
-  }
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; // escena estática
-
-  let ticking = false;
-  function render(){
-    ticking = false;
-    const rango = sky.offsetHeight - window.innerHeight;
-    const p = rango > 0 ? Math.min(Math.max(scroller.scrollTop / rango, 0), 1) : 0;
-    baby.style.transform = `translateX(-50%) translateY(${p * 46}vh) rotate(${-5 + p * 10}deg)`;
-    copy.style.transform = `translateY(${p * 22}vh)`;
-    copy.style.opacity = String(1 - p * 0.55);
-    clouds.forEach(c => {
-      const par = parseFloat(c.dataset.par) || 0.5;
-      const dir = c.classList.contains("cloud-b") ? 1 : -1;
-      c.style.transform = `translateX(${dir * p * par * 70}vw)`;
-      c.style.opacity = String(Math.max(0, 0.96 - p * 0.7));
-    });
-    cue.style.opacity = String(Math.max(0, 1 - p * 2.4));
-  }
-  scroller.addEventListener("scroll", () => {
-    if (!ticking) { ticking = true; requestAnimationFrame(render); }
-  }, { passive: true });
-  window.addEventListener("resize", render, { passive: true });
-  render();
+/* ── Aparición de secciones al hacer scroll ── */
+(function reveal(){
+  const secs = document.querySelectorAll(".s");
+  const obs = new IntersectionObserver((ents) => {
+    ents.forEach(e => { if (e.isIntersecting) e.target.classList.add("in"); });
+  }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+  secs.forEach(s => obs.observe(s));
 })();
-
-/* ── Navegación del mazo: tarjeta por tarjeta ── */
-const deck = $("deck");
-const cards = Array.from(deck.querySelectorAll(".card")).filter(c => getComputedStyle(c).display !== "none");
-const dotnav = $("dotnav");
-cards.forEach((card, i) => {
-  const dot = document.createElement("button");
-  dot.className = "dot";
-  dot.setAttribute("aria-label", "Escena " + (i + 1));
-  dot.addEventListener("click", () => irA(i));
-  dotnav.appendChild(dot);
-});
-const dots = Array.from(dotnav.children);
-let actual = 0;
-
-function irA(i){
-  const dest = Math.max(0, Math.min(cards.length - 1, i));
-  cards[dest].scrollIntoView({ behavior: "smooth" });
-}
-const obs = new IntersectionObserver((entradas) => {
-  entradas.forEach(en => {
-    if (en.isIntersecting) {
-      actual = cards.indexOf(en.target);
-      dots.forEach((d, j) => d.classList.toggle("on", j === actual));
-    }
-  });
-}, { root: deck, threshold: 0.6 });
-cards.forEach(c => obs.observe(c));
-
-document.querySelectorAll("[data-next]").forEach(btn =>
-  btn.addEventListener("click", () => irA(actual + 1))
-);
-$("backTop").addEventListener("click", () => irA(0));
-
-document.addEventListener("keydown", (e) => {
-  const tag = (document.activeElement || {}).tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA") return;
-  if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); irA(actual + 1); }
-  if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); irA(actual - 1); }
-});
 
 /* ── Textos según configuración ── */
 (function pintar(){
-  if (CONFIG.MAMA) $("mama").textContent = CONFIG.MAMA;
-  if (CONFIG.PAPA) $("papa").textContent = CONFIG.PAPA;
   $("plazo").textContent = "Confirma antes del " + CONFIG.PLAZO;
 
-  if (CONFIG.HORA)  { const el = $("horaV");  el.textContent = CONFIG.HORA;  el.classList.remove("tbd"); }
-  if (CONFIG.LUGAR) { const el = $("lugarV"); el.textContent = CONFIG.LUGAR; el.classList.remove("tbd"); }
-  if (CONFIG.HORA && CONFIG.LUGAR) {
-    $("fichaNote").innerHTML = "¡Ya está todo listo! Confírmanos igual para tener las sillas justas. <br>— Barbi &amp; David";
-  }
-
-  // Botón de la lista de regalos (Google Drive)
   const gift = $("giftBtn");
-  if (gift) {
-    if (CONFIG.LISTA_REGALOS_URL) gift.href = CONFIG.LISTA_REGALOS_URL;
-    else gift.addEventListener("click", (e) => { e.preventDefault(); alert("La lista está en camino. Vuelve pronto 🙂"); });
-  }
+  if (CONFIG.LISTA_REGALOS_URL) gift.href = CONFIG.LISTA_REGALOS_URL;
+  else gift.addEventListener("click", (e) => { e.preventDefault(); alert("La lista está en camino. Vuelve pronto 🙂"); });
 
   const wa = configurado(CONFIG.WHATSAPP) ? "https://wa.me/" + CONFIG.WHATSAPP : null;
   if (wa) { $("dudasLink").href = wa; $("fixLink").href = wa + "?text=" + encodeURIComponent("Hola! Confirmé al baby shower de Damián pero tengo un cambio: "); }
   else { $("dudasLink").style.display = "none"; }
 
-  // Botón compartir (los invitados reenvían la invitación)
   $("shareBtn").href = "https://wa.me/?text=" + encodeURIComponent(
     "Estás invitad@ al Baby Shower de Damián 🍼 Sáb 25 de julio, 17:00, Restaurante El Ancla (La Cisterna). Confirma aquí: " + URL_INVITACION
   );
 
-  // Archivo de calendario (.ics)
   const ics = [
     "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//d10//damian//ES","BEGIN:VEVENT",
     "UID:babyshower-damian-20260725@d10.cl",
@@ -748,9 +463,7 @@ $("form").addEventListener("submit", (e) => {
   };
   const total = asiste ? acomp + 1 : 0;
   const btn = $("submitBtn");
-
-  const guardarLocal = () =>
-    localStorage.setItem("damian_rsvp", JSON.stringify({ nombre, total, asiste }));
+  const guardarLocal = () => localStorage.setItem("damian_rsvp", JSON.stringify({ nombre, total, asiste }));
 
   // «No puedo» no suma sillas: no pasa por la planilla (avisa por WhatsApp si está configurado)
   if (!asiste) {
@@ -790,7 +503,7 @@ $("form").addEventListener("submit", (e) => {
       btn.disabled = false;
       btn.textContent = "Confirmar asistencia →";
       const wa = configurado(CONFIG.WHATSAPP)
-        ? "\n\nPlan B: escríbenos por WhatsApp con el botón «¿Dudas? Escríbenos» (última tarjeta)."
+        ? "\n\nPlan B: escríbenos por WhatsApp con el botón «¿Dudas? Escríbenos» (al final)."
         : "";
       alert("El envío falló (problema de conexión). Intenta de nuevo." + wa);
     });
