@@ -159,7 +159,6 @@ textarea:focus{border-color:var(--red)}
 .stamp{display:inline-block;border:4px double var(--red);color:var(--red);border-radius:8px;padding:9px 22px;font-size:19px;letter-spacing:.36em;font-weight:700;text-transform:uppercase;transform:rotate(-7deg);margin-bottom:18px;animation:stampin .45s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes stampin{from{transform:rotate(-7deg) scale(2.3);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
 .confirmed p{font-family:'Courier Prime',monospace;font-size:14.5px;line-height:1.65;margin:8px 0}
-.confirmed .exp{font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--red);font-weight:600}
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:22px}
 
 /* ── Regalos ── */
@@ -270,7 +269,6 @@ textarea:focus{border-color:var(--red)}
 
         <div class="confirmed" id="confirmed">
           <div class="stamp" id="stampTxt">Confirmado</div>
-          <p class="exp" id="expediente">Expediente Nº 0000</p>
           <p id="confText">Quedaste adentro.</p>
           <p id="confSub"></p>
           <div class="actions">
@@ -446,7 +444,6 @@ document.querySelectorAll("input[name=actitud]").forEach(r =>
 function mostrarConfirmado(nombre, total, asiste){
   $("form").style.display = "none";
   $("confirmed").style.display = "block";
-  $("expediente").textContent = "Expediente Nº " + String(1000 + Math.floor(Math.random() * 9000));
   $("stampTxt").textContent = asiste ? "Confirmado" : "Recibido";
   if (asiste) {
     $("confText").textContent =
