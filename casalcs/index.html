@@ -37,6 +37,7 @@ h1{font-size:18px;margin:0 0 2px;font-weight:700;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:0 0 10px;font-size:13px}
 .stats{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:0 0 12px}
 .stats dt{color:var(--muted)} .stats dd{margin:0;font-weight:700}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline}
 label.row{display:flex;align-items:center;gap:10px;margin:6px 0}
 input[type=range]{flex:1;accent-color:var(--accent)}
 .val{min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums}
@@ -73,7 +74,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:12px;margin-top:8px}
   <h1>Terreno casa Los Muermos</h1>
   <p class="sub">Prueba de concepto con relieve satelital</p>
   <dl class="stats">
-    <dt>Área marcada</dt><dd>≈ 6.300 m²</dd>
+    <dt><span class="sw" style="background:#f2c230"></span>Área levantamiento</dt><dd>≈ 6.300 m²</dd>
+    <dt><span class="sw" style="background:#4fb6e3"></span>Corte tras la casa</dt><dd>≈ 1.570 m²</dd>
     <dt>Perímetro</dt><dd>≈ 350 m</dd>
     <dt>Desnivel en el área</dt><dd id="dn">—</dd>
   </dl>
@@ -174,6 +176,25 @@ const polyPts = densify(T.poly);
 const polyGeo = new THREE.BufferGeometry(); polyGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(polyPts.length*3),3));
 const polyLine = new THREE.Line(polyGeo, new THREE.LineBasicMaterial({color:0xf2c230}));
 scene.add(polyLine);
+
+// Corte despejado detrás de la casa (KML de David, 28-10-2026)
+const CORTE = [[2.82,28.22],[-48.11,-1.4],[-6.01,-26.15],[-3.36,-23.47],[-3.9,-14.82],[-4.03,-12.78],[-2.03,-10.59],[-2.01,-8.7],[0.01,-5.23],[1.99,-1.96],[3.87,-0.31],[7.1,0.46],[9.74,2.84],[10.27,6.66],[9.83,10.98],[11.45,12.85],[11.74,16.8],[15.21,19.43]];
+const corteTri = THREE.ShapeUtils.triangulateShape(CORTE.map(p=>new THREE.Vector2(p[0],p[1])), []);
+const corteGeo = new THREE.BufferGeometry();
+corteGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(CORTE.length*3),3));
+corteGeo.setIndex(corteTri.flat());
+const corteFill = new THREE.Mesh(corteGeo, new THREE.MeshBasicMaterial({color:0x4fb6e3, transparent:true, opacity:0.45, side:THREE.DoubleSide, depthWrite:false}));
+scene.add(corteFill);
+const cortePts = densify(CORTE);
+const corteLineGeo = new THREE.BufferGeometry(); corteLineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(cortePts.length*3),3));
+const corteLine = new THREE.Line(corteLineGeo, new THREE.LineBasicMaterial({color:0x1d7fb0}));
+scene.add(corteLine);
+function updateCorte(){
+  const a=corteGeo.attributes.position.array; CORTE.forEach((p,i)=>{ a[i*3]=p[0]; a[i*3+1]=hAt(p[0],p[1])*EX+1.2; a[i*3+2]=-p[1]; });
+  corteGeo.attributes.position.needsUpdate=true; corteGeo.computeBoundingSphere();
+  const b=corteLineGeo.attributes.position.array; cortePts.forEach((p,i)=>{ b[i*3]=p[0]; b[i*3+1]=hAt(p[0],p[1])*EX+1.4; b[i*3+2]=-p[1]; });
+  corteLineGeo.attributes.position.needsUpdate=true; corteLineGeo.computeBoundingSphere();
+}
 const pin = new THREE.Group();
 const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,24,8), new THREE.MeshLambertMaterial({color:0xc4392b}));
 stick.position.y=12; pin.add(stick);
@@ -188,12 +209,14 @@ function applyExaggeration(){
   const a=polyGeo.attributes.position.array; polyPts.forEach((p,i)=>{ a[i*3]=p[0]; a[i*3+1]=hAt(p[0],p[1])*EX+0.8; a[i*3+2]=-p[1]; });
   polyGeo.attributes.position.needsUpdate=true; polyGeo.computeBoundingSphere();
   const [mx,my]=T.marker; pin.position.set(mx, hAt(mx,my)*EX, -my);
+  updateCorte();
 }
 applyExaggeration();
 
 // Cámara
 const cx = T.poly.reduce((s,p)=>s+p[0],0)/T.poly.length, cy = T.poly.reduce((s,p)=>s+p[1],0)/T.poly.length;
-function resetView(){ const h=hAt(cx,cy)*EX; controls.target.set(cx,h,-cy); camera.position.set(cx+180, h+170, -cy+260); controls.update(); }
+const kx = CORTE.reduce((s,p)=>s+p[0],0)/CORTE.length, ky = CORTE.reduce((s,p)=>s+p[1],0)/CORTE.length;
+function resetView(){ const h=hAt(kx,ky)*EX; controls.target.set(kx,h,-ky); camera.position.set(kx+120, h+120, -ky+170); controls.update(); }
 resetView();
 
 // UI
@@ -213,7 +236,7 @@ function probe(ev){
   const x=hit.point.x, y=-hit.point.z, h=hAt(x,y), [mx,my]=T.marker;
   const dist=Math.hypot(x-mx,y-my), dh=h-hAt(mx,my);
   ph.textContent=h.toFixed(1).replace('.',',')+' m';
-  pd.textContent='A '+Math.round(dist)+' m del marcador, '+(dh>=0?'+':'−')+Math.abs(dh).toFixed(1).replace('.',',')+' m'+(inPoly(x,y,T.poly)?' · dentro del área':'');
+  pd.textContent='A '+Math.round(dist)+' m del marcador, '+(dh>=0?'+':'−')+Math.abs(dh).toFixed(1).replace('.',',')+' m'+(inPoly(x,y,CORTE)?' · dentro del corte':inPoly(x,y,T.poly)?' · dentro del área':'');
 }
 renderer.domElement.addEventListener('pointermove', probe);
 renderer.domElement.addEventListener('pointerdown', probe);
