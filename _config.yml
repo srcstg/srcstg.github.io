@@ -1,0 +1,3 @@
+# Sin plugins ni temas: solo se necesita que Jekyll no descarte las carpetas _next (exports de Next.js).
+include:
+  - _next
