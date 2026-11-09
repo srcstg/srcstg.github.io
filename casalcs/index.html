@@ -44,6 +44,7 @@ input[type=range]::-moz-range-thumb{width:1.75rem;height:1.75rem}
 .val{flex:0 0 auto;min-width:2.6em;text-align:right;font-variant-numeric:tabular-nums}
 .btns{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
 .grp{color:var(--muted);font-size:.9375rem;margin:.875rem 0 .25rem}
+.btns[hidden],.hint[hidden],.pins[hidden]{display:none}
 button{font:inherit;font-size:1rem;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:8px;padding:.625rem .875rem;min-height:2.75rem;cursor:pointer}
 .btns button[aria-pressed]::before{content:"";display:inline-block;width:1.1em;height:1.1em;border:2px solid currentColor;border-radius:4px;margin-right:.5em;vertical-align:-.2em;text-align:center;font-size:.9em;line-height:1}
 .btns button[aria-pressed="true"]::before{content:"\2713";background:#2a2000;color:var(--accent);border-color:#2a2000}
@@ -129,7 +130,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
   <p class="grp">Medir</p>
   <div class="btns"><button id="bm" aria-pressed="false">Medir distancias</button><button id="bmclr">Borrar medición</button></div>
   <div class="measure" id="measure" hidden>Toca el terreno en el punto de partida y luego en cada punto del recorrido.</div>
-  <p class="grp">Ubicar elementos</p>
+  <p class="grp">Ubicar elementos y recorridos</p>
   <div class="btns">
     <button id="bpin" aria-pressed="false">Ubicar elementos</button>
     <select id="pintype" aria-label="Tipo de elemento">
@@ -138,9 +139,15 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
       <option value="estanque">Estanque</option>
       <option value="llave">Llave o salida</option>
       <option value="otro">Otro</option>
+      <optgroup label="Recorridos">
+        <option value="L:manguera">Manguera</option>
+        <option value="L:tubo">Tubo de riego</option>
+        <option value="L:cable">Cable eléctrico</option>
+      </optgroup>
     </select>
   </div>
-  <p class="hint" id="pinhint" hidden>Elige el tipo y toca el terreno donde va. Puedes cambiarle el nombre en la lista.</p>
+  <p class="hint" id="pinhint" hidden>Elige el tipo y toca el terreno donde va. Para una manguera o tubo, toca cada punto del recorrido y luego «Terminar recorrido». Puedes cambiar los nombres en la lista.</p>
+  <div class="btns" id="linedraftbtns" hidden><button id="blclose">Terminar recorrido</button><button id="blundo">Deshacer último punto</button></div>
   <ol class="pins" id="pins"></ol>
   <div class="btns" id="pinbtns" hidden><button id="pinclr">Borrar marcas</button></div>
   <p class="grp">Dibujar zonas</p>
@@ -452,6 +459,7 @@ function applyEx(){
   if(window.measReady) drawMeasure();
   if(window.pinsReady) drawPins();
   if(window.zonesReady) drawZones();
+  if(window.linesReady) drawLines();
   renderer.shadowMap.needsUpdate=true;
 }
 applyEx();
@@ -495,7 +503,7 @@ renderer.domElement.addEventListener('pointerdown',ev=>{ pdown=[ev.clientX,ev.cl
 renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&&!zoning)||!pdown) return; const moved=Math.hypot(ev.clientX-pdown[0],ev.clientY-pdown[1]); pdown=null; if(moved>6) return;
   const r=renderer.domElement.getBoundingClientRect(); m.x=((ev.clientX-r.left)/r.width)*2-1; m.y=-((ev.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(m,camera); const hit=ray.intersectObject(mesh)[0]; if(!hit) return; const x=hit.point.x, y=-hit.point.z, h=hAt(x,y); if(isNaN(h)) return;
-  if(pinning){ addPin(x,y); return; }
+  if(pinning){ if(pinType.value.startsWith('L:')){ lineDraft.push([x,y]); drawLines(); } else addPin(x,y); return; }
   if(zoning){ zoneDraft.push([x,y]); drawZones(); return; }
   measPts.push({x,y,h}); drawMeasure(); });
 
@@ -509,7 +517,7 @@ function loadPins(){ try{ const h=location.hash.match(/[#&]m=([^&]+)/); if(h){ p
   try{ const v=localStorage.getItem('casalcs-marcas'); if(v) pins=JSON.parse(v); }catch(e){} }
 function savePins(){ try{ localStorage.setItem('casalcs-marcas',JSON.stringify(pins)); }catch(e){} if(window.pubReady) pubStatus(); }
 const b64u=v=>btoa(unescape(encodeURIComponent(JSON.stringify(v))));
-function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); u.hash=parts.join('&'); return u.href; }
+function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); u.hash=parts.join('&'); return u.href; }
 function drawPins(){
   while(pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
@@ -524,12 +532,13 @@ function drawPins(){
     const inp=li.querySelector('input'); inp.value=p.name; inp.addEventListener('change',()=>{ p.name=inp.value.trim()||T.n; savePins(); drawPins(); });
     li.querySelector('.del').addEventListener('click',()=>{ pins.splice(i,1); savePins(); drawPins(); });
     pinsEl.appendChild(li); });
-  pinBtns.hidden=pins.length===0; }
-function setPinning(on){ pinning=on; view.classList.toggle('pinning',on); pinHint.hidden=!on;
+  if(window.linesReady) renderLineItems();
+  pinBtns.hidden=pins.length===0&&!(window.linesReady&&lines.length); }
+function setPinning(on){ pinning=on; view.classList.toggle('pinning',on); pinHint.hidden=!on; if(!on&&window.linesReady){ lineDraft=[]; drawLines(); }
   if(on&&measuring){ document.getElementById('bm').setAttribute('aria-pressed','false'); setMeasuring(false); }
   if(on&&window.zonesReady&&zoning){ document.getElementById('bzone').setAttribute('aria-pressed','false'); setZoning(false); } }
 toggle(document.getElementById('bpin'),setPinning);
-document.getElementById('pinclr').addEventListener('click',()=>{ if(pins.length&&!confirm('¿Borrar las '+pins.length+' marcas?')) return; pins=[]; savePins(); history.replaceState(null,'',location.pathname); drawPins(); });
+document.getElementById('pinclr').addEventListener('click',()=>{ const n=pins.length+(window.linesReady?lines.length:0); if(n&&!confirm('¿Borrar las '+n+' marcas y recorridos?')) return; pins=[]; savePins(); if(window.linesReady){ lines=[]; lineDraft=[]; saveLines(); drawLines(); } history.replaceState(null,'',location.pathname); drawPins(); });
 document.getElementById('pinshare').addEventListener('click',ev=>{ const link=pinLink(); history.replaceState(null,'',link);
   const done=()=>{ ev.target.textContent='Enlace copiado'; setTimeout(()=>ev.target.textContent='Copiar enlace con marcas y zonas',2000); };
   if(navigator.clipboard) navigator.clipboard.writeText(link).then(done,()=>prompt('Copia este enlace:',link)); else prompt('Copia este enlace:',link); });
@@ -592,23 +601,61 @@ document.getElementById('zoneclr').addEventListener('click',()=>{ if(zones.lengt
 zoneType.addEventListener('change',drawZones);
 loadZones(); window.zonesReady=true;
 
+// Recorridos: mangueras, tubos y cables como líneas sobre el terreno, con largo y desnivel
+const LINE_TYPES={manguera:{n:'Manguera',c:'#1fa3c4'},tubo:{n:'Tubo de riego',c:'#8b5cf6'},cable:{n:'Cable eléctrico',c:'#f0c020'}};
+const lineGroup=new THREE.Group(); scene.add(lineGroup);
+let lines=[], lineDraft=[];
+const lineDraftBtns=document.getElementById('linedraftbtns');
+function loadLines(){ try{ const h=location.hash.match(/[#&]l=([^&]+)/); if(h){ lines=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){}
+  try{ const v=localStorage.getItem('casalcs-lineas'); if(v) lines=JSON.parse(v); }catch(e){} }
+function saveLines(){ try{ localStorage.setItem('casalcs-lineas',JSON.stringify(lines)); }catch(e){} if(window.pubReady) pubStatus(); }
+function groundPath(P){ const out=[]; for(let i=0;i<P.length-1;i++){ const a=P[i],b=P[i+1], n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/0.5));
+  for(let k=0;k<n;k++){ const x=a[0]+(b[0]-a[0])*k/n, y=a[1]+(b[1]-a[1])*k/n, h=hAt(x,y); out.push([x,y,isNaN(h)?CMED:h]); } }
+  const l=P[P.length-1], hl=hAt(l[0],l[1]); out.push([l[0],l[1],isNaN(hl)?CMED:hl]); return out; }
+function lineStats(P){ const path=groundPath(P); let plano=0, real=0; for(let i=0;i<path.length-1;i++){ const a=path[i],b=path[i+1], d=Math.hypot(b[0]-a[0],b[1]-a[1]); plano+=d; real+=Math.hypot(d,b[2]-a[2]); }
+  return {plano,real,des:path[path.length-1][2]-path[0][2],hmax:Math.max(...path.map(p=>p[2]))-path[0][2]}; }
+function drawLineObj(P,col,thick){ const path=groundPath(P); const arr=new Float32Array(path.length*3); path.forEach((p,i)=>{ arr[i*3]=p[0]; arr[i*3+1]=p[2]*EX+0.8; arr[i*3+2]=-p[1]; });
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(arr,3)); const grp=new THREE.Group(); grp.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:col})));
+  // tramos como cilindros finos para que se vean con grosor
+  for(let i=0;i<path.length-1;i++){ const a=new THREE.Vector3(arr[i*3],arr[i*3+1],arr[i*3+2]), b=new THREE.Vector3(arr[i*3+3],arr[i*3+4],arr[i*3+5]), L=a.distanceTo(b); if(L<1e-3) continue;
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(thick,thick,L,6),new THREE.MeshBasicMaterial({color:col,depthTest:false})); c.renderOrder=4; c.position.copy(a).lerp(b,0.5); c.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize()); grp.add(c); }
+  P.forEach(p=>{ const h=hAt(p[0],p[1]); const d=new THREE.Mesh(measDotGeo,new THREE.MeshBasicMaterial({color:col,depthTest:false})); d.renderOrder=4; d.scale.setScalar(0.7); d.position.set(p[0],(isNaN(h)?CMED:h)*EX+0.8,-p[1]); grp.add(d); });
+  return grp; }
+function drawLines(){
+  while(lineGroup.children.length) lineGroup.remove(lineGroup.children[0]);
+  lines.forEach((l,i)=>{ const T=LINE_TYPES[l.t]||LINE_TYPES.manguera, col=new THREE.Color(T.c); lineGroup.add(drawLineObj(l.pts,col,0.18));
+    const st=lineStats(l.pts), mid=l.pts[Math.floor(l.pts.length/2)], h=hAt(mid[0],mid[1]); const sp=textSprite((i+1)+' · '+l.name+' · '+fmt(st.plano,0)+' m'); sp.position.set(mid[0],(isNaN(h)?CMED:h)*EX+2.4,-mid[1]); lineGroup.add(sp); });
+  if(lineDraft.length){ const t=pinType.value.slice(2), col=new THREE.Color((LINE_TYPES[t]||LINE_TYPES.manguera).c); lineGroup.add(drawLineObj(lineDraft,col,0.12)); }
+  lineDraftBtns.hidden=lineDraft.length===0; document.getElementById('blclose').disabled=lineDraft.length<2; }
+function renderLineItems(){ lines.forEach((l,i)=>{ const T=LINE_TYPES[l.t]||LINE_TYPES.manguera, st=lineStats(l.pts); const li=document.createElement('li');
+    li.innerHTML='<span class="num" style="background:'+T.c+';border-radius:2px;height:.5rem;align-self:center"></span><input value="" aria-label="Nombre del recorrido"><button class="del" aria-label="Quitar recorrido" title="Quitar recorrido">×</button>'+
+      '<span class="det">'+T.n+' · '+fmt(st.plano,1)+' m en planta, '+fmt(st.real,1)+' m por el suelo · desnivel '+(st.des>=0?'+':'−')+fmt(Math.abs(st.des),1)+' m'+(st.hmax>st.des+0.3?' · punto más alto +'+fmt(st.hmax,1)+' m':'')+'</span>';
+    const inp=li.querySelector('input'); inp.value=l.name; inp.addEventListener('change',()=>{ l.name=inp.value.trim()||T.n; saveLines(); drawLines(); drawPins(); });
+    li.querySelector('.del').addEventListener('click',()=>{ lines.splice(i,1); saveLines(); drawLines(); drawPins(); });
+    pinsEl.appendChild(li); }); }
+document.getElementById('blclose').addEventListener('click',()=>{ if(lineDraft.length<2) return; const t=pinType.value.slice(2), T=LINE_TYPES[t]||LINE_TYPES.manguera, n=lines.filter(l=>l.t===t).length+1;
+  lines.push({t,name:T.n+' '+n,pts:lineDraft.map(p=>[+p[0].toFixed(2),+p[1].toFixed(2)])}); lineDraft=[]; saveLines(); drawLines(); drawPins(); });
+document.getElementById('blundo').addEventListener('click',()=>{ lineDraft.pop(); drawLines(); });
+pinType.addEventListener('change',()=>{ if(!pinType.value.startsWith('L:')&&lineDraft.length){ lineDraft=[]; } drawLines(); });
+loadLines(); window.linesReady=true;
+
 // Estado publicado para todos: marcas.json en el sitio. Lo local manda si difiere; se puede descargar para publicar o descartar.
-let published={pins:[],zones:[]};
+let published={pins:[],zones:[],lines:[]};
 const pubHint=document.getElementById('pubhint'), pubReset=document.getElementById('pubreset');
-const stateJSON=()=>JSON.stringify({pins,zones});
-function pubStatus(){ const same=stateJSON()===JSON.stringify({pins:published.pins||[],zones:published.zones||[]}); pubHint.hidden=same; pubReset.hidden=same;
-  if(same){ try{ localStorage.removeItem('casalcs-marcas'); localStorage.removeItem('casalcs-zonas'); }catch(e){} } }
-fetch('marcas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; published={pins:j.pins||[],zones:j.zones||[]};
-  const hasHash=/[#&](m|z)=/.test(location.hash); let hasLocal=false; try{ hasLocal=!!(localStorage.getItem('casalcs-marcas')||localStorage.getItem('casalcs-zonas')); }catch(e){}
-  if(!hasHash&&!hasLocal){ pins=published.pins.slice(); zones=published.zones.slice(); drawPins(); drawZones(); }
+const stateJSON=()=>JSON.stringify({pins,zones,lines});
+function pubStatus(){ const same=stateJSON()===JSON.stringify({pins:published.pins||[],zones:published.zones||[],lines:published.lines||[]}); pubHint.hidden=same; pubReset.hidden=same;
+  if(same){ try{ localStorage.removeItem('casalcs-marcas'); localStorage.removeItem('casalcs-zonas'); localStorage.removeItem('casalcs-lineas'); }catch(e){} } }
+fetch('marcas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; published={pins:j.pins||[],zones:j.zones||[],lines:j.lines||[]};
+  const hasHash=/[#&](m|z|l)=/.test(location.hash); let hasLocal=false; try{ hasLocal=!!(localStorage.getItem('casalcs-marcas')||localStorage.getItem('casalcs-zonas')||localStorage.getItem('casalcs-lineas')); }catch(e){}
+  if(!hasHash&&!hasLocal){ pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); drawLines(); drawPins(); drawZones(); }
   pubStatus(); }).catch(()=>{});
-document.getElementById('pubdl').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({pins,zones},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='marcas.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); });
+document.getElementById('pubdl').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({pins,zones,lines},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='marcas.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); });
 window.pubReady=true;
-pubReset.addEventListener('click',()=>{ if(!confirm('¿Descartar tus cambios locales y volver a lo publicado?')) return; pins=published.pins.slice(); zones=published.zones.slice(); history.replaceState(null,'',location.pathname); drawPins(); drawZones(); pubStatus(); });
+pubReset.addEventListener('click',()=>{ if(!confirm('¿Descartar tus cambios locales y volver a lo publicado?')) return; pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); lineDraft=[]; history.replaceState(null,'',location.pathname); drawLines(); drawPins(); drawZones(); pubStatus(); });
 
 // Cámara: mirando desde el sureste hacia la casa, con el río en primer plano
 function resetView(){ const t=new THREE.Vector3(0,(31)*EX,0); controls.target.copy(t); camera.position.set(118,t.y+100,118); controls.update(); }
-resetView(); contourColors(); drawPins(); drawZones();
+resetView(); contourColors(); drawLines(); drawPins(); drawZones();
 
 // UI
 const ex=document.getElementById('ex'), exv=document.getElementById('exv');
