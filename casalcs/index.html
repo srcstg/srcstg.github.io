@@ -82,6 +82,14 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
 .pins .det{grid-column:2;color:var(--muted);font-size:.9375rem}
 .pins .del{min-height:2.25rem;padding:.25rem .625rem;font-size:1.125rem;line-height:1}
 .hint{font-size:.9375rem;color:var(--muted);margin:.375rem 0 0}
+.riego{margin-top:.5rem;padding:.75rem .875rem;border:1.5px solid var(--line);border-radius:8px;font-size:1rem;line-height:1.5}
+.riego b{font-variant-numeric:tabular-nums}
+.riego h3{font-size:1rem;margin:.75rem 0 .25rem;font-weight:700}
+.riego h3:first-child{margin-top:0}
+.riego .warn{color:#c4392b}
+.pins .det input[type=number]{width:4.5em;border:1.5px solid var(--line);border-radius:6px;padding:.125rem .375rem;font:inherit;font-size:1rem;color:var(--ink);background:transparent;margin:0 .25rem}
+.row2{display:grid;grid-template-columns:1fr auto;gap:.5rem .75rem;align-items:center;margin:.375rem 0;font-size:1rem}
+.row2 input[type=number]{width:5.5em;font:inherit;font-size:1rem;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:.5rem .625rem;min-height:2.75rem}
 #loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted);font-size:1.125rem;pointer-events:none}
 @media (prefers-reduced-motion:reduce){ .panel{transition:none} }
 .panel{transition:transform .32s ease, opacity .32s ease}
@@ -137,6 +145,8 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
       <option value="rec">Recolector de agua</option>
       <option value="bomba">Bomba</option>
       <option value="estanque">Estanque</option>
+      <option value="toma">Toma de agua</option>
+      <option value="regador">Regador</option>
       <option value="llave">Llave o salida</option>
       <option value="otro">Otro</option>
       <optgroup label="Recorridos">
@@ -166,6 +176,12 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
   <div class="btns" id="zonedraftbtns" hidden><button id="bzclose">Cerrar zona</button><button id="bzundo">Deshacer último punto</button></div>
   <ol class="pins" id="zones"></ol>
   <div class="btns" id="zonebtns" hidden><button id="zoneclr">Borrar zonas</button></div>
+  <p class="grp">Riego del pasto</p>
+  <div class="row2"><label for="rr">Radio de los regadores (m)</label><input type="number" id="rr" min="3" max="25" step="0.5" value="10"></div>
+  <div class="row2"><label for="rturno">Regadores que riegan a la vez</label><input type="number" id="rturno" min="1" max="60" step="1" value="4"></div>
+  <div class="row2"><label for="rdiam">Diámetro del tubo</label><select id="rdiam"><option value="25">25 mm</option><option value="32" selected>32 mm</option><option value="40">40 mm</option><option value="50">50 mm</option><option value="63">63 mm</option></select></div>
+  <div class="btns"><button id="rprop">Proponer regadores para el pasto</button></div>
+  <div class="riego" id="riego">—</div>
   <p class="grp">Compartir</p>
   <p class="hint" id="pubhint" hidden>Tienes cambios que solo se ven en este equipo. Para que los vean todos, descarga el archivo y publícalo en el sitio.</p>
   <div class="btns"><button id="pubdl">Descargar marcas.json para publicar</button><button id="pubreset" hidden>Volver a lo publicado</button></div>
@@ -201,6 +217,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
     <p class="note">La casa, el container y la casa del vecino (fuera del lote, al noreste) se recortaron de la nube de puntos del mismo vuelo: los techos son la superficie LiDAR real en celdas de 0,5 m, el container es una caja de 6 × 2,4 m a la cota medida, y los muros bajan hasta el suelo. Los árboles son la superficie superior del follaje según la nube (celdas de 1 m, desde 2,5 m de alto), sin troncos ni copas individuales; el color va de oliva (bajo) a verde claro (alto). Las sombras salen del relieve, las construcciones y las copas.</p>
     <p class="note">La capa de puntos es la nube LiDAR del vuelo recortada al lote más 5 m de margen y adelgazada con densidad variable: un punto por cubo de 0,2 m en el suelo, el pasto y las construcciones, y de 0,6 m en el follaje (≈ 419 mil puntos, 4,6 MB que se cargan al prenderla). Dentro de la ortofoto cada punto lleva su color real; fuera, gris en el suelo y verde según la altura. Combínala con Edificios, Árboles y Terreno como quieras.</p>
     <p class="note">Las marcas y zonas que ven todos se leen del archivo marcas.json del sitio. Los cambios que hagas quedan primero solo en tu equipo; con «Descargar marcas.json para publicar» obtienes el archivo que hay que subir al sitio para que todos lo vean.</p>
+    <p class="note">El riego se calcula sobre las zonas de tipo «Pasto» que dibujes (si no hay ninguna, sobre el corte). Cada regador riega un círculo de su radio; el caudal, la lluvia equivalente y las alturas de bomba son estimaciones para orientar la compra, no un cálculo de ingeniería.</p>
     <p class="note">La foto es la ortofoto incluida en el plano PDF. El nivel del río es el del día del vuelo; en verano será menor.</p>
   </details>
 </section>
@@ -508,7 +525,7 @@ renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&
   measPts.push({x,y,h}); drawMeasure(); });
 
 // Ubicar elementos: marcas con nombre sobre el terreno, guardadas en este navegador y compartibles por enlace
-const PIN_TYPES={rec:{n:'Recolector de agua',c:'#4fb6e3'},bomba:{n:'Bomba',c:'#e5533d'},estanque:{n:'Estanque',c:'#3f8f5f'},llave:{n:'Llave o salida',c:'#e0a91b'},otro:{n:'Elemento',c:'#b8b8b8'}};
+const PIN_TYPES={rec:{n:'Recolector de agua',c:'#4fb6e3'},bomba:{n:'Bomba',c:'#e5533d'},estanque:{n:'Estanque',c:'#3f8f5f'},toma:{n:'Toma de agua',c:'#2b6cb0'},regador:{n:'Regador',c:'#22c55e'},llave:{n:'Llave o salida',c:'#e0a91b'},otro:{n:'Elemento',c:'#b8b8b8'}};
 const pinGroup=new THREE.Group(); scene.add(pinGroup);
 let pins=[], pinning=false;
 const pinsEl=document.getElementById('pins'), pinHint=document.getElementById('pinhint'), pinBtns=document.getElementById('pinbtns'), pinType=document.getElementById('pintype');
@@ -523,12 +540,15 @@ function drawPins(){
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
     const pole=new THREE.Mesh(poleGeo,new THREE.MeshBasicMaterial({color:col})); pole.scale.y=3; pole.position.set(p.x,y+1.5,-p.y); pinGroup.add(pole);
     const head=new THREE.Mesh(headGeo,new THREE.MeshBasicMaterial({color:col})); head.position.set(p.x,y+3.2,-p.y); pinGroup.add(head);
-    const sp=textSprite((i+1)+' · '+p.name); sp.position.set(p.x,y+4.8,-p.y); pinGroup.add(sp); });
+    const sp=textSprite((i+1)+' · '+p.name); sp.position.set(p.x,y+4.8,-p.y); pinGroup.add(sp);
+    if(p.t==='regador'&&window.riegoReady){ const r=p.r||+document.getElementById('rr').value||10, circ=[]; for(let k=0;k<36;k++){ const a=k/36*2*Math.PI; circ.push([p.x+r*Math.cos(a),p.y+r*Math.sin(a)]); } const {g}=zoneMesh(circ,col,0.18); pinGroup.add(g); } });
+  if(window.riegoReady) riegoResumen();
   pinsEl.innerHTML='';
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y), dw=distWater(p.x,p.y), T=PIN_TYPES[p.t]||PIN_TYPES.otro;
     const li=document.createElement('li');
     li.innerHTML='<span class="num" style="background:'+T.c+'">'+(i+1)+'</span><input value="" aria-label="Nombre de la marca"><button class="del" aria-label="Quitar marca" title="Quitar marca">×</button>'+
-      '<span class="det">'+T.n+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
+      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
+    const rad=li.querySelector('.rad'); if(rad){ rad.value=p.r||+document.getElementById('rr').value||10; rad.addEventListener('change',()=>{ p.r=+rad.value||10; savePins(); drawPins(); }); }
     const inp=li.querySelector('input'); inp.value=p.name; inp.addEventListener('change',()=>{ p.name=inp.value.trim()||T.n; savePins(); drawPins(); });
     li.querySelector('.del').addEventListener('click',()=>{ pins.splice(i,1); savePins(); drawPins(); });
     pinsEl.appendChild(li); });
@@ -542,7 +562,7 @@ document.getElementById('pinclr').addEventListener('click',()=>{ const n=pins.le
 document.getElementById('pinshare').addEventListener('click',ev=>{ const link=pinLink(); history.replaceState(null,'',link);
   const done=()=>{ ev.target.textContent='Enlace copiado'; setTimeout(()=>ev.target.textContent='Copiar enlace con marcas y zonas',2000); };
   if(navigator.clipboard) navigator.clipboard.writeText(link).then(done,()=>prompt('Copia este enlace:',link)); else prompt('Copia este enlace:',link); });
-function addPin(x,y){ const t=pinType.value, T=PIN_TYPES[t]; const n=pins.filter(p=>p.t===t).length+1; pins.push({t,name:T.n+' '+n,x:+x.toFixed(2),y:+y.toFixed(2)}); savePins(); drawPins(); }
+function addPin(x,y){ const t=pinType.value, T=PIN_TYPES[t]; const n=pins.filter(p=>p.t===t).length+1; const pin={t,name:T.n+' '+n,x:+x.toFixed(2),y:+y.toFixed(2)}; if(t==='regador') pin.r=+document.getElementById('rr').value||10; pins.push(pin); savePins(); drawPins(); }
 loadPins(); window.pinsReady=true;
 
 // Dibujar zonas: polígonos sobre el terreno con área y perímetro, guardados junto con las marcas
@@ -555,7 +575,7 @@ function loadZones(){ try{ const h=location.hash.match(/[#&]z=([^&]+)/); if(h){ 
 function saveZones(){ try{ localStorage.setItem('casalcs-zonas',JSON.stringify(zones)); }catch(e){} if(window.pubReady) pubStatus(); }
 function polyArea(P){ let a=0; for(let i=0;i<P.length;i++){ const [x1,y1]=P[i],[x2,y2]=P[(i+1)%P.length]; a+=x1*y2-x2*y1; } return Math.abs(a)/2; }
 function polyPerim(P){ let d=0; for(let i=0;i<P.length;i++){ const a=P[i],b=P[(i+1)%P.length]; d+=Math.hypot(b[0]-a[0],b[1]-a[1]); } return d; }
-function zoneMesh(P,color){ // relleno que sigue el terreno + contorno
+function zoneMesh(P,color,opacity){ // relleno que sigue el terreno + contorno
   const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]), X0=Math.floor(Math.min(...xs)),X1=Math.ceil(Math.max(...xs)),Y0=Math.floor(Math.min(...ys)),Y1=Math.ceil(Math.max(...ys));
   const cols=X1-X0+1, rows=Y1-Y0+1, id=new Int32Array(cols*rows).fill(-1), pts=[], tri=[];
   for(let r=0;r<rows;r++) for(let q=0;q<cols;q++){ const x=X0+q,y=Y0+r; if(inPoly(x,y,P)){ id[r*cols+q]=pts.length; pts.push([x,y]); } }
@@ -567,7 +587,7 @@ function zoneMesh(P,color){ // relleno que sigue el terreno + contorno
   const g=new THREE.Group(); let area3=0;
   if(tri.length){ const arr=new Float32Array(pts.length*3); pts.forEach((p,i)=>{ const h=hAt(p[0],p[1]); arr[i*3]=p[0]; arr[i*3+1]=(isNaN(h)?CMED:h)*EX+0.6; arr[i*3+2]=-p[1]; });
     const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.BufferAttribute(arr,3)); geo.setIndex(tri);
-    g.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color,transparent:true,opacity:0.35,side:THREE.DoubleSide,depthWrite:false})));
+    g.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color,transparent:true,opacity:opacity||0.35,side:THREE.DoubleSide,depthWrite:false})));
     for(let i=0;i<tri.length;i+=3){ const A=new THREE.Vector3(arr[tri[i]*3],arr[tri[i]*3+1]/EX,arr[tri[i]*3+2]),B=new THREE.Vector3(arr[tri[i+1]*3],arr[tri[i+1]*3+1]/EX,arr[tri[i+1]*3+2]),C=new THREE.Vector3(arr[tri[i+2]*3],arr[tri[i+2]*3+1]/EX,arr[tri[i+2]*3+2]); area3+=new THREE.Triangle(A,B,C).getArea(); } }
   const cp=densify(P); const la=new Float32Array(cp.length*3); cp.forEach((p,i)=>{ const h=hAt(p[0],p[1]); la[i*3]=p[0]; la[i*3+1]=(isNaN(h)?CMED:h)*EX+0.75; la[i*3+2]=-p[1]; });
   const lg=new THREE.BufferGeometry(); lg.setAttribute('position',new THREE.BufferAttribute(la,3)); g.add(new THREE.Line(lg,new THREE.LineBasicMaterial({color})));
@@ -584,6 +604,7 @@ function drawZones(){
     const inp=li.querySelector('input'); inp.value=z.name; inp.addEventListener('change',()=>{ z.name=inp.value.trim()||T.n; saveZones(); drawZones(); });
     li.querySelector('.del').addEventListener('click',()=>{ zones.splice(i,1); saveZones(); drawZones(); });
     zonesEl.appendChild(li); });
+  if(window.riegoReady&&window.pinsReady) riegoResumen();
   // borrador en curso
   if(zoneDraft.length){ const col=new THREE.Color((ZONE_TYPES[zoneType.value]||ZONE_TYPES.otro).c);
     zoneDraft.forEach(p=>{ const h=hAt(p[0],p[1]); const d=new THREE.Mesh(measDotGeo,new THREE.MeshBasicMaterial({color:col})); d.position.set(p[0],(isNaN(h)?CMED:h)*EX+0.8,-p[1]); zoneGroup.add(d); });
@@ -638,6 +659,52 @@ document.getElementById('blclose').addEventListener('click',()=>{ if(lineDraft.l
 document.getElementById('blundo').addEventListener('click',()=>{ lineDraft.pop(); drawLines(); });
 pinType.addEventListener('change',()=>{ if(!pinType.value.startsWith('L:')&&lineDraft.length){ lineDraft=[]; } drawLines(); });
 loadLines(); window.linesReady=true;
+
+// Riego: cobertura del pasto, propuesta de regadores y resumen hidráulico (estimaciones)
+const riegoEl=document.getElementById('riego'), rrEl=document.getElementById('rr'), rturnoEl=document.getElementById('rturno'), rdiamEl=document.getElementById('rdiam');
+function grassPolys(){ const z=zones.filter(z=>z.t==='pasto').map(z=>z.pts); return z.length?z:[C]; }
+function grassCells(){ const cells=[]; grassPolys().forEach(P=>{ const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); for(let y=Math.floor(Math.min(...ys));y<=Math.ceil(Math.max(...ys));y++) for(let x=Math.floor(Math.min(...xs));x<=Math.ceil(Math.max(...xs));x++) if(inPoly(x+0.5,y+0.5,P)) cells.push([x+0.5,y+0.5]); }); return cells; }
+function coverage(){ const cells=grassCells(), regs=pins.filter(p=>p.t==='regador'); let cov=0;
+  for(const c of cells){ for(const r of regs){ const R=r.r||+rrEl.value||10; if(Math.hypot(c[0]-r.x,c[1]-r.y)<=R){ cov++; break; } } }
+  return {area:cells.length, covered:cov, cells}; }
+function proponerRegadores(){
+  const R=+rrEl.value||10, step=R*0.95, polys=grassPolys(); let added=0;
+  pins=pins.filter(p=>!(p.t==='regador'&&p.auto)); // reemplaza la propuesta anterior, conserva los puestos a mano
+  const cells=grassCells(); const covered=c=>pins.some(r=>r.t==='regador'&&Math.hypot(c[0]-r.x,c[1]-r.y)<=(r.r||R));
+  polys.forEach(P=>{ const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); const X0=Math.min(...xs)-R*0.3, X1=Math.max(...xs)+R*0.3, Y0=Math.min(...ys)-R*0.3, Y1=Math.max(...ys)+R*0.3; let row=0;
+    for(let y=Y0;y<=Y1;y+=step*0.866,row++) for(let x=X0+(row%2?step/2:0);x<=X1;x+=step){ if(!inPoly(x,y,P)&&distPoly(x,y,P)>R*0.3) continue;
+      // solo si aporta celdas nuevas de pasto
+      let gain=0; for(const c of cells){ if(Math.hypot(c[0]-x,c[1]-y)<=R&&!covered(c)) gain++; } if(gain<Math.PI*R*R*0.08) continue;
+      pins.push({t:'regador',name:'Regador '+(pins.filter(p=>p.t==='regador').length+1),x:+x.toFixed(2),y:+y.toFixed(2),r:R,auto:true}); added++; } });
+  // poda: quita los que al sacarlos no bajan la cobertura
+  for(let i=pins.length-1;i>=0;i--){ const p=pins[i]; if(!(p.t==='regador'&&p.auto)) continue; const before=coverage().covered; pins.splice(i,1); if(coverage().covered<before) pins.splice(i,0,p); }
+  let k=1; pins.forEach(p=>{ if(p.t==='regador'&&p.auto) p.name='Regador '+(k++); });
+  savePins(); drawPins(); }
+document.getElementById('rprop').addEventListener('click',()=>{ if(!pins.some(p=>p.t==='regador'&&p.auto)||confirm('¿Reemplazo la propuesta anterior de regadores? Los que pusiste a mano se conservan.')) proponerRegadores(); });
+function hazen(L,Q,Dmm){ const D=Dmm/1000, C=150; return 10.67*L*Math.pow(Q,1.852)/(Math.pow(C,1.852)*Math.pow(D,4.87)); } // m, Q en m³/s
+function riegoResumen(){
+  const cv=coverage(), regs=pins.filter(p=>p.t==='regador'), R=+rrEl.value||10, turno=Math.max(1,Math.min(regs.length||1,+rturnoEl.value||1)), D=+rdiamEl.value||32;
+  const qReg=0.009*R*R; // m³/h por regador a ~2,5 bar (estimación)
+  const toma=pins.find(p=>p.t==='toma')||pins.find(p=>p.t==='rec'), est=pins.find(p=>p.t==='estanque');
+  const hOf=p=>p?hAt(p.x,p.y):NaN;
+  const tubos=lines.filter(l=>l.t==='tubo'||l.t==='manguera'); let Ltub=0; tubos.forEach(l=>{ Ltub+=lineStats(l.pts).real; });
+  let html='<h3>Pasto</h3>'+fmt(cv.area,0)+' m² · regado por los regadores: <b>'+(cv.area?Math.round(100*cv.covered/cv.area):0)+' %</b>'+(cv.covered<cv.area*0.95&&regs.length?' <span class="warn">(quedan '+fmt(cv.area-cv.covered,0)+' m² sin regar)</span>':'')+
+    '<br>Agua para 5 mm al día: <b>'+fmt(cv.area*5/1000,1)+' m³</b> diarios ('+fmt(cv.area*5,0)+' litros)';
+  html+='<h3>Regadores</h3>'+(regs.length?'<b>'+regs.length+'</b> regadores · caudal estimado '+fmt(qReg,2)+' m³/h cada uno · '+turno+' a la vez: <b>'+fmt(qReg*turno,1)+' m³/h</b> ('+Math.round(qReg*turno*1000/60)+' L/min)'+
+    '<br>Lluvia equivalente ≈ '+fmt(qReg*1000/(Math.PI*R*R),1)+' mm/h · para 5 mm: <b>'+Math.round(5/(qReg*1000/(Math.PI*R*R))*60)+' min</b> por turno · '+Math.ceil(regs.length/turno)+' turnos':'Pon regadores a mano o usa «Proponer regadores para el pasto».');
+  html+='<h3>Bombas</h3>';
+  if(toma&&est){ const hT=hOf(toma), hE=hOf(est), Qd=cv.area*5/1000, Qb=Math.max(Qd/4,1); const L1=Math.hypot(est.x-toma.x,est.y-toma.y)*1.15; const hf1=hazen(L1,Qb/3600,D);
+    html+='De «'+toma.name+'» a «'+est.name+'»: sube <b>'+fmt(hE-hT)+' m</b> en ≈ '+fmt(L1,0)+' m de tubo. Para llenar el día de riego ('+fmt(Qd,1)+' m³) en 4 h: '+fmt(Qb,1)+' m³/h → altura de bomba ≈ <b>'+fmt(hE-hT+hf1+3,0)+' m</b> (incluye roce y 3 m de margen).<br>'; }
+  else html+='Marca una <b>toma de agua</b> en el río y un <b>estanque</b> para calcular la bomba de llenado.<br>';
+  if(est&&regs.length){ const hE=hOf(est); let hmax=-1e9, dmax=0; regs.forEach(r=>{ const h=hOf(r); if(!isNaN(h)) hmax=Math.max(hmax,h); dmax=Math.max(dmax,Math.hypot(r.x-est.x,r.y-est.y)); });
+    const L2=Ltub>0?Ltub:dmax*1.3, Q2=qReg*turno/3600, hf2=hazen(L2,Q2,D);
+    html+='De «'+est.name+'» a los regadores: el más alto está <b>'+(hmax>=hE?'+':'−')+fmt(Math.abs(hmax-hE))+' m</b> respecto al estanque · tubo '+(Ltub>0?'trazado ':'estimado ')+fmt(L2,0)+' m de '+D+' mm → roce ≈ '+fmt(hf2,1)+' m'+(hf2>8?' <span class="warn">(mucho roce: usa un tubo más grueso o menos regadores a la vez)</span>':'')+
+      '<br>Altura de bomba para regar ≈ <b>'+fmt(Math.max(0,hmax-hE)+25+hf2+2,0)+' m</b> a '+fmt(qReg*turno,1)+' m³/h (25 m de presión en el regador, roce y 2 m de margen).'; }
+  else if(regs.length) html+='Marca un <b>estanque</b> para calcular la bomba de riego.';
+  html+='<p class="hint">Estimaciones para dimensionar: caudal según radio a 2,5 bar, roce con tubo de polietileno. Confirma con la ficha del regador y la curva de la bomba.</p>';
+  riegoEl.innerHTML=html; }
+[rrEl,rturnoEl,rdiamEl].forEach(el=>el.addEventListener('change',()=>{ drawPins(); }));
+window.riegoReady=true;
 
 // Estado publicado para todos: marcas.json en el sitio. Lo local manda si difiere; se puede descargar para publicar o descartar.
 let published={pins:[],zones:[],lines:[]};
