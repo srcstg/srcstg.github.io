@@ -87,6 +87,11 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
 .riego h3{font-size:1rem;margin:.75rem 0 .25rem;font-weight:700}
 .riego h3:first-child{margin-top:0}
 .riego .warn{color:#c4392b}
+.riego .sect{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+.riego .sect button{padding:.5rem .75rem;min-height:2.5rem}
+.riego .sect button .dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;margin-right:.4em;vertical-align:-.05em}
+.riego .sect button.on{background:var(--accent);color:#1a1400;border-color:var(--accent)}
+.riego .sect button.on .dot{outline:2px solid #1a1400}
 .pins .det input[type=number]{width:4.5em;border:1.5px solid var(--line);border-radius:6px;padding:.125rem .375rem;font:inherit;font-size:1rem;color:var(--ink);background:transparent;margin:0 .25rem}
 .row2{display:grid;grid-template-columns:1fr auto;gap:.5rem .75rem;align-items:center;margin:.375rem 0;font-size:1rem}
 .row2 input[type=number]{width:5.5em;font:inherit;font-size:1rem;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:.5rem .625rem;min-height:2.75rem}
@@ -540,7 +545,7 @@ const b64u=v=>btoa(unescape(encodeURIComponent(JSON.stringify(v))));
 function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); if(window.riegoReady&&pipes.length) parts.push('p='+b64u(pipes)); u.hash=parts.join('&'); return u.href; }
 function drawPins(){
   while(pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
-  pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
+  pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; if(p.t==='regador'&&window.riegoReady&&!sectorVisible(p)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
     const pole=new THREE.Mesh(poleGeo,new THREE.MeshBasicMaterial({color:col})); pole.scale.y=3; pole.position.set(p.x,y+1.5,-p.y); pinGroup.add(pole);
     const head=new THREE.Mesh(headGeo,new THREE.MeshBasicMaterial({color:col})); head.position.set(p.x,y+3.2,-p.y); pinGroup.add(head);
     const sp=textSprite((i+1)+' · '+p.name); sp.position.set(p.x,y+4.8,-p.y); pinGroup.add(sp);
@@ -711,6 +716,9 @@ let pipes=[]; const pipeGroup=new THREE.Group(); scene.add(pipeGroup);
 const PIPE_COLORS=['#f97316','#a855f7','#06b6d4','#ec4899','#84cc16','#eab308','#f43f5e','#3b82f6'], MATRIZ_COLOR='#f1f5f9', VALV_LOSS=2; // m de pérdida en electroválvula de 1" + filtro
 const diamFor=(Q,Dmin)=>Math.max(Dmin, DIAMS.find(d=>Q/3600/(Math.PI*(d/1000)*(d/1000)/4)<=1.5)||63); // Q en m³/h, velocidad ≤ 1,5 m/s
 const ctlPin=()=>pins.find(p=>p.t==='control');
+let sectorSel=0; // 0 = todos
+const sectorOf=p=>{ const pp=pipes.find(q=>q.k>0&&(q.regs||[]).some(r=>Math.abs(r[0]-p.x)<0.05&&Math.abs(r[1]-p.y)<0.05)); return pp?pp.k:0; };
+const sectorVisible=p=>!sectorSel||!pipes.length||sectorOf(p)===sectorSel;
 function loadPipes(){ try{ const h=location.hash.match(/[#&]p=([^&]+)/); if(h){ pipes=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){} try{ const v=localStorage.getItem('casalcs-tubos'); if(v) pipes=JSON.parse(v); }catch(e){} if(!Array.isArray(pipes)||(pipes.length&&!(pipes[0].segs&&pipes[0].ctl))) pipes=[]; }
 function savePipes(){ try{ localStorage.setItem('casalcs-tubos',JSON.stringify(pipes)); }catch(e){} }
 function armarRed(){
@@ -748,11 +756,12 @@ function armarRed(){
       const down=nodes.map((q,j)=>j?qDe(q):0); ord.slice().reverse().forEach(j=>{ if(parent[j]>0) down[parent[j]]+=down[j]; });
       const hf=Array(m).fill(hf0); ord.forEach(j=>{ const i=parent[j], L=dist(nodes[i],nodes[j]), D=diamFor(down[j],Dmin); hf[j]=hf[i]+hazen(L*1.1,down[j]/3600,D); Ltot+=L*1.1; Ls[D]=+((Ls[D]||0)+L*1.1).toFixed(1);
         edges.push(seg(nodes[i],nodes[j],D)); const dz=hz(nodes[j].x,nodes[j].y)-hE, need=dz+25+hf[j]; if(!worst||need>worst.need) worst={need,hf:hf[j],dz,far:[nodes[j].x,nodes[j].y]}; });
-      pipes.push({k:T.k,n:T.grp.length,Q:+T.Q.toFixed(2),tee:[r2(B.x),r2(B.y)],Lc:+Lc.toFixed(1),L:+Ltot.toFixed(1),D:Dg,byD:Ls,hf:+worst.hf.toFixed(1),dz:+worst.dz.toFixed(1),need:+worst.need.toFixed(1),far:[r2(worst.far[0]),r2(worst.far[1])],segs:edges}); }); }
+      pipes.push({k:T.k,n:T.grp.length,regs:T.grp.map(r=>[r.x,r.y]),Q:+T.Q.toFixed(2),tee:[r2(B.x),r2(B.y)],Lc:+Lc.toFixed(1),L:+Ltot.toFixed(1),D:Dg,byD:Ls,hf:+worst.hf.toFixed(1),dz:+worst.dz.toFixed(1),need:+worst.need.toFixed(1),far:[r2(worst.far[0]),r2(worst.far[1])],segs:edges}); }); }
   savePipes(); drawPipes(); riegoResumen(); if(window.pubReady) pubStatus(); }
 function drawPipes(){ while(pipeGroup.children.length) pipeGroup.remove(pipeGroup.children[0]);
   const yAt=(x,y,up)=>{ const h=hAt(x,y); return (isNaN(h)?CMED:h)*EX+up; };
-  pipes.forEach(pp=>{ const col=new THREE.Color(pp.k===0?MATRIZ_COLOR:PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]);
+  if(sectorSel&&!pipes.some(pp=>pp.k===sectorSel)) sectorSel=0;
+  pipes.forEach(pp=>{ if(sectorSel&&pp.k&&pp.k!==sectorSel) return; const col=new THREE.Color(pp.k===0?MATRIZ_COLOR:PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]);
     pp.segs.forEach(e=>pipeGroup.add(drawLineObj([[e[0],e[1]],[e[2],e[3]]],col,pp.k===0?0.26:0.14)));
     if(pp.k===0) return;
     const sp=textSprite('Sector '+pp.k+' · Ø'+pp.D+' mm'); sp.position.set(pp.tee[0],yAt(pp.tee[0],pp.tee[1],2.6),-pp.tee[1]); pipeGroup.add(sp); }); }
@@ -783,11 +792,15 @@ function riegoResumen(){
     const desc=o=>Object.keys(o).sort((a,b)=>a-b).map(d=>fmt(o[d],0)+' m de Ø'+d).join(' + ')+' mm', peor=sect.reduce((m,pp)=>pp.need>m.need?pp:m,sect[0]), Qmax=Math.max(...sect.map(pp=>pp.Q)), H=peor.need+2, P=potencia(Qmax,H), est8=sect.length<=4?4:sect.length<=6?6:sect.length<=8?8:12;
     html+='<h3>Bomba de riego (estanque → regadores)</h3>Impulsa <b>'+fmt(Qmax,1)+' m³/h</b> ('+Math.round(Qmax*1000/60)+' L/min) a <b>'+fmt(H,0)+' m</b> de altura (sector '+peor.k+': 25 m en el regador, '+fmt(peor.hf,1)+' m de roce con válvula y filtro, '+sg(peor.dz)+' m de desnivel y 2 m de margen): motor de ≈ '+fmt(P.kW,2)+' kW, comprar de <b>'+hpTxt(P.hpc)+' HP</b>. La enciende el programador con un relé cuando abre un sector.';
     html+='<h3>Control de válvulas</h3>'+(ctl?'En «'+ctl.name+'», a '+fmt(mat.L,0)+' m de tubo Ø'+mat.D+' mm de la bomba. ':'No has marcado un «Control de válvulas»: se supone junto al estanque. ')+'Colector de superficie con <b>'+sect.length+' electroválvulas de 1"</b> (una por sector), filtro de malla, y un <b>programador WiFi de '+est8+' estaciones</b> que se maneja desde el celular (por ejemplo Rain Bird con WiFi u Orbit B-hyve), con relé de partida para la bomba de riego.'+(mat.mal?' <span class="warn">Ningún corredor de tubos cabe en el lote sin pasar por una construcción: mueve el control o los regadores.</span>':'');
+    const nomb=pp=>(pp.regs||[]).map(r=>{ const i=pins.findIndex(q=>q.t==='regador'&&Math.abs(q.x-r[0])<0.05&&Math.abs(q.y-r[1])<0.05); return i<0?'?':(i+1); }).join(', ');
+    html+='<h3>Sectores de riego</h3>Ver en el terreno: <div class="sect"><button data-s="0"'+(sectorSel?'':' class="on"')+'>Todos</button>'+sect.map(pp=>'<button data-s="'+pp.k+'"'+(sectorSel===pp.k?' class="on"':'')+'><span class="dot" style="background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span>Sector '+pp.k+' · '+pp.n+(pp.n===1?' regador':' regadores')+'</button>').join('')+'</div>'+
+      sect.map(pp=>'<span class="dot" style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span> Sector '+pp.k+': <b>'+pp.n+(pp.n===1?' regador':' regadores')+'</b> (marcas '+nomb(pp)+') · '+fmt(pp.Q,1)+' m³/h · '+Math.round(5/mmh*60)+' min para 5 mm').join('<br>');
     html+='<h3>Red de tubos</h3>'+sect.map(pp=>'Sector '+pp.k+': '+pp.n+' regadores, '+fmt(pp.Q,1)+' m³/h · '+fmt(pp.Lc,0)+' m de Ø'+pp.D+' mm desde el control y el resto en ramal · total <b>'+fmt(pp.L,0)+' m</b> ('+desc(pp.byD)+') · roce '+fmt(pp.hf,1)+' m · regador crítico '+sg(pp.dz)+' m').join('<br>');
     html+='<h3>Lista de compra</h3>Tubo: '+Object.keys(porD).sort((a,b)=>a-b).map(d=>'<b>'+fmt(porD[d],0)+' m</b> de Ø'+d+' mm').join(' · ')+'<br>'+sect.length+' electroválvulas de 1" · programador WiFi de '+est8+' estaciones · relé de bomba · filtro de malla · estanque de '+fmt(Vest,1)+' m³ · bomba de riego de '+hpTxt(P.hpc)+' HP'+(lle?' · bomba de llenado de '+hpTxt(lle.P.hpc)+' HP'+(lle.dz>6?' (sumergible o de orilla)':''):'')+' · '+regs.length+' regadores'; }
   else if(regs.length&&est) html+='<h3>Red de tubos</h3>Usa «Armar red de tubos» para trazar el tubo de la bomba al control, un tubo por sector y sus ramales, y calcular diámetros, roce y las bombas.';
   html+='<p class="hint">Estimaciones para dimensionar: boquillas a 2,5 bar, 10 % extra de tubo por curvas, roce con polietileno, velocidad ≤ 1,5 m/s, 2 m de pérdida en válvula y filtro, rendimiento de motobomba 45 %. Confirma con la ficha del regador y la curva de la bomba.</p>';
   riegoEl.innerHTML=html; }
+riegoEl.addEventListener('click',e=>{ const b=e.target.closest('button[data-s]'); if(!b) return; sectorSel=+b.dataset.s||0; drawPins(); });
 [rrEl,rturnoEl,rdiamEl,rfillEl].forEach(el=>el.addEventListener('change',()=>{ if(pipes.length) armarRed(); drawPins(); }));
 loadPipes(); window.riegoReady=true;
 
