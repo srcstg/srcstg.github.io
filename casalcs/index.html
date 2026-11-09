@@ -73,6 +73,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:1rem;margin-top:.75r
 .measure[hidden]{display:none}
 #view.measuring,#view.pinning,#view.zoning{cursor:crosshair}
 #view.moving{cursor:move}
+#view.overpin{cursor:pointer}
 .pins .num.sq{border-radius:4px}
 select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:.5rem .75rem;min-height:2.75rem}
 .pins{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.375rem}
@@ -91,6 +92,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
 .riego h3{font-size:1rem;margin:.75rem 0 .25rem;font-weight:700}
 .riego h3:first-child{margin-top:0}
 .riego .warn{color:#c4392b}
+.riego .sub{color:var(--muted);font-size:.9375rem}
 .riego .sect{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
 .riego .sect button{padding:.5rem .75rem;min-height:2.5rem}
 .riego .sect button .dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;margin-right:.4em;vertical-align:-.05em}
@@ -193,7 +195,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
   <div class="row2"><label for="rfill">Horas para llenar el estanque</label><input type="number" id="rfill" min="1" max="24" step="1" value="4"></div>
   <div class="row2"><label for="rdiam">Diámetro mínimo del tubo</label><select id="rdiam"><option value="25">25 mm</option><option value="32" selected>32 mm</option><option value="40">40 mm</option><option value="50">50 mm</option><option value="63">63 mm</option></select></div>
   <div class="btns"><button id="rprop">Proponer regadores para el pasto</button></div>
-  <p class="hint">Los regadores se ponen primero por el borde del pasto regando hacia adentro, para dejar el centro libre, y al centro solo los que hagan falta para cerrar huecos; giran medio círculo o un cuarto en los bordes y nunca mojan la casa. La bomba del estanque manda el agua al control de válvulas; de ahí sale un tubo por sector, en paralelo por un corredor al lado del pasto, sin que ningún tubo se cruce. Marca un «Control de válvulas» para ubicar la estación; si no, se supone junto al estanque. La red se arma sola con los regadores que haya, y se rehace cada vez que mueves, agregas o quitas uno. A cada regador le puedes fijar el radio y el caudal en litros por minuto en su ficha; si dejas el caudal vacío, se estima por el radio y el giro.</p>
+  <p class="hint">Los regadores se ponen primero por el borde del pasto regando hacia adentro, para dejar el centro libre, y al centro solo los que hagan falta para cerrar huecos; giran medio círculo o un cuarto en los bordes y nunca mojan la casa. La bomba del estanque manda el agua al control de válvulas; de ahí sale un tubo por sector, en tramos rectos dentro del lote y rodeando la casa y el container, sin que los sectores se crucen. Abajo, en «Sectores de riego», elige un sector para ver solo sus regadores y el agua corriendo por sus tubos; cada regador dice en su ficha la presión y el caudal que le llegan. Marca un «Control de válvulas» para ubicar la estación; si no, se supone junto al estanque. La red se arma sola con los regadores que haya, y se rehace cada vez que mueves, agregas o quitas uno. A cada regador le puedes fijar el radio y el caudal en litros por minuto en su ficha; si dejas el caudal vacío, se estima por el radio y el giro.</p>
   <div class="riego" id="riego">—</div>
   <p class="grp">Compartir</p>
   <p class="hint" id="pubhint" hidden>Tienes cambios que solo se ven en este equipo. Para que los vean todos, descarga el archivo y publícalo en el sitio.</p>
@@ -530,7 +532,9 @@ toggle(document.getElementById('bm'),setMeasuring);
 document.getElementById('bmclr').addEventListener('click',()=>{ measPts.length=0; drawMeasure(); if(!measuring) measEl.hidden=true; });
 let pdown=null;
 renderer.domElement.addEventListener('pointerdown',ev=>{ pdown=[ev.clientX,ev.clientY]; });
-renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&&!zoning&&movingIdx<0)||!pdown) return; const moved=Math.hypot(ev.clientX-pdown[0],ev.clientY-pdown[1]); pdown=null; if(moved>6) return;
+renderer.domElement.addEventListener('pointerup',ev=>{ if(!pdown) return; const moved=Math.hypot(ev.clientX-pdown[0],ev.clientY-pdown[1]); pdown=null; if(moved>6) return;
+  if(!measuring&&!zoning){ const pi=pinHit(ev); if(pi>=0){ setMoving(movingIdx===pi?-1:pi); return; } }
+  if(!measuring&&!pinning&&!zoning&&movingIdx<0) return;
   const r=renderer.domElement.getBoundingClientRect(); m.x=((ev.clientX-r.left)/r.width)*2-1; m.y=-((ev.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(m,camera); const hit=ray.intersectObject(mesh)[0]; if(!hit) return; const x=hit.point.x, y=-hit.point.z, h=hAt(x,y); if(isNaN(h)) return;
   if(movingIdx>=0){ const p=pins[movingIdx]; if(p){ p.x=+x.toFixed(2); p.y=+y.toFixed(2); } setMoving(-1); savePins(); drawPins(); return; }
@@ -543,9 +547,12 @@ const PIN_TYPES={rec:{n:'Recolector de agua',c:'#4fb6e3'},bomba:{n:'Bomba',c:'#e
 const pinGroup=new THREE.Group(); scene.add(pinGroup);
 let pins=[], pinning=false, movingIdx=-1;
 const pinsEl=document.getElementById('pins'), pinHint=document.getElementById('pinhint'), pinBtns=document.getElementById('pinbtns'), pinType=document.getElementById('pintype');
-const poleGeo=new THREE.CylinderGeometry(0.12,0.12,1,8), headGeo=new THREE.SphereGeometry(0.7,16,12);
+const poleGeo=new THREE.CylinderGeometry(0.12,0.12,1,8), headGeo=new THREE.SphereGeometry(0.7,16,12), hitGeo=new THREE.SphereGeometry(1.6,8,6), hitMat=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
 const moveHint=document.getElementById('movehint');
-function setMoving(i){ if(i>=pins.length) i=-1; movingIdx=i; view.classList.toggle('moving',i>=0); pinsEl.querySelectorAll('li').forEach((li,k)=>li.classList.toggle('moving',k===i)); moveHint.hidden=i<0; if(i>=0) moveHint.textContent='Toca el terreno donde va «'+(i+1)+' · '+pins[i].name+'». Esc para cancelar.'; }
+let pinHeads={}; const SEL_COLOR='#f2c230';
+function setMoving(i){ if(i>=pins.length) i=-1; movingIdx=i; view.classList.toggle('moving',i>=0); pinsEl.querySelectorAll('li').forEach((li,k)=>li.classList.toggle('moving',k===i)); moveHint.hidden=i<0; if(i>=0) moveHint.textContent='Toca el terreno donde va «'+(i+1)+' · '+pins[i].name+'». Esc para cancelar.';
+  Object.entries(pinHeads).forEach(([k,hd])=>{ const on=+k===i; hd.material.color.set(on?SEL_COLOR:hd.userData.c); hd.scale.setScalar(on?1.7:1); });
+  if(i>=0){ const li=pinsEl.children[i]; if(li&&li.scrollIntoView) li.scrollIntoView({block:'nearest',behavior:'smooth'}); } }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&movingIdx>=0) setMoving(-1); });
 function loadPins(){ try{ const h=location.hash.match(/[#&]m=([^&]+)/); if(h){ pins=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){}
   try{ const v=localStorage.getItem('casalcs-marcas'); if(v) pins=JSON.parse(v); }catch(e){} }
@@ -554,10 +561,12 @@ const b64u=v=>btoa(unescape(encodeURIComponent(JSON.stringify(v))));
 function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); u.hash=parts.join('&'); return u.href; }
 function drawPins(){
   while(pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
-  pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; if(p.t==='regador'&&window.riegoReady&&!sectorVisible(p)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
-    const pole=new THREE.Mesh(poleGeo,new THREE.MeshBasicMaterial({color:col})); pole.scale.y=3; pole.position.set(p.x,y+1.5,-p.y); pinGroup.add(pole);
-    const head=new THREE.Mesh(headGeo,new THREE.MeshBasicMaterial({color:col})); head.position.set(p.x,y+3.2,-p.y); pinGroup.add(head);
-    const sp=textSprite((i+1)+' · '+p.name); sp.position.set(p.x,y+4.8,-p.y); pinGroup.add(sp);
+  pinHeads={};
+  pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; if(p.t==='regador'&&window.riegoReady&&!sectorVisible(p)) return; const c=(PIN_TYPES[p.t]||PIN_TYPES.otro).c, col=new THREE.Color(c), y=h*EX;
+    const pole=new THREE.Mesh(poleGeo,new THREE.MeshBasicMaterial({color:col})); pole.scale.y=3; pole.position.set(p.x,y+1.5,-p.y); pole.userData.idx=i; pinGroup.add(pole);
+    const head=new THREE.Mesh(headGeo,new THREE.MeshBasicMaterial({color:col})); head.position.set(p.x,y+3.2,-p.y); head.userData.idx=i; head.userData.c=c; pinGroup.add(head); pinHeads[i]=head;
+    const hit=new THREE.Mesh(hitGeo,hitMat); hit.position.copy(head.position); hit.userData.idx=i; pinGroup.add(hit); // zona de toque más generosa
+    const sp=textSprite((i+1)+' · '+p.name+(p.t==='regador'?' · '+fmt(radOf(p),0)+' m':'')); sp.position.set(p.x,y+4.8,-p.y); sp.userData.idx=i; pinGroup.add(sp);
     if(p.t==='regador'&&window.riegoReady){ const {g}=zoneMesh(sectorPoly(p),col,0.18); pinGroup.add(g); } });
   if(window.riegoReady) drawPipes();
   if(window.riegoReady) riegoResumen();
@@ -565,7 +574,7 @@ function drawPins(){
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y), dw=distWater(p.x,p.y), T=PIN_TYPES[p.t]||PIN_TYPES.otro;
     const li=document.createElement('li');
     li.innerHTML='<span class="num" style="background:'+T.c+'">'+(i+1)+'</span><input value="" aria-label="Nombre de la marca"><button class="mov" aria-label="Mover marca" title="Mover: toca el terreno donde va">Mover</button><button class="del" aria-label="Quitar marca" title="Quitar marca">×</button>'+
-      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m · caudal <input type="number" class="cau" min="1" max="300" step="0.5" aria-label="Caudal del regador en litros por minuto"> L/min · gira '+Math.round(arcOf(p)[1])+'°':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
+      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m · caudal <input type="number" class="cau" min="1" max="300" step="0.5" aria-label="Caudal del regador en litros por minuto"> L/min · gira '+Math.round(arcOf(p)[1])+'°'+(window.riegoReady?simTxt(p):''):'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
     const rad=li.querySelector('.rad'); if(rad){ rad.value=p.r||+document.getElementById('rr').value||10; rad.addEventListener('change',()=>{ p.r=+rad.value||10; savePins(); drawPins(); }); }
     const cau=li.querySelector('.cau'); if(cau){ cau.value=p.q>0?p.q:''; cau.placeholder=window.riegoReady?Math.round(qDe(p)*1000/60):''; cau.title='Vacío = se estima por el radio y el giro'; cau.addEventListener('change',()=>{ const v=+cau.value; if(v>0) p.q=v; else delete p.q; savePins(); drawPins(); }); }
     const inp=li.querySelector('input'); inp.value=p.name; inp.addEventListener('change',()=>{ p.name=inp.value.trim()||T.n; savePins(); drawPins(); });
@@ -656,12 +665,12 @@ function groundPath(P){ const out=[]; for(let i=0;i<P.length-1;i++){ const a=P[i
   const l=P[P.length-1], hl=hAt(l[0],l[1]); out.push([l[0],l[1],isNaN(hl)?CMED:hl]); return out; }
 function lineStats(P){ const path=groundPath(P); let plano=0, real=0; for(let i=0;i<path.length-1;i++){ const a=path[i],b=path[i+1], d=Math.hypot(b[0]-a[0],b[1]-a[1]); plano+=d; real+=Math.hypot(d,b[2]-a[2]); }
   return {plano,real,des:path[path.length-1][2]-path[0][2],hmax:Math.max(...path.map(p=>p[2]))-path[0][2]}; }
-function drawLineObj(P,col,thick){ const path=groundPath(P); const arr=new Float32Array(path.length*3); path.forEach((p,i)=>{ arr[i*3]=p[0]; arr[i*3+1]=p[2]*EX+0.8; arr[i*3+2]=-p[1]; });
+function drawLineObj(P,col,thick,noDots){ const path=groundPath(P); const arr=new Float32Array(path.length*3); path.forEach((p,i)=>{ arr[i*3]=p[0]; arr[i*3+1]=p[2]*EX+0.8; arr[i*3+2]=-p[1]; });
   const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(arr,3)); const grp=new THREE.Group(); grp.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:col})));
   // tramos como cilindros finos para que se vean con grosor
   for(let i=0;i<path.length-1;i++){ const a=new THREE.Vector3(arr[i*3],arr[i*3+1],arr[i*3+2]), b=new THREE.Vector3(arr[i*3+3],arr[i*3+4],arr[i*3+5]), L=a.distanceTo(b); if(L<1e-3) continue;
     const c=new THREE.Mesh(new THREE.CylinderGeometry(thick,thick,L,6),new THREE.MeshBasicMaterial({color:col,depthTest:false})); c.renderOrder=4; c.position.copy(a).lerp(b,0.5); c.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize()); grp.add(c); }
-  P.forEach(p=>{ const h=hAt(p[0],p[1]); const d=new THREE.Mesh(measDotGeo,new THREE.MeshBasicMaterial({color:col,depthTest:false})); d.renderOrder=4; d.scale.setScalar(0.7); d.position.set(p[0],(isNaN(h)?CMED:h)*EX+0.8,-p[1]); grp.add(d); });
+  if(!noDots) P.forEach(p=>{ const h=hAt(p[0],p[1]); const d=new THREE.Mesh(measDotGeo,new THREE.MeshBasicMaterial({color:col,depthTest:false})); d.renderOrder=4; d.scale.setScalar(0.7); d.position.set(p[0],(isNaN(h)?CMED:h)*EX+0.8,-p[1]); grp.add(d); });
   return grp; }
 function drawLines(){
   while(lineGroup.children.length) lineGroup.remove(lineGroup.children[0]);
@@ -726,74 +735,113 @@ function proponerRegadores(){
 document.getElementById('rprop').addEventListener('click',()=>{ const n=pins.filter(p=>p.t==='regador').length; if(!n||confirm('¿Reemplazo los '+n+' regadores actuales por una propuesta nueva?')) proponerRegadores(); });
 function hazen(L,Q,Dmm){ const D=Dmm/1000, Cc=150; return 10.67*L*Math.pow(Q,1.852)/(Math.pow(Cc,1.852)*Math.pow(D,4.87)); } // m, Q en m³/s
 const qDe=p=>p.q>0?p.q*60/1000:0.009*radOf(p)*radOf(p)*arcOf(p)[1]/360; // m³/h: caudal fijado a mano (L/min) o, si no, ~2,5 bar con boquilla proporcional al arco
-// Red de tubos: la bomba del estanque manda al control de válvulas; de ahí un tubo por sector, en paralelo por un corredor al costado del pasto; ningún tubo se cruza
+// Red de tubos: la bomba del estanque manda al control de válvulas; de ahí un tubo por sector. Los tubos se trazan por una grilla de 1 m que
+// solo pisa el lote y rodea las construcciones; cada sector es un árbol: cada regador se conecta por el camino más corto al tubo ya trazado.
 let pipes=[]; const pipeGroup=new THREE.Group(); scene.add(pipeGroup);
 const PIPE_COLORS=['#f97316','#a855f7','#06b6d4','#ec4899','#84cc16','#eab308','#f43f5e','#3b82f6'], MATRIZ_COLOR='#f1f5f9', VALV_LOSS=2; // m de pérdida en electroválvula de 1" + filtro
 const diamFor=(Q,Dmin)=>Math.max(Dmin, DIAMS.find(d=>Q/3600/(Math.PI*(d/1000)*(d/1000)/4)<=1.5)||63); // Q en m³/h, velocidad ≤ 1,5 m/s
+const Pn=R=>25+5*Math.max(0,Math.min(1,(R-10)/3)); // presión que pide la boquilla (m): 2,5 bar hasta 10 m de radio, 3 bar a 13 m o más
 const ctlPin=()=>pins.find(p=>p.t==='control');
 let sectorSel=0; // 0 = todos
 const sectorOf=p=>{ const pp=pipes.find(q=>q.k>0&&(q.regs||[]).some(r=>Math.abs(r[0]-p.x)<0.05&&Math.abs(r[1]-p.y)<0.05)); return pp?pp.k:0; };
 const sectorVisible=p=>!sectorSel||!pipes.length||sectorOf(p)===sectorSel;
+const simOf=p=>{ for(const pp of pipes){ const s=(pp.sim||[]).find(s=>Math.abs(s.x-p.x)<0.05&&Math.abs(s.y-p.y)<0.05); if(s) return s; } return null; };
+function simTxt(p){ const s=simOf(p); if(!s) return ''; const low=s.bar<2, hi=s.bar>4; return ' · le llegan ≈ <b'+(low||hi?' class="warn"':'')+'>'+fmt(s.bar,1)+' bar</b> y '+Math.round(s.lpm)+' L/min, alcanza ≈ '+fmt(s.alc,0)+' m'+(low?' (poca presión)':hi?' (demasiada presión)':''); }
 function armarRed(){
   const regs=pins.filter(p=>p.t==='regador'), est=pins.find(p=>p.t==='estanque')||pins.find(p=>p.t==='bomba'), ctl=ctlPin()||est; pipes=[];
   if(est&&regs.length){
     const per=Math.max(1,+rturnoEl.value||1), n=regs.length, Dmin=+rdiamEl.value||25, hE=hAt(est.x,est.y), hz=(x,y)=>{ const h=hAt(x,y); return isNaN(h)?hE:h; };
-    // eje principal del pasto; el corredor de tubos va paralelo a él
-    const cx=regs.reduce((a,r)=>a+r.x,0)/n, cy=regs.reduce((a,r)=>a+r.y,0)/n; let sxx=0,sxy=0,syy=0; regs.forEach(r=>{ sxx+=(r.x-cx)*(r.x-cx); sxy+=(r.x-cx)*(r.y-cy); syy+=(r.y-cy)*(r.y-cy); });
-    const th=0.5*Math.atan2(2*sxy,sxx-syy), ux=Math.cos(th), uy=Math.sin(th);
-    const tOf=q=>(q.x-cx)*ux+(q.y-cy)*uy, sOf=q=>-(q.x-cx)*uy+(q.y-cy)*ux, at=(t,s)=>({x:cx+ux*t-uy*s,y:cy+uy*t+ux*s}), dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-    const ts=regs.map(tOf), ss=regs.map(sOf), tmin=Math.min(...ts), tmax=Math.max(...ts), sMin=Math.min(...ss), sMax=Math.max(...ss), sC=sOf(ctl), tC=Math.max(tmin,Math.min(tmax,tOf(ctl)));
-    const libre=(a,b)=>{ const L=dist(a,b), m=Math.ceil(L/1)||1; for(let i=0;i<=m;i++){ const x=a.x+(b.x-a.x)*i/m, y=a.y+(b.y-a.y)*i/m; if(!inPoly(x,y,LOTE)||inBldg(x,y,0.5)) return false; } return true; };
-    // para una línea de corredor s: sectores por lado (los regadores de cada lado, en tramos consecutivos a lo largo del eje) y tubos apilados hacia sus regadores,
-    // el sector más lejano pegado a la línea y el más cercano más afuera: así el ramal de un sector nunca cruza el tubo de otro
-    const plan=sc=>{ const T=[]; [1,-1].forEach(sig=>{ const side=regs.filter(r=>sig*(sOf(r)-sc)>=0&&(sig>0||sOf(r)-sc<0)).sort((a,b)=>tOf(a)-tOf(b)); if(!side.length) return;
-        const k=Math.ceil(side.length/per), base=Math.floor(side.length/k), extra=side.length%k; let i0=0;
-        for(let g=0;g<k;g++){ const grp=side.slice(i0,i0+base+(g<extra?1:0)); i0+=grp.length; const t=grp.reduce((a,r)=>a+tOf(r),0)/grp.length; T.push({grp,t,sig,Q:grp.reduce((a,r)=>a+qDe(r),0),dir:t>=tC?1:-1,d:Math.abs(t-tC)}); } });
-      [1,-1].forEach(sig=>[1,-1].forEach(dir=>{ T.filter(x=>x.sig===sig&&x.dir===dir).sort((a,b)=>b.d-a.d).forEach((x,i)=>{ x.off=sc+sig*0.4*(i+1); }); }));
-      T.sort((a,b)=>a.d-b.d).forEach((x,i)=>{ x.k=i+1; x.A=at(tC,x.off); const tf=x.grp.map(tOf), tF=x.dir>0?Math.max(...tf):Math.min(...tf); x.B=at(Math.abs(tF-tC)>x.d?tF:x.t,x.off); });
-      return {sc,T,ok:T.every(x=>libre(ctl,x.A)&&libre(x.A,x.B))}; };
-    // candidatos: fuera del pasto por el lado del control, fuera por el otro lado, y si no cabe, por dentro del pasto desde el lado del control
-    const lado=sC>=(sMin+sMax)/2?1:-1, marg=1.5+0.4*Math.ceil(n/per), cands=[lado>0?sMax+marg:sMin-marg, lado>0?sMin-marg:sMax+marg];
-    for(let v=0;v<=1.001;v+=0.1) cands.push(lado>0?sMax-(sMax-sMin)*v:sMin+(sMax-sMin)*v);
-    const r2=v=>+v.toFixed(2), seg=(a,b,D)=>[r2(a.x),r2(a.y),r2(b.x),r2(b.y),D], d0=dist(est,ctl);
-    // ¿el tramo pasa por una construcción?
-    const pasa=(a,b)=>{ const L=dist(a,b), m=Math.ceil(L/0.5)||1; for(let i=0;i<=m;i++){ if(inBldg(a.x+(b.x-a.x)*i/m,a.y+(b.y-a.y)*i/m,0.8)) return true; } return false; };
-    // arma la red completa para un corredor dado
-    const build=(P,mal)=>{ const out=[], turnos=P.T, Qmax=Math.max(...turnos.map(T=>T.Q)), D0=diamFor(Qmax,Dmin), L0=+(d0*1.1).toFixed(1);
-    out.push({k:0,segs:d0>0.3?[seg(est,ctl,D0)]:[],L:d0>0.3?L0:0,D:D0,byD:d0>0.3?{[D0]:L0}:{},ctl:[r2(ctl.x),r2(ctl.y)],mal});
-    turnos.forEach(T=>{ const A=T.A, B=T.B, Dg=diamFor(T.Q,Dmin), Ls={}; const poly=[ctl]; if(dist(ctl,A)>0.3) poly.push(A); if(dist(poly[poly.length-1],B)>0.3) poly.push(B);
-      // punto más cercano del tubo del sector (y su posición a lo largo de él) para cada regador
-      const foot=q=>{ let best=null, acc=0; for(let i=0;i+1<poly.length;i++){ const a=poly[i], b=poly[i+1], L=dist(a,b), u=L?Math.max(0,Math.min(1,((q.x-a.x)*(b.x-a.x)+(q.y-a.y)*(b.y-a.y))/(L*L))):0, pt={x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u}, d=dist(pt,q); if(!best||d<best.d) best={pt,d,s:acc+u*L}; acc+=L; } return best; };
-      // ramal: árbol de largo mínimo donde cada regador se cuelga del tubo del sector donde pasa, o de otro regador; nunca por encima de una construcción
-      const grp=T.grp, m=grp.length, inT=Array(m).fill(false), par=Array(m).fill(-1), att=Array(m).fill(null), ord=[]; let casa=false;
-      for(let it=0;it<m;it++){ let bj=-1,bi=-1,bd=1e9,bf=null,ok=false;
-        for(let pass=0;pass<2&&bj<0;pass++){ for(let j=0;j<m;j++){ if(inT[j]) continue; const f=foot(grp[j]); if((pass||!pasa(f.pt,grp[j]))&&f.d<bd){ bd=f.d; bj=j; bi=-1; bf=f; }
-            for(let i=0;i<m;i++) if(inT[i]){ const d=dist(grp[i],grp[j]); if((pass||!pasa(grp[i],grp[j]))&&d<bd){ bd=d; bj=j; bi=i; bf=null; } } } if(bj>=0&&pass) casa=true; }
-        inT[bj]=true; par[bj]=bi; att[bj]=bf; ord.push(bj); }
-      // caudal aguas abajo de cada regador y por cada punto de conexión al tubo
-      const down=grp.map(qDe); ord.slice().reverse().forEach(j=>{ if(par[j]>=0) down[par[j]]+=down[j]; });
-      const taps=ord.filter(j=>par[j]<0).map(j=>({s:att[j].s,q:down[j]})).sort((a,b)=>a.s-b.s); const sEnd=Math.max(...taps.map(t=>t.s));
-      // tubo del sector recortado hasta la última conexión; roce tramo a tramo con el caudal que va quedando
-      const hfTubo=s0=>{ let h=0, prev=0, q=T.Q; for(const t of taps){ if(t.s>=s0) break; h+=hazen((t.s-prev)*1.1,q/3600,Dg); prev=t.s; q-=t.q; } return h+hazen(Math.max(0,s0-prev)*1.1,Math.max(q,0.01)/3600,Dg); };
-      const edges=[]; let acc=0, Lc=0; for(let i=0;i+1<poly.length&&acc<sEnd-0.01;i++){ const a=poly[i], b=poly[i+1], L=dist(a,b), u=Math.min(1,(sEnd-acc)/L), e={x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u}; edges.push(seg(a,e,Dg)); Lc+=dist(a,e)*1.1; acc+=L; }
-      Ls[Dg]=+Lc.toFixed(1); let Ltot=Lc, worst=null; const hf0=(d0>0.3?hazen(d0*1.1,T.Q/3600,D0):0)+VALV_LOSS, hf=Array(m).fill(0);
-      ord.forEach(j=>{ const from=par[j]>=0?grp[par[j]]:att[j].pt, base=par[j]>=0?hf[par[j]]:hf0+hfTubo(att[j].s), L=dist(from,grp[j]), D=diamFor(down[j],Dmin); hf[j]=base+hazen(L*1.1,down[j]/3600,D); Ltot+=L*1.1; Ls[D]=+((Ls[D]||0)+L*1.1).toFixed(1);
-        edges.push(seg(from,grp[j],D)); const dz=hz(grp[j].x,grp[j].y)-hE, need=dz+25+hf[j]; if(!worst||need>worst.need) worst={need,hf:hf[j],dz,far:[grp[j].x,grp[j].y]}; });
-      const nTubo=edges.filter(e=>e[4]===Dg).length; const end=(()=>{ let acc=0; for(let i=0;i+1<poly.length;i++){ const a=poly[i], b=poly[i+1], L=dist(a,b); if(acc+L>=sEnd-0.01){ const u=L?(sEnd-acc)/L:0; return {x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u}; } acc+=L; } return B; })();
-      out.push({k:T.k,n:m,regs:grp.map(r=>[r.x,r.y]),Q:+T.Q.toFixed(2),tee:[r2(end.x),r2(end.y)],Lc:+Lc.toFixed(1),L:+Ltot.toFixed(1),D:Dg,byD:Ls,hf:+worst.hf.toFixed(1),dz:+worst.dz.toFixed(1),need:+worst.need.toFixed(1),far:[r2(worst.far[0]),r2(worst.far[1])],casa,segs:edges}); });
-    return out; };
-    // de todos los corredores que caben, el que usa menos tubo en total
-    let best=null; cands.forEach(sc=>{ const q=plan(sc); if(!q.ok) return; const o=build(q,false), L=o.reduce((x,pp)=>x+pp.L,0); if(!best||L<best.L-0.01) best={L,o}; });
-    pipes=best?best.o:build(plan(cands[0]),true); }
+    const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), r2=v=>+v.toFixed(2), BMARG=0.6;
+    // ¿se puede tirar un tubo recto entre dos puntos? (dentro del lote y sin pisar construcciones)
+    const libre=(a,b)=>{ const L=Math.hypot(b[0]-a[0],b[1]-a[1]), m=Math.max(2,Math.ceil(L/0.4)); for(let i=1;i<m;i++){ const x=a[0]+(b[0]-a[0])*i/m, y=a[1]+(b[1]-a[1])*i/m; if(!inPoly(x,y,LOTE)||inBldg(x,y,BMARG)) return false; } return true; };
+    // endereza una polilínea: desde cada punto salta al más lejano que se alcanza en línea recta libre
+    const recto=pts=>{ const o=[pts[0]]; let i=0; while(i<pts.length-1){ let j=pts.length-1; while(j>i+1&&!libre(pts[i],pts[j])) j--; o.push(pts[j]); i=j; } return o; };
+    // grilla de 1 m sobre el lote: 0 = no se puede pasar (fuera del lote o construcción con 0,6 m de margen)
+    const xs=LOTE.map(p=>p[0]), ys=LOTE.map(p=>p[1]), x0=Math.floor(Math.min(...xs))-2, y0=Math.floor(Math.min(...ys))-2, W=Math.ceil(Math.max(...xs))-x0+4, Hh=Math.ceil(Math.max(...ys))-y0+4, N=W*Hh;
+    const cX=i=>x0+(i%W)+0.5, cY=i=>y0+Math.floor(i/W)+0.5;
+    const base=new Float32Array(N); for(let i=0;i<N;i++){ const x=cX(i), y=cY(i); base[i]=(!inPoly(x,y,LOTE)||inBldg(x,y,BMARG))?0:1; }
+    const cellOf=p=>{ const ix=Math.floor(p.x-x0), iy=Math.floor(p.y-y0); if(ix>=0&&iy>=0&&ix<W&&iy<Hh&&base[ix+iy*W]) return ix+iy*W; let best=-1,bd=1e9; for(let j=0;j<N;j++) if(base[j]){ const d=Math.hypot(cX(j)-p.x,cY(j)-p.y); if(d<bd){ bd=d; best=j; } } return bd<=4?best:-1; };
+    const NB=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,Math.SQRT2],[1,-1,Math.SQRT2],[-1,1,Math.SQRT2],[-1,-1,Math.SQRT2]];
+    // Dijkstra desde varias celdas fuente (costo 0); se detiene cuando alcanzó todas las metas
+    const dijk=(src,cost,goals)=>{ const d=new Float64Array(N).fill(Infinity), prev=new Int32Array(N).fill(-1), heap=[]; let left=goals?goals.filter(g=>g>=0).length:-1; const gset=new Uint8Array(N); if(goals) goals.forEach(g=>{ if(g>=0) gset[g]=1; });
+      const push=(c,i)=>{ heap.push([c,i]); let k=heap.length-1; while(k>0){ const q=(k-1)>>1; if(heap[q][0]<=heap[k][0]) break; [heap[q],heap[k]]=[heap[k],heap[q]]; k=q; } };
+      const pop=()=>{ const t=heap[0], l=heap.pop(); if(heap.length){ heap[0]=l; let k=0; for(;;){ const a=2*k+1,b=a+1; let m=k; if(a<heap.length&&heap[a][0]<heap[m][0]) m=a; if(b<heap.length&&heap[b][0]<heap[m][0]) m=b; if(m===k) break; [heap[m],heap[k]]=[heap[k],heap[m]]; k=m; } } return t; };
+      src.forEach(i=>{ d[i]=0; push(0,i); });
+      while(heap.length){ const [c,i]=pop(); if(c>d[i]) continue; if(gset[i]){ gset[i]=0; if(--left===0) break; } const ix=i%W, iy=(i-ix)/W;
+        for(const [dx,dy,L] of NB){ const nx=ix+dx, ny=iy+dy; if(nx<0||ny<0||nx>=W||ny>=Hh) continue; const j=nx+ny*W; if(!cost[j]) continue; if(L>1&&(!cost[i+dx]||!cost[i+dy*W])) continue; const nc=c+L*cost[j]; if(nc<d[j]){ d[j]=nc; prev[j]=i; push(nc,j); } } }
+      return {d,prev}; };
+    const ciCtl=cellOf(ctl), ciEst=cellOf(est), used=new Uint8Array(N), out=[];
+    const stepL=(i,j)=>Math.hypot(cX(i)-cX(j),cY(i)-cY(j));
+    // tramos (polilíneas aguas arriba → aguas abajo) a partir de los padres; se parten donde cambia el diámetro o se ramifica
+    const runsFrom=(parent,inTree,D,root,ptOf,keep)=>{ const nch=new Int32Array(N), done=new Uint8Array(N), runs=[]; for(let i=0;i<N;i++) if(inTree[i]&&parent[i]>=0) nch[parent[i]]++;
+      const simp=pts=>{ const o=[pts[0]]; for(let i=1;i<pts.length-1;i++){ const a=o[o.length-1], b=pts[i], c=pts[i+1]; if(Math.abs((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]))>1e-6) o.push(b); } o.push(pts[pts.length-1]); return o; };
+      for(let leaf=0;leaf<N;leaf++){ if(!inTree[leaf]||nch[leaf]||leaf===root) continue; let i=leaf, pts=[ptOf(i)], Dr=D[i];
+        while(i!==root&&parent[i]>=0&&!done[i]){ done[i]=1; const q=parent[i]; pts.push(ptOf(q)); if(q===root||nch[q]>1||D[q]!==Dr||done[q]||keep[q]!==undefined){ runs.push({pts:recto(simp(pts.reverse())),D:Dr}); pts=[ptOf(q)]; Dr=D[q]; } i=q; }
+        if(pts.length>1) runs.push({pts:recto(simp(pts.reverse())),D:Dr}); }
+      return runs; };
+    if(ciCtl<0||ciEst<0){ pipes=[{k:0,segs:[],L:0,D:Dmin,byD:{},ctl:[r2(ctl.x),r2(ctl.y)],mal:true}]; }
+    else {
+      // sectores: grupos compactos de regadores (semilla = el más lejano del control sin asignar, y sus vecinos más cercanos por camino), tamaños parejos
+      const k=Math.ceil(n/per), sizes=Array.from({length:k},(_,g)=>Math.floor(n/k)+(g<n%k?1:0)), cells=regs.map(cellOf);
+      const dCtl=dijk([ciCtl],base).d, dc=r=>{ const c=cells[regs.indexOf(r)]; return c>=0&&dCtl[c]<Infinity?dCtl[c]:1e6+dist(r,ctl); };
+      let libres=regs.slice(); const grupos=[];
+      sizes.forEach(sz=>{ libres.sort((a,b)=>dc(b)-dc(a)); const seed=libres.shift(), cs=cells[regs.indexOf(seed)], dS=cs>=0?dijk([cs],base).d:null, ds=r=>{ const c=cells[regs.indexOf(r)]; return dS&&c>=0&&dS[c]<Infinity?dS[c]:1e6+dist(r,seed); };
+        libres.sort((a,b)=>ds(a)-ds(b)); const grp=[seed]; while(grp.length<sz&&libres.length) grp.push(libres.shift()); grupos.push(grp); });
+      grupos.sort((a,b)=>Math.min(...a.map(dc))-Math.min(...b.map(dc)));
+      // caudal de cada sector y tubo bomba → control
+      const Qs=grupos.map(g=>g.reduce((a,r)=>a+qDe(r),0)), Qmax=Math.max(...Qs), D0=diamFor(Qmax,Dmin); let L0=0, segs0=[], mal0=false;
+      if(ciEst!==ciCtl||dist(est,ctl)>0.3){ const {d,prev}=dijk([ciEst],base,[ciCtl]); if(d[ciCtl]===Infinity) mal0=true; else { const path=[]; for(let i=ciCtl;i>=0;i=prev[i]) path.push(i); path.reverse(); // est → ctl
+          const pts=recto([[r2(est.x),r2(est.y)],...path.map(i=>[r2(cX(i)),r2(cY(i))]),[r2(ctl.x),r2(ctl.y)]]); for(let i=1;i<pts.length;i++) L0+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]); L0=+(L0*1.1).toFixed(1); segs0=[{pts,D:D0}]; path.forEach(i=>used[i]=1); } }
+      out.push({k:0,segs:segs0,L:L0,D:D0,byD:L0?{[D0]:L0}:{},ctl:[r2(ctl.x),r2(ctl.y)],mal:mal0});
+      const hf0=Q=>(L0?hazen(L0,Q/3600,D0):0)+VALV_LOSS;
+      grupos.forEach((grp,gi)=>{ const K=gi+1, m=grp.length, gc=grp.map(r=>cells[regs.indexOf(r)]);
+        const cost=new Float32Array(N); for(let i=0;i<N;i++) cost[i]=base[i]?base[i]*(used[i]?4:1):0; // pasar donde ya va otro tubo cuesta 4 veces: así los sectores no se cruzan si hay otra forma
+        const parent=new Int32Array(N).fill(-1), inTree=new Uint8Array(N); inTree[ciCtl]=1; const tree=[ciCtl], pend=gc.map((c,j)=>({c,j})), sin=[];
+        while(pend.length){ const goals=pend.map(p=>p.c), {d,prev}=dijk(tree,cost,goals); let bj=-1,bd=Infinity; pend.forEach((p,j)=>{ if(p.c>=0&&d[p.c]<bd){ bd=d[p.c]; bj=j; } }); if(bj<0){ pend.forEach(p=>sin.push(p.j)); break; }
+          const p=pend.splice(bj,1)[0]; for(let i=p.c;!inTree[i];i=prev[i]){ parent[i]=prev[i]; inTree[i]=1; tree.push(i); } }
+        tree.forEach(i=>used[i]=1);
+        // caudal por tramo (lo que pasa de cada celda a su padre), diámetros y roce acumulado hasta cada regador; luego simulación con la bomba
+        const qn=grp.map(qDe), pn=grp.map(r=>Pn(radOf(r))), dz=grp.map(r=>hz(r.x,r.y)-hE), ok=j=>gc[j]>=0&&inTree[gc[j]]&&!sin.includes(j);
+        const flowFor=q=>{ const f=new Float32Array(N); grp.forEach((r,j)=>{ if(!ok(j)) return; for(let i=gc[j];i!==ciCtl&&i>=0;i=parent[i]) f[i]+=q[j]; }); return f; };
+        const hfFor=(f,D,Q)=>grp.map((r,j)=>{ if(!ok(j)) return 0; let h=hf0(Q); for(let i=gc[j];i!==ciCtl&&i>=0;i=parent[i]) h+=hazen(stepL(i,parent[i])*1.1,f[i]/3600,D[i]); return h; });
+        const f0=flowFor(qn), D=new Uint8Array(N); tree.forEach(i=>{ if(i!==ciCtl) D[i]=diamFor(f0[i],Dmin); }); const Q=qn.reduce((a,q,j)=>a+(ok(j)?q:0),0), hf=hfFor(f0,D,Q);
+        const need=grp.map((r,j)=>dz[j]+pn[j]+hf[j]); let wj=0; need.forEach((v,j)=>{ if(ok(j)&&v>need[wj]) wj=j; });
+        // largo por diámetro
+        // cada celda se dibuja en su centro, salvo la del control y las de los regadores, que van en el punto exacto
+        const exact={}; exact[ciCtl]=[r2(ctl.x),r2(ctl.y)]; grp.forEach((r,j)=>{ if(ok(j)&&exact[gc[j]]===undefined) exact[gc[j]]=[r2(r.x),r2(r.y)]; });
+        const ptOf=i=>exact[i]||[r2(cX(i)),r2(cY(i))];
+        const segs=runsFrom(parent,inTree,D,ciCtl,ptOf,exact); // los regadores son siempre vértices del tubo grp.forEach((r,j)=>{ if(ok(j)&&(exact[gc[j]][0]!==r2(r.x)||exact[gc[j]][1]!==r2(r.y))) segs.push({pts:[exact[gc[j]],[r2(r.x),r2(r.y)]],D:diamFor(qn[j],Dmin)}); });
+        const byD={}; let L=0; segs.forEach(sg=>{ for(let i=1;i<sg.pts.length;i++){ const l=Math.hypot(sg.pts[i][0]-sg.pts[i-1][0],sg.pts[i][1]-sg.pts[i-1][1])*1.1; L+=l; byD[sg.D]=(byD[sg.D]||0)+l; } }); Object.keys(byD).forEach(d=>byD[d]=+byD[d].toFixed(1));
+        // etiqueta a mitad del camino al regador crítico
+        let tee=[r2(ctl.x),r2(ctl.y)]; if(ok(wj)){ const path=[]; for(let i=gc[wj];i!==ciCtl&&i>=0;i=parent[i]) path.push(i); const c=path[Math.floor(path.length/2)]; if(c!==undefined) tee=[r2(cX(c)),r2(cY(c))]; }
+        const Dmax=tree.length>1?Math.max(...tree.filter(i=>i!==ciCtl).map(i=>D[i])):Dmin;
+        out.push({k:K,n:m,regs:grp.map(r=>[r.x,r.y]),idx:grp.map(r=>pins.indexOf(r)),Q:+Q.toFixed(2),tee,L:+L.toFixed(1),D:Dmax,byD,hf:+hf[wj].toFixed(1),dz:+dz[wj].toFixed(1),pn:pn[wj],need:+need[wj].toFixed(1),far:[r2(grp[wj].x),r2(grp[wj].y)],sin:sin.map(j=>pins.indexOf(grp[j])+1),segs,
+          _sim:{grp,gc,qn,pn,dz,ok,parent,D,flowFor,hfFor}}); });
+      // simulación: con la bomba dimensionada para el peor sector (+2 m), ¿qué presión y caudal le llega a cada regador cuando corre su sector?
+      const H=Math.max(...out.filter(pp=>pp.k>0).map(pp=>pp.need))+2;
+      out.filter(pp=>pp.k>0).forEach(pp=>{ const S=pp._sim; let q=S.qn.slice(), P=S.pn.slice();
+        for(let it=0;it<4;it++){ const Q=q.reduce((a,v,j)=>a+(S.ok(j)?v:0),0), f=S.flowFor(q), hf=S.hfFor(f,S.D,Q); P=S.grp.map((r,j)=>Math.max(1,H-S.dz[j]-hf[j])); q=S.qn.map((v,j)=>v*Math.sqrt(P[j]/S.pn[j])); }
+        pp.sim=S.grp.map((r,j)=>({x:r.x,y:r.y,i:pins.indexOf(r),bar:S.ok(j)?P[j]/10.2:0,lpm:S.ok(j)?q[j]*1000/60:0,alc:S.ok(j)?radOf(r)*Math.pow(P[j]/S.pn[j],0.3):0})); pp.Qsim=+q.reduce((a,v,j)=>a+(S.ok(j)?v:0),0).toFixed(2); delete pp._sim; });
+      pipes=out; } }
   drawPipes(); riegoResumen(); }
 function autoRed(){ if(pins.some(p=>p.t==='regador')&&pins.some(p=>p.t==='estanque'||p.t==='bomba')) armarRed(); else { pipes=[]; drawPipes(); riegoResumen(); } }
-function drawPipes(){ while(pipeGroup.children.length) pipeGroup.remove(pipeGroup.children[0]);
+// Simulación visual: cuando se mira un solo sector, el agua corre por sus tubos (puntos que avanzan de la bomba a los regadores)
+let flowRuns=[], flowPts=null; const flowMat=new THREE.PointsMaterial({color:'#bae6fd',size:0.9,sizeAttenuation:true,depthTest:false,transparent:true,opacity:0.95});
+function setFlow(runs){ flowRuns=[]; if(flowPts){ pipeGroup.remove(flowPts); flowPts.geometry.dispose(); flowPts=null; } if(!runs.length) return;
+  let total=0; runs.forEach(r=>{ const P=groundPath(r.pts), cum=[0]; for(let i=1;i<P.length;i++) cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1])); const L=cum[cum.length-1]; if(L<0.2) return; const v=r.Q/3600/(Math.PI*(r.D/1000)*(r.D/1000)/4), np=Math.max(1,Math.round(L/2.5)); flowRuns.push({P,cum,L,v:2+5*Math.min(v,1.5),np}); total+=np; });
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(total*3),3)); flowPts=new THREE.Points(g,flowMat); flowPts.renderOrder=5; flowPts.frustumCulled=false; pipeGroup.add(flowPts); }
+window.flowTick=function(t){ if(!flowPts||!flowRuns.length) return; const arr=flowPts.geometry.attributes.position.array; let k=0; const T=t/1000;
+  flowRuns.forEach(r=>{ for(let p=0;p<r.np;p++){ const s=((T*r.v+p*r.L/r.np)%r.L+r.L)%r.L; let i=1; while(i<r.cum.length-1&&r.cum[i]<s) i++; const a=r.P[i-1], b=r.P[i], u=(s-r.cum[i-1])/Math.max(1e-6,r.cum[i]-r.cum[i-1]); arr[k++]=a[0]+(b[0]-a[0])*u; arr[k++]=(a[2]+(b[2]-a[2])*u)*EX+1.1; arr[k++]=-(a[1]+(b[1]-a[1])*u); } });
+  flowPts.geometry.attributes.position.needsUpdate=true; };
+function drawPipes(){ while(pipeGroup.children.length) pipeGroup.remove(pipeGroup.children[0]); flowPts=null;
   const yAt=(x,y,up)=>{ const h=hAt(x,y); return (isNaN(h)?CMED:h)*EX+up; };
   if(sectorSel&&!pipes.some(pp=>pp.k===sectorSel)) sectorSel=0;
+  const runs=[]; const sel=pipes.find(pp=>pp.k===sectorSel);
   pipes.forEach(pp=>{ if(sectorSel&&pp.k&&pp.k!==sectorSel) return; const col=new THREE.Color(pp.k===0?MATRIZ_COLOR:PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]);
-    pp.segs.forEach(e=>pipeGroup.add(drawLineObj([[e[0],e[1]],[e[2],e[3]]],col,pp.k===0?0.26:0.14)));
+    pp.segs.forEach(e=>{ pipeGroup.add(drawLineObj(e.pts,col,pp.k===0?0.26:0.14,true)); if(sectorSel) runs.push({pts:e.pts,D:e.D,Q:pp.k===0?(sel?sel.Qsim||sel.Q:pp.Q):(pp.Qsim||pp.Q)}); });
     if(pp.k===0) return;
-    const sp=textSprite('Sector '+pp.k+' · Ø'+pp.D+' mm'); sp.position.set(pp.tee[0],yAt(pp.tee[0],pp.tee[1],2.6),-pp.tee[1]); pipeGroup.add(sp); }); }
+    const sp=textSprite('Sector '+pp.k+' · Ø'+pp.D+' mm'); sp.position.set(pp.tee[0],yAt(pp.tee[0],pp.tee[1],2.6),-pp.tee[1]); pipeGroup.add(sp); });
+  setFlow(runs); }
 const EFF=0.45, HPS=[0.5,0.75,1,1.5,2,3,4,5.5,7.5]; // rendimiento motobomba y potencias comerciales
 const hpTxt=h=>String(h).replace('.',',');
 function potencia(Q,H){ const kW=Q/3600*9.81*H/EFF, hp=kW/0.746; return {kW,hp,hpc:HPS.find(h=>h>=hp*1.1)||Math.ceil(hp)}; } // Q m³/h, H m
@@ -818,15 +866,15 @@ function riegoResumen(){
   else html+='Marca una <b>toma de agua</b> en el río'+(est?'':' y un estanque')+' para calcular esta bomba.';
   if(pipes.length){ const mat=pipes.find(pp=>pp.k===0), sect=pipes.filter(pp=>pp.k>0), porD={}; pipes.forEach(pp=>Object.keys(pp.byD||{}).forEach(d=>{ porD[d]=(porD[d]||0)+pp.byD[d]; }));
     const desc=o=>Object.keys(o).sort((a,b)=>a-b).map(d=>fmt(o[d],0)+' m de Ø'+d).join(' + ')+' mm', peor=sect.reduce((m,pp)=>pp.need>m.need?pp:m,sect[0]), Qmax=Math.max(...sect.map(pp=>pp.Q)), H=peor.need+2, P=potencia(Qmax,H), est8=sect.length<=4?4:sect.length<=6?6:sect.length<=8?8:12;
-    html+='<h3>Bomba de riego (estanque → regadores)</h3>Impulsa <b>'+fmt(Qmax,1)+' m³/h</b> ('+Math.round(Qmax*1000/60)+' L/min) a <b>'+fmt(H,0)+' m</b> de altura (sector '+peor.k+': 25 m en el regador, '+fmt(peor.hf,1)+' m de roce con válvula y filtro, '+sg(peor.dz)+' m de desnivel y 2 m de margen): motor de ≈ '+fmt(P.kW,2)+' kW, comprar de <b>'+hpTxt(P.hpc)+' HP</b>. La enciende el programador con un relé cuando abre un sector.';
-    html+='<h3>Control de válvulas</h3>'+(ctl?'En «'+ctl.name+'», a '+fmt(mat.L,0)+' m de tubo Ø'+mat.D+' mm de la bomba. ':'No has marcado un «Control de válvulas»: se supone junto al estanque. ')+'Colector de superficie con <b>'+sect.length+' electroválvulas de 1"</b> (una por sector), filtro de malla, y un <b>programador WiFi de '+est8+' estaciones</b> que se maneja desde el celular (por ejemplo Rain Bird con WiFi u Orbit B-hyve), con relé de partida para la bomba de riego.'+(mat.mal?' <span class="warn">Ningún corredor de tubos cabe en el lote sin pasar por una construcción: mueve el control o los regadores.</span>':'');
+    html+='<h3>Bomba de riego (estanque → regadores)</h3>Impulsa <b>'+fmt(Qmax,1)+' m³/h</b> ('+Math.round(Qmax*1000/60)+' L/min) a <b>'+fmt(H,0)+' m</b> de altura (sector '+peor.k+': '+fmt(peor.pn,0)+' m en el regador, '+fmt(peor.hf,1)+' m de roce con válvula y filtro, '+sg(peor.dz)+' m de desnivel y 2 m de margen): motor de ≈ '+fmt(P.kW,2)+' kW, comprar de <b>'+hpTxt(P.hpc)+' HP</b>. La enciende el programador con un relé cuando abre un sector.';
+    html+='<h3>Control de válvulas</h3>'+(ctl?'En «'+ctl.name+'», a '+fmt(mat.L,0)+' m de tubo Ø'+mat.D+' mm de la bomba. ':'No has marcado un «Control de válvulas»: se supone junto al estanque. ')+'Colector de superficie con <b>'+sect.length+' electroválvulas de 1"</b> (una por sector), filtro de malla, y un <b>programador WiFi de '+est8+' estaciones</b> que se maneja desde el celular (por ejemplo Rain Bird con WiFi u Orbit B-hyve), con relé de partida para la bomba de riego.'+(mat.mal?' <span class="warn">No hay camino dentro del lote del estanque al control sin pasar por una construcción: mueve uno de los dos.</span>':'');
     const nomb=pp=>(pp.regs||[]).map(r=>{ const i=pins.findIndex(q=>q.t==='regador'&&Math.abs(q.x-r[0])<0.05&&Math.abs(q.y-r[1])<0.05); return i<0?'?':(i+1); }).join(', ');
-    html+='<h3>Sectores de riego</h3>Ver en el terreno: <div class="sect"><button data-s="0"'+(sectorSel?'':' class="on"')+'>Todos</button>'+sect.map(pp=>'<button data-s="'+pp.k+'"'+(sectorSel===pp.k?' class="on"':'')+'><span class="dot" style="background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span>Sector '+pp.k+' · '+pp.n+(pp.n===1?' regador':' regadores')+'</button>').join('')+'</div>'+
-      sect.map(pp=>'<span class="dot" style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span> Sector '+pp.k+': <b>'+pp.n+(pp.n===1?' regador':' regadores')+'</b> (marcas '+nomb(pp)+') · '+fmt(pp.Q,1)+' m³/h · '+Math.round(5/mmh*60)+' min para 5 mm').join('<br>');
-    html+='<h3>Red de tubos</h3>'+sect.map(pp=>'Sector '+pp.k+': '+pp.n+' regadores, '+fmt(pp.Q,1)+' m³/h · '+fmt(pp.Lc,0)+' m de Ø'+pp.D+' mm desde el control y el resto en ramal · total <b>'+fmt(pp.L,0)+' m</b> ('+desc(pp.byD)+') · roce '+fmt(pp.hf,1)+' m · regador crítico '+sg(pp.dz)+' m'+(pp.casa?' <span class="warn">— un tramo no pudo evitar una construcción</span>':'')).join('<br>');
+    html+='<h3>Sectores de riego</h3>Ver en el terreno (con un sector elegido, el agua corre por sus tubos): <div class="sect"><button data-s="0"'+(sectorSel?'':' class="on"')+'>Todos</button>'+sect.map(pp=>'<button data-s="'+pp.k+'"'+(sectorSel===pp.k?' class="on"':'')+'><span class="dot" style="background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span>Sector '+pp.k+' · '+pp.n+(pp.n===1?' regador':' regadores')+'</button>').join('')+'</div>'+
+      sect.map(pp=>'<span class="dot" style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span> Sector '+pp.k+': <b>'+pp.n+(pp.n===1?' regador':' regadores')+'</b> (marcas '+nomb(pp)+') · '+fmt(pp.Q,1)+' m³/h · '+Math.round(5/mmh*60)+' min para 5 mm'+((pp.sim||[]).length?'<br><span class="sub">Le llega a cada regador: '+pp.sim.map(s=>(s.i+1)+': <b'+(s.bar<2||s.bar>4?' class="warn"':'')+'>'+fmt(s.bar,1)+' bar</b>, '+Math.round(s.lpm)+' L/min').join(' · ')+'</span>':'')).join('<br>');
+    html+='<h3>Red de tubos</h3>'+sect.map(pp=>'Sector '+pp.k+': '+pp.n+' regadores, '+fmt(pp.Q,1)+' m³/h · <b>'+fmt(pp.L,0)+' m</b> de tubo ('+desc(pp.byD)+') · roce '+fmt(pp.hf,1)+' m · regador crítico '+sg(pp.dz)+' m'+((pp.sin||[]).length?' <span class="warn">— no hay camino dentro del lote hasta la marca '+pp.sin.join(', ')+'</span>':'')).join('<br>')+'<br><span class="sub">Tramos rectos donde se puede, siempre dentro del lote y rodeando la casa y el container; los sectores no se cruzan salvo que no haya otra forma.</span>';
     html+='<h3>Lista de compra</h3>Tubo: '+Object.keys(porD).sort((a,b)=>a-b).map(d=>'<b>'+fmt(porD[d],0)+' m</b> de Ø'+d+' mm').join(' · ')+'<br>'+sect.length+' electroválvulas de 1" · programador WiFi de '+est8+' estaciones · relé de bomba · filtro de malla · estanque de '+fmt(Vest,1)+' m³ · bomba de riego de '+hpTxt(P.hpc)+' HP'+(lle?' · bomba de llenado de '+hpTxt(lle.P.hpc)+' HP'+(lle.dz>6?' (sumergible o de orilla)':''):'')+' · '+regs.length+' regadores'; }
   else if(regs.length&&!est) html+='<h3>Red de tubos</h3>Marca un <b>estanque</b>: la red de tubos se arma sola con los regadores que haya.';
-  html+='<p class="hint">Estimaciones para dimensionar: boquillas a 2,5 bar, 10 % extra de tubo por curvas, roce con polietileno, velocidad ≤ 1,5 m/s, 2 m de pérdida en válvula y filtro, rendimiento de motobomba 45 %. Confirma con la ficha del regador y la curva de la bomba.</p>';
+  html+='<p class="hint">Estimaciones para dimensionar: boquillas a 2,5 bar hasta 10 m de radio y 3 bar a 13 m, 10 % extra de tubo por curvas, roce con polietileno, velocidad ≤ 1,5 m/s, 2 m de pérdida en válvula y filtro, rendimiento de motobomba 45 %. Confirma con la ficha del regador y la curva de la bomba.</p>';
   riegoEl.innerHTML=html; }
 riegoEl.addEventListener('click',e=>{ const b=e.target.closest('button[data-s]'); if(!b) return; sectorSel=+b.dataset.s||0; drawPins(); });
 [rrEl,rturnoEl,rdiamEl,rfillEl].forEach(el=>el.addEventListener('change',()=>{ autoRed(); drawPins(); }));
@@ -919,7 +967,10 @@ ex.addEventListener('input',updateSun);
 
 // Lectura
 const ray=new THREE.Raycaster(), m=new THREE.Vector2(), ph=document.getElementById('ph'), pd=document.getElementById('pd');
+function pinHit(ev){ if(!pinGroup.visible||!pinGroup.children.length) return -1; const r=renderer.domElement.getBoundingClientRect(); m.x=((ev.clientX-r.left)/r.width)*2-1; m.y=-((ev.clientY-r.top)/r.height)*2+1; ray.setFromCamera(m,camera);
+  const hit=ray.intersectObjects(pinGroup.children,true).find(o=>o.object.userData.idx!==undefined); return hit?hit.object.userData.idx:-1; }
 function probe(ev){
+  if(ev.type==='pointermove') view.classList.toggle('overpin',pinHit(ev)>=0);
   const r=renderer.domElement.getBoundingClientRect();
   m.x=((ev.clientX-r.left)/r.width)*2-1; m.y=-((ev.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(m,camera); const hit=ray.intersectObjects([mesh,...(bldgGroup.visible?bldgMeshes:[]),...(treeGroup.visible?[treeMesh,skirtMesh]:[])])[0]; if(!hit) return;
@@ -935,7 +986,7 @@ renderer.domElement.addEventListener('pointerdown',probe);
 
 const comp=document.getElementById('comp');
 window.addEventListener('resize',()=>{ renderer.setSize(view.clientWidth,view.clientHeight); camera.aspect=view.clientWidth/view.clientHeight; camera.updateProjectionMatrix(); });
-(function loop(){ controls.update(); comp.style.transform='rotate('+controls.getAzimuthalAngle()+'rad)'; renderer.render(scene,camera); requestAnimationFrame(loop); })();
+(function loop(){ controls.update(); if(window.flowTick) flowTick(performance.now()); comp.style.transform='rotate('+controls.getAzimuthalAngle()+'rad)'; renderer.render(scene,camera); requestAnimationFrame(loop); })();
 </script>
 </body>
 </html>
