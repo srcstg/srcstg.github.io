@@ -72,15 +72,19 @@ details summary{cursor:pointer;color:var(--muted);font-size:1rem;margin-top:.75r
 .measure b{font-variant-numeric:tabular-nums}
 .measure[hidden]{display:none}
 #view.measuring,#view.pinning,#view.zoning{cursor:crosshair}
+#view.moving{cursor:move}
 .pins .num.sq{border-radius:4px}
 select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:8px;padding:.5rem .75rem;min-height:2.75rem}
 .pins{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.375rem}
-.pins li{display:grid;grid-template-columns:auto 1fr auto;gap:.5rem;align-items:center;border:1px solid var(--line);border-radius:8px;padding:.375rem .5rem}
+.pins li{display:grid;grid-template-columns:auto 1fr auto auto;gap:.5rem;align-items:center;border:1px solid var(--line);border-radius:8px;padding:.375rem .5rem}
 .pins .num{display:inline-grid;place-items:center;width:1.75rem;height:1.75rem;border-radius:50%;color:#fff;font-weight:700;font-size:.9375rem}
 .pins input{font:inherit;font-size:1rem;color:var(--ink);background:transparent;border:0;border-bottom:1px dashed var(--line);padding:.125rem 0;min-width:0;width:100%}
 .pins input:focus{outline:none;border-bottom-color:var(--accent)}
-.pins .det{grid-column:2;color:var(--muted);font-size:.9375rem}
+.pins .det{grid-column:2/-1;color:var(--muted);font-size:.9375rem}
 .pins .del{min-height:2.25rem;padding:.25rem .625rem;font-size:1.125rem;line-height:1}
+.pins .mov{min-height:2.25rem;padding:.25rem .625rem;font-size:.9375rem}
+.pins li.moving{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.pins li.moving .mov{background:var(--accent);color:#1a1400;border-color:var(--accent)}
 .hint{font-size:.9375rem;color:var(--muted);margin:.375rem 0 0}
 .riego{margin-top:.5rem;padding:.75rem .875rem;border:1.5px solid var(--line);border-radius:8px;font-size:1rem;line-height:1.5}
 .riego b{font-variant-numeric:tabular-nums}
@@ -163,6 +167,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
     </select>
   </div>
   <p class="hint" id="pinhint" hidden>Elige el tipo y toca el terreno donde va. Para una manguera o tubo, toca cada punto del recorrido y luego «Terminar recorrido». Puedes cambiar los nombres en la lista.</p>
+  <p class="hint" id="movehint" hidden></p>
   <div class="btns" id="linedraftbtns" hidden><button id="blclose">Terminar recorrido</button><button id="blundo">Deshacer último punto</button></div>
   <ol class="pins" id="pins"></ol>
   <div class="btns" id="pinbtns" hidden><button id="pinclr">Borrar marcas</button></div>
@@ -525,9 +530,10 @@ toggle(document.getElementById('bm'),setMeasuring);
 document.getElementById('bmclr').addEventListener('click',()=>{ measPts.length=0; drawMeasure(); if(!measuring) measEl.hidden=true; });
 let pdown=null;
 renderer.domElement.addEventListener('pointerdown',ev=>{ pdown=[ev.clientX,ev.clientY]; });
-renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&&!zoning)||!pdown) return; const moved=Math.hypot(ev.clientX-pdown[0],ev.clientY-pdown[1]); pdown=null; if(moved>6) return;
+renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&&!zoning&&movingIdx<0)||!pdown) return; const moved=Math.hypot(ev.clientX-pdown[0],ev.clientY-pdown[1]); pdown=null; if(moved>6) return;
   const r=renderer.domElement.getBoundingClientRect(); m.x=((ev.clientX-r.left)/r.width)*2-1; m.y=-((ev.clientY-r.top)/r.height)*2+1;
   ray.setFromCamera(m,camera); const hit=ray.intersectObject(mesh)[0]; if(!hit) return; const x=hit.point.x, y=-hit.point.z, h=hAt(x,y); if(isNaN(h)) return;
+  if(movingIdx>=0){ const p=pins[movingIdx]; if(p){ p.x=+x.toFixed(2); p.y=+y.toFixed(2); } setMoving(-1); savePins(); drawPins(); return; }
   if(pinning){ if(pinType.value.startsWith('L:')){ lineDraft.push([x,y]); drawLines(); } else addPin(x,y); return; }
   if(zoning){ zoneDraft.push([x,y]); drawZones(); return; }
   measPts.push({x,y,h}); drawMeasure(); });
@@ -535,9 +541,12 @@ renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&
 // Ubicar elementos: marcas con nombre sobre el terreno, guardadas en este navegador y compartibles por enlace
 const PIN_TYPES={rec:{n:'Recolector de agua',c:'#4fb6e3'},bomba:{n:'Bomba',c:'#e5533d'},estanque:{n:'Estanque',c:'#3f8f5f'},control:{n:'Control de válvulas',c:'#f59e0b'},toma:{n:'Toma de agua',c:'#2b6cb0'},regador:{n:'Regador',c:'#22c55e'},llave:{n:'Llave o salida',c:'#e0a91b'},otro:{n:'Elemento',c:'#b8b8b8'}};
 const pinGroup=new THREE.Group(); scene.add(pinGroup);
-let pins=[], pinning=false;
+let pins=[], pinning=false, movingIdx=-1;
 const pinsEl=document.getElementById('pins'), pinHint=document.getElementById('pinhint'), pinBtns=document.getElementById('pinbtns'), pinType=document.getElementById('pintype');
 const poleGeo=new THREE.CylinderGeometry(0.12,0.12,1,8), headGeo=new THREE.SphereGeometry(0.7,16,12);
+const moveHint=document.getElementById('movehint');
+function setMoving(i){ if(i>=pins.length) i=-1; movingIdx=i; view.classList.toggle('moving',i>=0); pinsEl.querySelectorAll('li').forEach((li,k)=>li.classList.toggle('moving',k===i)); moveHint.hidden=i<0; if(i>=0) moveHint.textContent='Toca el terreno donde va «'+(i+1)+' · '+pins[i].name+'». Esc para cancelar.'; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&movingIdx>=0) setMoving(-1); });
 function loadPins(){ try{ const h=location.hash.match(/[#&]m=([^&]+)/); if(h){ pins=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){}
   try{ const v=localStorage.getItem('casalcs-marcas'); if(v) pins=JSON.parse(v); }catch(e){} }
 function savePins(){ try{ localStorage.setItem('casalcs-marcas',JSON.stringify(pins)); }catch(e){} if(window.riegoReady) autoRed(); if(window.pubReady) pubStatus(); }
@@ -555,20 +564,22 @@ function drawPins(){
   pinsEl.innerHTML='';
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y), dw=distWater(p.x,p.y), T=PIN_TYPES[p.t]||PIN_TYPES.otro;
     const li=document.createElement('li');
-    li.innerHTML='<span class="num" style="background:'+T.c+'">'+(i+1)+'</span><input value="" aria-label="Nombre de la marca"><button class="del" aria-label="Quitar marca" title="Quitar marca">×</button>'+
+    li.innerHTML='<span class="num" style="background:'+T.c+'">'+(i+1)+'</span><input value="" aria-label="Nombre de la marca"><button class="mov" aria-label="Mover marca" title="Mover: toca el terreno donde va">Mover</button><button class="del" aria-label="Quitar marca" title="Quitar marca">×</button>'+
       '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m · caudal <input type="number" class="cau" min="1" max="300" step="0.5" aria-label="Caudal del regador en litros por minuto"> L/min · gira '+Math.round(arcOf(p)[1])+'°':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
     const rad=li.querySelector('.rad'); if(rad){ rad.value=p.r||+document.getElementById('rr').value||10; rad.addEventListener('change',()=>{ p.r=+rad.value||10; savePins(); drawPins(); }); }
     const cau=li.querySelector('.cau'); if(cau){ cau.value=p.q>0?p.q:''; cau.placeholder=window.riegoReady?Math.round(qDe(p)*1000/60):''; cau.title='Vacío = se estima por el radio y el giro'; cau.addEventListener('change',()=>{ const v=+cau.value; if(v>0) p.q=v; else delete p.q; savePins(); drawPins(); }); }
     const inp=li.querySelector('input'); inp.value=p.name; inp.addEventListener('change',()=>{ p.name=inp.value.trim()||T.n; savePins(); drawPins(); });
-    li.querySelector('.del').addEventListener('click',()=>{ pins.splice(i,1); savePins(); drawPins(); });
+    li.querySelector('.mov').addEventListener('click',()=>setMoving(movingIdx===i?-1:i));
+    li.querySelector('.del').addEventListener('click',()=>{ if(movingIdx>=0) setMoving(-1); pins.splice(i,1); savePins(); drawPins(); });
     pinsEl.appendChild(li); });
+  if(movingIdx>=0) setMoving(movingIdx);
   if(window.linesReady) renderLineItems();
   pinBtns.hidden=pins.length===0&&!(window.linesReady&&lines.length); }
 function setPinning(on){ pinning=on; view.classList.toggle('pinning',on); pinHint.hidden=!on; if(!on&&window.linesReady){ lineDraft=[]; drawLines(); }
   if(on&&measuring){ document.getElementById('bm').setAttribute('aria-pressed','false'); setMeasuring(false); }
   if(on&&window.zonesReady&&zoning){ document.getElementById('bzone').setAttribute('aria-pressed','false'); setZoning(false); } }
 toggle(document.getElementById('bpin'),setPinning);
-document.getElementById('pinclr').addEventListener('click',()=>{ const n=pins.length+(window.linesReady?lines.length:0); if(n&&!confirm('¿Borrar las '+n+' marcas y recorridos?')) return; pins=[]; if(window.riegoReady){ pipes=[]; savePipes(); drawPipes(); } savePins(); if(window.linesReady){ lines=[]; lineDraft=[]; saveLines(); drawLines(); } history.replaceState(null,'',location.pathname); drawPins(); });
+document.getElementById('pinclr').addEventListener('click',()=>{ const n=pins.length+(window.linesReady?lines.length:0); if(n&&!confirm('¿Borrar las '+n+' marcas y recorridos?')) return; pins=[]; savePins(); if(window.linesReady){ lines=[]; lineDraft=[]; saveLines(); drawLines(); } history.replaceState(null,'',location.pathname); drawPins(); });
 document.getElementById('pinshare').addEventListener('click',ev=>{ const link=pinLink(); history.replaceState(null,'',link);
   const done=()=>{ ev.target.textContent='Enlace copiado'; setTimeout(()=>ev.target.textContent='Copiar enlace con marcas y zonas',2000); };
   if(navigator.clipboard) navigator.clipboard.writeText(link).then(done,()=>prompt('Copia este enlace:',link)); else prompt('Copia este enlace:',link); });
