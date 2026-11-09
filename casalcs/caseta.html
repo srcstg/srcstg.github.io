@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caseta de riego · Lote B8 Los Muermos</title>
+<meta name="description" content="Ficha de la caseta de riego del Lote B8 Los Muermos: planta acotada, esquema hidráulico, equipos, eléctrico y operación.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#dfe5e3; --paper:#fafbf9; --ink:#182321; --muted:#44524e; --line:#a9b6b2; --soft:#edf1ef; --accent:#e0a91b; --accent-ink:#7a5a05;
+  --water:#1e7fb8; --sector1:#f97316; --sector2:#a855f7; --elec:#b91c1c;
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s6:1.5rem; --s8:2rem; --s12:3rem;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#1a2122; --paper:#232c2d; --ink:#e6ecea; --muted:#a3b0ad; --line:#3b4847; --soft:#1e2627; --accent:#f2c230; --accent-ink:#f2c230; --water:#5eb3e6; --elec:#f87171; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#1a2122; --paper:#232c2d; --ink:#e6ecea; --muted:#a3b0ad; --line:#3b4847; --soft:#1e2627; --accent:#f2c230; --accent-ink:#f2c230; --water:#5eb3e6; --elec:#f87171; color-scheme:dark; }
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:1.0625rem;line-height:1.55}
+.sheet{max-width:60rem;margin:0 auto;padding:var(--s6) var(--s4) var(--s12)}
+header.top{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s6);align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:var(--s3);margin-bottom:var(--s6)}
+h1{font-size:clamp(1.5rem,1.1rem + 1.8vw,2.25rem);line-height:1.15;margin:0;text-wrap:balance}
+h1 small{display:block;font-size:1rem;font-weight:400;color:var(--muted);margin-top:var(--s1)}
+.meta{color:var(--muted);font-size:.9375rem}
+.meta a{color:inherit}
+h2{font-size:1.375rem;line-height:1.2;margin:var(--s8) 0 var(--s3);padding-top:var(--s3);border-top:1px solid var(--line);text-wrap:balance}
+h2 .n{display:inline-block;min-width:1.6em;color:var(--accent-ink);font-variant-numeric:tabular-nums}
+h3{font-size:1.0625rem;margin:var(--s6) 0 var(--s2)}
+p{max-width:68ch;margin:0 0 var(--s3);text-wrap:pretty}
+p.lead{font-size:1.125rem}
+ul,ol{max-width:68ch;margin:0 0 var(--s3);padding-left:1.3em}
+li{margin-bottom:var(--s1)}
+.muted{color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:var(--s4) var(--s4)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:var(--s3);margin:var(--s4) 0 var(--s6)}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:var(--s3) var(--s4)}
+.kpi b{display:block;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--muted);font-size:.9375rem}
+figure{margin:var(--s4) 0 var(--s6);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:var(--s3)}
+figure svg{display:block;width:100%;height:auto}
+figcaption{color:var(--muted);font-size:.9375rem;margin-top:var(--s2);max-width:none}
+table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:.9375rem;margin:var(--s3) 0 var(--s6)}
+th,td{text-align:left;vertical-align:top;padding:.55rem .7rem;border-top:1px solid var(--line)}
+th{background:var(--soft);border-top:0;font-weight:700}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sub td{background:var(--soft);font-weight:700}
+.pend{border-left:4px solid var(--accent);padding-left:var(--s3)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:var(--s4)}
+a{color:var(--accent-ink)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.print{display:inline-block;background:var(--ink);color:var(--paper);border:0;border-radius:8px;padding:.5rem .9rem;font:inherit;cursor:pointer}
+/* planos */
+.sv text{font-family:"Atkinson Hyperlegible",system-ui,sans-serif;fill:var(--ink)}
+.sv .mut{fill:var(--muted)}
+.sv .wall{fill:var(--soft);stroke:var(--ink);stroke-width:2}
+.sv .inner{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.sv .eq{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.sv .pipe{stroke:var(--water);stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sv .p1{stroke:var(--sector1)} .sv .p2{stroke:var(--sector2)}
+.sv .el{stroke:var(--elec);stroke-width:1.5;stroke-dasharray:5 4;fill:none}
+.sv .dim{stroke:var(--muted);stroke-width:1;fill:none}
+.sv .tag circle{fill:var(--accent);stroke:var(--ink);stroke-width:1}
+.sv .tag text{font-weight:700;font-size:11px;text-anchor:middle;dominant-baseline:central;fill:#182321}
+.sv .box{fill:var(--paper);stroke:var(--ink);stroke-width:1.5;rx:6}
+.sv .lab{font-size:12px;text-anchor:middle}
+.sv .lab2{font-size:11px;text-anchor:middle;fill:var(--muted)}
+.v3d{position:relative;width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:linear-gradient(#cfe3ee,#e9efe9);touch-action:none}
+.v3d canvas{display:block;width:100%;height:100%}
+.btns3d{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+.btns3d button{font:inherit;font-size:.9375rem;padding:.4rem .8rem;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer}
+.btns3d button[aria-pressed="true"]{background:var(--accent);color:#182321;border-color:var(--accent)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .v3d{background:linear-gradient(#2a3a44,#1e2627)} }
+@media (max-width:40rem){ .sheet{padding:var(--s4) var(--s4) var(--s8)} th,td{padding:.45rem .5rem} }
+@media print{
+  :root{ --bg:#fff; --paper:#fff; --soft:#f1f3f2; --ink:#000; --muted:#333; --line:#999; color-scheme:light }
+  body{font-size:10.5pt;line-height:1.4}
+  .sheet{max-width:none;padding:0}
+  .noprint{display:none !important}
+  h2{break-after:avoid;margin-top:1.4rem}
+  figure,table,.card,.kpis{break-inside:avoid}
+  figure,table{box-shadow:none}
+  a{color:inherit;text-decoration:none}
+  @page{size:A4;margin:14mm}
+}
+@media (prefers-reduced-motion: no-preference){ a,button{transition:opacity .15s cubic-bezier(.16,1,.3,1)} }
+</style>
+</head>
+<body>
+<main class="sheet">
+<header class="top">
+  <h1>Caseta de riego <small>Lote B8 Los Muermos · gabinete de bombeo y control de válvulas</small></h1>
+  <div class="meta">Ficha del 9 de noviembre de 2026 · según el esquema publicado en <a href="index.html">el visor del terreno</a> · <button class="print noprint" onclick="print()">Imprimir</button></div>
+</header>
+
+<p class="lead">Un gabinete de 1,2 × 0,6 m y 1 m de alto, pegado al estanque en la terraza, reúne la bomba de riego, el filtro, el colector con las dos electroválvulas, el programador WiFi y el tablero eléctrico. No se entra: se abren las dos puertas del frente y todo queda a la mano. Los dos tubos de los sectores salen por el piso, enterrados hacia el pasto.</p>
+
+<div class="kpis">
+  <div class="kpi"><b>1 HP</b><span>bomba de riego, 220 V monofásica</span></div>
+  <div class="kpi"><b>2,5 m³/h a 38 m</b><span>punto de trabajo (41 L/min)</span></div>
+  <div class="kpi"><b>2 sectores</b><span>de 5 regadores, 105 min cada uno</span></div>
+  <div class="kpi"><b>1,2 × 0,6 m</b><span>gabinete, 1 m de alto, puertas al frente</span></div>
+</div>
+
+<h2><span class="n">1</span> Dónde va y por qué</h2>
+<p>El gabinete ocupa el lugar de la marca «Control de válvulas 1» del visor, a 3 m del estanque y 4,6 m sobre el nivel del río. El estanque queda al lado y más alto que la bomba, así que la bomba trabaja siempre con el agua llegándole por gravedad: no se desceba y no necesita válvula de pie.</p>
+<ul>
+  <li>Radier a la cota del terreno, 31,9 m; fondo del estanque unos 30 cm más arriba (sobre una base de arena o radier).</li>
+  <li>Los tubos de los sectores bajan por el piso del gabinete y siguen enterrados a 40 cm hacia el poniente, uno al norte del pasto (sector 1, 72 m) y otro al sur (sector 2, 97 m).</li>
+  <li>La electricidad llega desde la casa por una canalización enterrada; ver la sección 5.</li>
+</ul>
+
+<h2><span class="n">2</span> Planta acotada</h2>
+<figure>
+<svg class="sv" viewBox="0 0 640 400" role="img" aria-labelledby="pl-t pl-d">
+  <title id="pl-t">Planta del gabinete</title>
+  <desc id="pl-d">Gabinete de 1,2 por 0,6 metros interiores con dos puertas al frente. El agua entra desde el estanque por el costado oriente, pasa por la llave, la bomba, la retención, el filtro y el manómetro, y llega al colector con dos electroválvulas pegado a la pared del fondo; de cada electroválvula un tubo baja por el piso. El tablero y el programador van en la pared del fondo, arriba.</desc>
+  <g transform="translate(600,40)"><line x1="0" y1="26" x2="0" y2="-14" class="dim" stroke-width="1.5"/><polygon points="0,-20 -6,-4 6,-4" fill="var(--ink)"/><text y="42" class="lab">N</text></g>
+  <!-- paredes de 5 cm -->
+  <rect x="85" y="75" width="390" height="210" class="wall"/>
+  <rect x="100" y="90" width="360" height="180" class="inner"/>
+  <!-- puertas dobles al frente (sur) -->
+  <rect x="100" y="270" width="360" height="15" fill="var(--paper)" stroke="none"/>
+  <line x1="100" y1="270" x2="100" y2="285" stroke="var(--ink)" stroke-width="2"/><line x1="460" y1="270" x2="460" y2="285" stroke="var(--ink)" stroke-width="2"/>
+  <line x1="100" y1="285" x2="100" y2="330" stroke="var(--ink)" stroke-width="1.5"/><line x1="460" y1="285" x2="460" y2="330" stroke="var(--ink)" stroke-width="1.5"/>
+  <path d="M100 285 A180 180 0 0 0 280 465" class="dim" stroke-dasharray="4 3" clip-path="inset(0 0 0 0)"/>
+  <path d="M460 285 A180 180 0 0 1 280 465" class="dim" stroke-dasharray="4 3"/>
+  <text x="280" y="352" class="lab2">dos puertas de 0,60 m, abren al frente</text>
+  <!-- estanque afuera, al oriente -->
+  <rect x="500" y="100" width="120" height="160" rx="10" fill="var(--soft)" stroke="var(--ink)" stroke-width="1.5"/>
+  <text x="560" y="175" class="lab">Estanque</text><text x="560" y="192" class="lab2">7.000 L, fondo</text><text x="560" y="206" class="lab2">30 cm sobre el radier</text>
+  <!-- línea de agua a 20 cm de la pared del fondo, 30 cm sobre el piso -->
+  <path class="pipe" d="M500 150 L118 150"/>
+  <text x="482" y="140" class="lab2">entra Ø40</text>
+  <!-- equipos -->
+  <rect x="430" y="137" width="12" height="26" class="eq"/>                        <!-- 1 llave -->
+  <rect x="334" y="118" width="120" height="64" class="eq" fill="none" stroke-dasharray="3 3"/> <!-- gomas / base -->
+  <rect x="346" y="134" width="50" height="32" class="eq"/><rect x="396" y="128" width="52" height="44" rx="6" class="eq"/> <!-- 2 bomba -->
+  <rect x="309" y="140" width="14" height="20" class="eq"/>                        <!-- 3 retención -->
+  <circle cx="274" cy="150" r="16" class="eq"/>                                     <!-- 4 filtro -->
+  <line x1="232" y1="150" x2="232" y2="118" stroke="var(--ink)" stroke-width="1.5"/><circle cx="232" cy="108" r="9" class="eq"/> <!-- 5 manómetro -->
+  <rect x="178" y="136" width="24" height="28" class="eq"/><rect x="130" y="136" width="24" height="28" class="eq"/> <!-- 6 EV -->
+  <rect x="110" y="143" width="12" height="14" class="eq"/>                        <!-- tapón -->
+  <!-- bajadas de sector por el piso -->
+  <path class="pipe p1" d="M190 164 L190 216"/><circle cx="190" cy="216" r="8" class="eq" stroke="var(--sector1)"/><circle cx="190" cy="216" r="2.5" fill="var(--sector1)"/>
+  <path class="pipe p2" d="M142 164 L142 216"/><circle cx="142" cy="216" r="8" class="eq" stroke="var(--sector2)"/><circle cx="142" cy="216" r="2.5" fill="var(--sector2)"/>
+  <text x="166" y="240" class="lab2">bajan por el piso</text><text x="166" y="254" class="lab2">a −40 cm, hacia el poniente</text>
+  <!-- tablero y programador en la pared del fondo, arriba (proyección) -->
+  <rect x="145" y="92" width="120" height="12" class="eq" stroke-dasharray="4 3"/><text x="205" y="68" class="lab2">tablero, arriba</text>
+  <rect x="325" y="92" width="60" height="12" class="eq" stroke-dasharray="4 3"/><text x="355" y="68" class="lab2">programador</text>
+  <!-- rejillas laterales -->
+  <rect x="85" y="200" width="15" height="50" fill="var(--ink)"/><rect x="460" y="200" width="15" height="50" fill="var(--ink)"/>
+  <text x="60" y="228" class="lab2" transform="rotate(-90 60 228)">rejilla</text>
+  <!-- etiquetas numeradas -->
+  <g class="tag"><circle cx="436" cy="190" r="10"/><text x="436" y="190">1</text></g>
+  <g class="tag"><circle cx="372" cy="198" r="10"/><text x="372" y="198">2</text></g>
+  <g class="tag"><circle cx="316" cy="190" r="10"/><text x="316" y="190">3</text></g>
+  <g class="tag"><circle cx="274" cy="190" r="10"/><text x="274" y="190">4</text></g>
+  <g class="tag"><circle cx="208" cy="108" r="10"/><text x="208" y="108">5</text></g>
+  <g class="tag"><circle cx="166" cy="190" r="10"/><text x="166" y="190">6</text></g>
+  <g class="tag"><circle cx="120" cy="68" r="10"/><text x="120" y="68">7</text></g>
+  <!-- cotas -->
+  <line x1="100" y1="380" x2="460" y2="380" class="dim"/><line x1="100" y1="374" x2="100" y2="386" class="dim"/><line x1="460" y1="374" x2="460" y2="386" class="dim"/>
+  <text x="280" y="398" class="lab">1,20 m interior (1,30 con paredes)</text>
+  <line x1="40" y1="90" x2="40" y2="270" class="dim"/><line x1="34" y1="90" x2="46" y2="90" class="dim"/><line x1="34" y1="270" x2="46" y2="270" class="dim"/>
+  <text x="26" y="180" class="lab" transform="rotate(-90 26 180)">0,60 m</text>
+</svg>
+<figcaption>Planta, norte arriba. Agua en azul; bajadas de los sectores en naranja (sector 1) y morado (sector 2). Los números remiten a la lista de equipos de la sección 4. Alto interior 1,00 m; techo a un agua que cae hacia el frente, con alero de 10 cm.</figcaption>
+</figure>
+
+<figure class="f3d">
+<div class="v3d" id="v3d" role="img" aria-label="Modelo 3D del gabinete: paredes, techo, dos puertas abiertas al frente, estanque al oriente, bomba, filtro, colector con electroválvulas, tablero y los dos tubos de sector bajando por el piso."></div>
+<div class="btns3d noprint"><button type="button" id="b3roof" aria-pressed="false">Sacar el techo</button><button type="button" id="b3top">Ver desde arriba</button><button type="button" id="b3iso">Vista normal</button></div>
+<figcaption>Modelo 3D de la misma planta, con las puertas abiertas. Arrastra para girar, rueda para acercar. El estanque está dibujado de 7.000 L (2,2 m de diámetro) sobre su base de 30 cm; los tubos de sector bajan por el piso a 40 cm y siguen enterrados hacia el poniente.</figcaption>
+</figure>
+
+<h3>Cómo se construye</h3>
+<ul>
+  <li>Radier de hormigón de 10 cm con malla, 1,4 × 0,9 m, con una leve pendiente hacia el frente para que el agua de una fuga escurra por debajo de las puertas.</li>
+  <li>Gabinete de 1,2 × 0,6 × 1,0 m interior, con paredes de 5 cm: madera impregnada con placa cementicia, o un gabinete metálico de exterior. Dos puertas de 0,60 m al frente con cerradura; techo a un agua con alero de 10 cm; una rejilla de ventilación en cada costado, enfrentadas, para que el motor respire.</li>
+  <li>La bomba va directo sobre el radier con gomas antivibración y pernos de anclaje; el resto cuelga de la pared del fondo con abrazaderas.</li>
+  <li>Pasadas: entrada Ø40 por el costado oriente a 30 cm del piso; dos bajadas Ø32 por el piso (cuando se hormigona se dejan las pasadas con tubo de mayor diámetro) que siguen a 40 cm hacia el poniente; canalización eléctrica Ø32 por el piso, atrás.</li>
+  <li>Los tubos se arman en PVC hidráulico clase 10 o PE; las uniones con la bomba y las electroválvulas, con uniones americanas para poder sacar los equipos sin cortar.</li>
+</ul>
+
+<h2><span class="n">3</span> Esquema hidráulico</h2>
+<figure>
+<svg class="sv" viewBox="0 0 1000 300" role="img" aria-labelledby="eh-t eh-d">
+  <title id="eh-t">Esquema hidráulico</title>
+  <desc id="eh-d">Del estanque sale el agua por una llave de paso a la bomba de riego; sigue por una válvula de retención, el filtro de malla y el manómetro hasta el colector, que reparte a dos electroválvulas, una por sector. El programador abre cada electroválvula y, por un relé, enciende la bomba. Una futura bomba de llenado desde el río alimenta el estanque.</desc>
+  <!-- cadena principal -->
+  <path class="pipe" d="M120 120 L190 120 M260 120 L300 120 M370 120 L410 120 M470 120 L510 120 M570 120 L610 120 M640 120 L660 120"/>
+  <rect x="30" y="70" width="90" height="100" class="box"/><text x="75" y="112" class="lab">Estanque</text><text x="75" y="130" class="lab2">6,5 m³ · +0,3 m</text>
+  <rect x="190" y="98" width="70" height="44" class="box"/><text x="225" y="116" class="lab">Llave</text><text x="225" y="132" class="lab2">1¼"</text>
+  <rect x="300" y="90" width="70" height="60" class="box"/><text x="335" y="114" class="lab">Bomba</text><text x="335" y="132" class="lab2">1 HP · 41 L/min · 38 m</text>
+  <rect x="410" y="98" width="60" height="44" class="box"/><text x="440" y="116" class="lab">Retención</text><text x="440" y="132" class="lab2">1"</text>
+  <rect x="510" y="98" width="60" height="44" class="box"/><text x="540" y="116" class="lab">Filtro</text><text x="540" y="132" class="lab2">malla 120</text>
+  <circle cx="625" cy="120" r="15" class="box"/><text x="625" y="98" class="lab2">manómetro 0–6 bar</text>
+  <!-- colector -->
+  <rect x="660" y="60" width="24" height="120" class="box"/><text x="672" y="200" class="lab2">colector Ø32</text>
+  <path class="pipe p1" d="M684 85 L730 85"/><path class="pipe p2" d="M684 155 L730 155"/>
+  <rect x="730" y="66" width="60" height="38" class="box"/><text x="760" y="82" class="lab">EV 1</text><text x="760" y="97" class="lab2">1" · 24 V</text>
+  <rect x="730" y="136" width="60" height="38" class="box"/><text x="760" y="152" class="lab">EV 2</text><text x="760" y="167" class="lab2">1" · 24 V</text>
+  <path class="pipe p1" d="M790 85 L830 85"/><path class="pipe p2" d="M790 155 L830 155"/>
+  <text x="835" y="80" font-size="12">Sector 1</text><text x="835" y="94" class="lab2" text-anchor="start">5 regadores · 2,3 m³/h · 72 m</text>
+  <text x="835" y="150" font-size="12">Sector 2</text><text x="835" y="164" class="lab2" text-anchor="start">5 regadores · 2,5 m³/h · 97 m</text>
+  <!-- programador y relé -->
+  <rect x="470" y="220" width="130" height="50" class="box"/><text x="535" y="240" class="lab">Programador WiFi</text><text x="535" y="257" class="lab2">4 estaciones · 24 VAC</text>
+  <path class="el" d="M600 235 L700 235 L700 104 L760 104"/><path class="el" d="M700 174 L760 174"/>
+  <rect x="330" y="228" width="80" height="36" class="box"/><text x="370" y="244" class="lab">Relé bomba</text><text x="370" y="258" class="lab2">bobina 24 V</text>
+  <path class="el" d="M470 245 L410 245"/><path class="el" d="M335 228 L335 150"/>
+  <text x="300" y="285" class="lab2" text-anchor="start">línea punteada: mando eléctrico</text>
+  <!-- llenado desde el río -->
+  <path class="pipe" stroke-dasharray="8 6" d="M75 170 L75 240 L200 240"/>
+  <rect x="200" y="222" width="90" height="36" class="box" stroke-dasharray="4 3"/><text x="245" y="238" class="lab">Bomba de llenado</text><text x="245" y="252" class="lab2">desde el río · pendiente</text>
+  <text x="75" y="262" class="lab2">flotador de nivel</text>
+</svg>
+<figcaption>Flujo de izquierda a derecha. La bomba parte solo cuando el programador abre una electroválvula: el relé cierra el circuito del motor con la misma señal de 24 V. La retención evita que el agua de los tubos se devuelva y golpee la bomba al parar.</figcaption>
+</figure>
+
+<h2><span class="n">4</span> Equipos y materiales</h2>
+<table>
+<thead><tr><th>#</th><th>Qué</th><th>Especificación</th><th class="num">Cant.</th></tr></thead>
+<tbody>
+<tr class="sub"><td colspan="4">Hidráulico</td></tr>
+<tr><td>1</td><td>Llave de paso general</td><td>Bola, 1¼", en la salida del estanque, dentro de la caseta</td><td class="num">1</td></tr>
+<tr><td>2</td><td>Bomba de riego</td><td>1 HP, 220 V monofásica, centrífuga multietapa; en su curva debe dar <b>al menos 38 m de altura con 41 L/min</b> (de ese tamaño: Pedrollo 4CPm 80-C, Pentax U5-150 o equivalentes; las periféricas de 1 HP quedan justas en ese punto)</td><td class="num">1</td></tr>
+<tr><td>3</td><td>Válvula de retención</td><td>1", a la salida de la bomba</td><td class="num">1</td></tr>
+<tr><td>4</td><td>Filtro de malla</td><td>1", malla 120 mesh, con tapa para lavar</td><td class="num">1</td></tr>
+<tr><td>5</td><td>Manómetro</td><td>Glicerina, 0–6 bar, con llave de ¼"</td><td class="num">1</td></tr>
+<tr><td>6</td><td>Electroválvulas</td><td>1", 24 VAC, con regulador de caudal (p. ej. Rain Bird 100-DV o HV); una tercera posición tapada para un sector futuro</td><td class="num">2</td></tr>
+<tr><td></td><td>Colector</td><td>PVC Ø32 clase 10 con tees de 1" roscadas, uniones americanas en bomba y electroválvulas, codos y adaptadores</td><td class="num">1 juego</td></tr>
+<tr><td></td><td>Tubo desde el estanque</td><td>PE o PVC Ø40, 3 m, con pasamuros</td><td class="num">3 m</td></tr>
+<tr><td></td><td>Tubo de los sectores</td><td>PE Ø32 PN6 o PVC Ø32 clase 10, enterrado a 40 cm; 72 m sector 1 + 97 m sector 2, más 10 % de recortes</td><td class="num">≈ 185 m</td></tr>
+<tr class="sub"><td colspan="4">Eléctrico y control</td></tr>
+<tr><td>7</td><td>Tablero</td><td>Caja estanca IP65 de 12 módulos, en la pared del fondo, arriba</td><td class="num">1</td></tr>
+<tr><td></td><td>Protección</td><td>Diferencial 2 × 25 A 30 mA + automático 2 × 10 A curva C para la bomba + automático 2 × 6 A para el programador y el enchufe</td><td class="num">1 juego</td></tr>
+<tr><td></td><td>Relé de bomba</td><td>Contactor 2 × 20 A con bobina 24 VAC, o relé de partida de riego (Rain Bird PSR o similar)</td><td class="num">1</td></tr>
+<tr><td></td><td>Programador</td><td>WiFi, 4 estaciones, 24 VAC, salida para relé de bomba (p. ej. Rain Bird ESP-TM2 WiFi u Orbit B-hyve), en la pared del fondo junto al tablero; si la señal WiFi no llega a la terraza, un repetidor en la casa</td><td class="num">1</td></tr>
+<tr><td></td><td>Cable de electroválvulas</td><td>Multiconductor 5 × 0,8 mm² para riego (2 válvulas, común y 2 de reserva), dentro de la caseta</td><td class="num">5 m</td></tr>
+<tr><td></td><td>Alimentación</td><td>Desde el tablero de la casa: 3 × 2,5 mm² (fase, neutro, tierra) en conduit Ø32 enterrado a 50 cm con cinta de advertencia; 3 × 4 mm² si el recorrido pasa de 60 m</td><td class="num">según distancia</td></tr>
+<tr><td></td><td>Tierra</td><td>Barra de tierra de 1,5 m junto a la caseta, unida al tablero</td><td class="num">1</td></tr>
+<tr><td></td><td>Varios</td><td>Enchufe estanco, gomas antivibración, pernos de anclaje, abrazaderas</td><td class="num">1 juego</td></tr>
+<tr class="sub"><td colspan="4">Obra</td></tr>
+<tr><td></td><td>Radier</td><td>Hormigón 1,4 × 0,9 × 0,10 m con malla, con las pasadas de los tubos</td><td class="num">≈ 0,13 m³</td></tr>
+<tr><td></td><td>Gabinete</td><td>1,2 × 0,6 × 1,0 m interior, dos puertas de 0,60 m con cerradura, techo a un agua, dos rejillas laterales</td><td class="num">1</td></tr>
+</tbody>
+</table>
+
+<h2><span class="n">5</span> Eléctrico</h2>
+<div class="cols">
+<div class="card">
+<h3 style="margin-top:0">Lo que consume</h3>
+<ul>
+  <li>Bomba de 1 HP: unos 0,75 kW, 5–6 A en régimen y un pico de arranque de 3–5 s. Es la única carga grande.</li>
+  <li>Programador y electroválvulas: menos de 30 W.</li>
+  <li>Potencia total a pedir al tablero de la casa: un circuito de 10 A dedicado.</li>
+</ul>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Cómo manda</h3>
+<ul>
+  <li>El programador abre una electroválvula con 24 V y, con la misma orden, excita la bobina del relé; el relé conecta los 220 V del motor.</li>
+  <li>Cuando termina la estación, corta la válvula y la bomba al mismo tiempo. Nunca queda la bomba empujando contra válvulas cerradas.</li>
+  <li>Para regar a mano: desde la app, o con el botón «manual» del programador. No conviene un interruptor directo de la bomba sin abrir antes una válvula.</li>
+</ul>
+</div>
+</div>
+
+<h2><span class="n">6</span> Operación</h2>
+<table>
+<thead><tr><th>Sector</th><th>Regadores</th><th class="num">Caudal</th><th class="num">Tiempo para 5 mm</th><th>Presión que llega</th></tr></thead>
+<tbody>
+<tr><td><span style="color:var(--sector1)">●</span> Sector 1</td><td>Marcas 3, 4, 10, 11 y 12 (lado norte y oriente del pasto)</td><td class="num">2,3 m³/h</td><td class="num">105 min</td><td>3,2–3,4 bar</td></tr>
+<tr><td><span style="color:var(--sector2)">●</span> Sector 2</td><td>Marcas 5, 6, 7, 8 y 9 (lado poniente y sur)</td><td class="num">2,5 m³/h</td><td class="num">105 min</td><td>3,1 bar</td></tr>
+</tbody>
+</table>
+<ul>
+  <li>Programa base: un sector tras otro, de noche o al amanecer, 3,5 h en total; 5,0 m³ por día de riego, que es lo que el estanque tiene que reponer.</li>
+  <li>Los regadores de 13 m (marcas 5 y 11) son los que mandan en cada sector; si en terreno el manómetro marca menos de 3 bar con un sector abierto, revisar el filtro primero.</li>
+  <li>Cada primavera: lavar el filtro, revisar que la retención cierre, probar el diferencial y hacer girar la bomba un minuto si estuvo parada todo el invierno.</li>
+</ul>
+
+<h2><span class="n">7</span> Lo que falta decidir</h2>
+<div class="pend">
+<ul>
+  <li><b>Toma de agua en el río y bomba de llenado.</b> Para reponer 6,5 m³ en 4 horas bastan 27 L/min subiendo 4,2 m más el tubo hasta la toma: una bomba chica, de ½ HP. Si el río baja mucho en verano o sube en invierno, conviene sumergible en una cámara de piedras en la orilla, con flotador de nivel en el estanque; si no, de superficie en un segundo gabinete chico junto a este, siempre que aspire menos de 6 m en vertical. Falta marcar la toma en el visor para calcular el tubo.</li>
+  <li><b>Recorrido eléctrico</b> desde la casa hasta la terraza: define la sección del cable.</li>
+  <li><b>Estanque:</b> uno de 7.000 L o dos de 3.500 L acoplados; define el ancho de la base junto a la caseta.</li>
+</ul>
+</div>
+
+<p class="muted" style="margin-top:var(--s8)">Los caudales, presiones y largos de tubo salen del visor del terreno con el esquema publicado el 9 de noviembre de 2026 (10 regadores, 2 sectores). Si se mueven regadores, hay que volver a mirar la bomba y los largos.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+// Modelo 3D de la caseta. Metros; x hacia el oriente, z hacia el sur, y hacia arriba. Origen: esquina interior noroeste, a nivel del piso.
+const el=document.getElementById('v3d'); if(!el||!window.THREE) return;
+const dark=matchMedia('(prefers-color-scheme: dark)').matches;
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.outputEncoding=THREE.sRGBEncoding; el.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,16/10,0.05,100);
+const controls=new THREE.OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.dampingFactor=.12; controls.maxPolarAngle=Math.PI/2-.02; controls.minDistance=1; controls.maxDistance=10; controls.target.set(.9,.4,.3);
+scene.add(new THREE.HemisphereLight(0xffffff,0x6b7f6a,.9)); const sun=new THREE.DirectionalLight(0xffffff,.85); sun.position.set(-3,6,4); scene.add(sun);
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.85,metalness:0},o||{}));
+const mWall=M(0xe7e2d6), mRoof=M(0x4a5456,{transparent:true,opacity:.55}), mSlab=M(0xb9b6ad), mDark=M(0x2b3335), mBlue=M(0x1e7fb8), mS1=M(0xf97316), mS2=M(0xa855f7), mTank=M(0x1f3b57), mEq=M(0x3c4648), mGreen=M(0x8fbf7a,{roughness:1}), mRed=M(0xb91c1c), mDoor=M(0x8a6a44), mGrill=M(0x1c2224);
+const box=(w,h,d,m,x,y,z)=>{ const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); o.position.set(x,y,z); scene.add(o); return o; };
+const cyl=(r,h,m,x,y,z,rot)=>{ const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,24),m); o.position.set(x,y,z); if(rot) o.rotation[rot[0]]=rot[1]; scene.add(o); return o; };
+// tubo entre dos puntos
+const pipe=(a,b,r,m)=>{ const A=new THREE.Vector3(...a), B=new THREE.Vector3(...b), L=A.distanceTo(B); const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,L,12),m); o.position.copy(A).add(B).multiplyScalar(.5); o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),B.clone().sub(A).normalize()); scene.add(o); return o; };
+const poly=(pts,r,m)=>{ for(let i=1;i<pts.length;i++) pipe(pts[i-1],pts[i],r,m); pts.forEach(p=>{ const j=new THREE.Mesh(new THREE.SphereGeometry(r,10,8),m); j.position.set(...p); scene.add(j); }); };
+// etiquetas
+const label=(t,x,y,z,s)=>{ const c=document.createElement('canvas'), g=c.getContext('2d'); const F='700 36px "Atkinson Hyperlegible",system-ui,sans-serif'; g.font=F; const w=Math.ceil(g.measureText(t).width)+36; c.width=w; c.height=56; g.font=F; g.fillStyle=dark?'rgba(30,38,39,.92)':'rgba(250,251,249,.92)'; g.beginPath(); if(g.roundRect) g.roundRect(0,0,w,56,14); else g.rect(0,0,w,56); g.fill(); g.fillStyle=dark?'#e6ecea':'#182321'; g.textBaseline='middle'; g.fillText(t,18,29); const tex=new THREE.CanvasTexture(c); tex.encoding=THREE.sRGBEncoding; const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true})); const k=(s||1)*.0036; sp.scale.set(w*k,56*k,1); sp.position.set(x,y,z); sp.renderOrder=9; scene.add(sp); return sp; };
+const W=.05, IX=1.2, IZ=.6, H=1.0; // paredes, interior, alto
+// terreno (algo transparente para ver los tubos enterrados) y radier
+const g=new THREE.Mesh(new THREE.PlaneGeometry(7,6),M(0x8fbf7a,{roughness:1,transparent:true,opacity:.85})); g.rotation.x=-Math.PI/2; g.position.set(1.2,-0.001,.4); scene.add(g);
+box(1.4,.1,.9,mSlab,IX/2,-.05,IZ/2);
+// paredes: fondo (norte), costados; el frente son las dos puertas
+box(IX+2*W,H,W,mWall,IX/2,H/2,-W/2);
+box(W,H,IZ+W,mWall,-W/2,H/2,IZ/2-W/2); box(W,H,IZ+W,mWall,IX+W/2,H/2,IZ/2-W/2);
+box(IX+2*W,.06,IZ+W,mWall,IX/2,.03,IZ/2-W/2); // zócalo / piso del gabinete sobre el radier
+// puertas dobles abiertas 90° hacia afuera (bisagras en los costados)
+box(.03,H,.6,mDoor,-W-.015,H/2,IZ+.3); box(.03,H,.6,mDoor,IX+W+.015,H/2,IZ+.3);
+// techo a un agua que cae hacia el frente, alero de 10 cm
+const roof=new THREE.Mesh(new THREE.BoxGeometry(IX+2*W+.2,.05,IZ+2*W+.2),mRoof); roof.rotation.x=Math.atan(.12/(IZ+2*W)); roof.position.set(IX/2,H+.08,IZ/2); scene.add(roof);
+// rejillas laterales enfrentadas
+box(.012,.2,.25,mGrill,-W-.006,.45,.4); box(.012,.2,.25,mGrill,IX+W+.006,.45,.4);
+// estanque de 7.000 L al oriente, sobre base de 30 cm
+const TX=IX+W+.3+1.1, TZ=.3; box(2.3,.3,2.3,mSlab,TX,.15,TZ); cyl(1.1,2.1,mTank,TX,.3+1.05,TZ); cyl(1.12,.08,mDark,TX,2.4,TZ);
+// línea de agua a 20 cm del fondo y 30 cm del piso: estanque → llave → bomba → retención → filtro → manómetro → colector
+const Y=.3, Z=.2;
+poly([[TX-1.1,Y,Z],[IX+W,Y,Z],[1.12,Y,Z]],.02,mBlue); // Ø40 desde el estanque
+cyl(.04,.08,mRed,1.12,Y,Z,['z',Math.PI/2]); cyl(.01,.12,mRed,1.12,Y+.06,Z); // 1 llave de bola
+pipe([1.12,Y,Z],[.82,Y,Z],.017,mBlue);
+cyl(.085,.22,mEq,1.07,.06+.1,Z,['z',Math.PI/2]); box(.16,.17,.17,mEq,.9,.06+.1,Z); // 2 bomba: motor + cuerpo, sobre gomas
+pipe([.9,Y+.02,Z],[.9,Y-.03,Z],.017,mBlue);
+cyl(.03,.07,mEq,.72,Y,Z,['z',Math.PI/2]); // 3 retención
+cyl(.055,.2,mEq,.58,Y,Z); // 4 filtro
+pipe([.44,Y,Z],[.44,Y+.14,Z],.006,mEq); cyl(.03,.02,mWall,.44,Y+.16,Z,['x',Math.PI/2]); // 5 manómetro
+pipe([.42,Y,Z],[.06,Y,Z],.017,mBlue); cyl(.022,.03,mBlue,.06,Y,Z,['z',Math.PI/2]); // colector y tapón
+box(.08,.11,.09,mDark,.3,Y+.02,Z); box(.08,.11,.09,mDark,.14,Y+.02,Z); // 6 electroválvulas
+poly([[.3,Y,Z],[.3,Y,.42],[.3,-.4,.42],[-.9,-.4,.42]],.017,mS1); // sector 1: baja por el piso y sigue enterrado al poniente
+poly([[.14,Y,Z],[.14,Y,.5],[.14,-.4,.5],[-.9,-.4,.5]],.017,mS2); // sector 2
+// tablero y programador en la pared del fondo, arriba
+box(.4,.3,.09,mWall,.35,.77,.045); box(.36,.26,.01,mDark,.35,.77,.095);
+box(.2,.18,.06,mWall,.85,.8,.03); box(.14,.1,.01,mDark,.85,.82,.065);
+// cable eléctrico enterrado que sube por el piso al tablero
+poly([[.35,-.5,.9],[.35,-.5,.08],[.35,.62,.08]],.012,mRed);
+// etiquetas
+label('Estanque 7.000 L',TX,2.75,TZ); label('Bomba 1 HP',.98,.52,Z,.8); label('Filtro',.58,.6,Z,.7); label('Electroválvulas',.22,.52,Z+.15,.7); label('Tablero',.35,1.0,.05,.7); label('Programador',.85,1.0,.03,.7); label('Sector 1',-.95,-.25,.42,.7); label('Sector 2',-.95,-.5,.5,.7); label('Puertas',IX/2,H+.35,IZ+.35,.7); label('Llave',1.12,.5,Z+.1,.6); label('N',.6,.2,-1.2,.8);
+// cámaras y dibujo solo cuando hace falta
+let need=true; const draw=()=>{ need=true; };
+const iso=()=>{ camera.position.set(-1.9,2.1,3.6); controls.target.set(.9,.4,.3); controls.update(); draw(); }; // desde el surponiente: la puerta y los tubos de sector al frente, el estanque atrás
+const top=()=>{ camera.position.set(1.0,5.5,.9); controls.target.set(1.0,0,.3); controls.update(); draw(); };
+function size(){ const w=el.clientWidth, h=el.clientHeight||w*10/16; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); draw(); }
+new ResizeObserver(size).observe(el); size(); iso();
+controls.addEventListener('change',draw);
+(function loop(){ requestAnimationFrame(loop); const moved=controls.update(); if(need||moved){ renderer.render(scene,camera); need=false; } })();
+document.getElementById('b3roof').addEventListener('click',e=>{ roof.visible=!roof.visible; e.currentTarget.setAttribute('aria-pressed',String(!roof.visible)); e.currentTarget.textContent=roof.visible?'Sacar el techo':'Poner el techo'; draw(); });
+document.getElementById('b3top').addEventListener('click',top); document.getElementById('b3iso').addEventListener('click',iso);
+})();
+</script>
+</body>
+</html>
