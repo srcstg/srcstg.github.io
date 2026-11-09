@@ -67,6 +67,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:1rem;margin-top:.75r
 .seg{display:flex;gap:6px}
 .seg button{flex:1;padding:6px 4px;font-size:12px}
 #sunread{margin-top:8px;min-height:2.6em;line-height:1.35}
+.measure{margin-top:.75rem;padding:.75rem .875rem;border:1.5px solid var(--accent);border-radius:8px;font-size:1rem;line-height:1.5}
+.measure b{font-variant-numeric:tabular-nums}
+.measure[hidden]{display:none}
+#view.measuring{cursor:crosshair}
 #loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted);font-size:1.125rem;pointer-events:none}
 @media (prefers-reduced-motion:reduce){ .panel{transition:none} }
 .panel{transition:transform .32s ease, opacity .32s ease}
@@ -112,6 +116,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:1rem;margin-top:.75r
     <button id="bp" aria-pressed="true">Nube de puntos</button>
     <button id="bg" aria-pressed="true">Terreno</button>
   </div>
+  <p class="grp">Medir</p>
+  <div class="btns"><button id="bm" aria-pressed="false">Medir distancias</button><button id="bmclr">Borrar medición</button></div>
+  <div class="measure" id="measure" hidden>Toca el terreno en el punto de partida y luego en cada punto del recorrido.</div>
   <div class="btns"><button id="br">Volver a la vista inicial</button></div>
   <div class="sun" hidden>
     <h2>Sol por estación</h2>
@@ -397,9 +404,49 @@ function applyEx(){
   tGeo.attributes.position.needsUpdate=true; tGeo.computeVertexNormals(); tGeo.computeBoundingSphere();
   { const a=skirtGeo.attributes.position.array; skirtV.forEach(([i,j,top],q)=>{ const k=j*nx+i, g=isNaN(H[k])?TC[k]-5:H[k]; a[q*3]=x0+i*dx; a[q*3+1]=(top?TC[k]:g-0.5)*EX; a[q*3+2]=-(y0-j*dy); }); skirtGeo.attributes.position.needsUpdate=true; skirtGeo.computeVertexNormals(); skirtGeo.computeBoundingSphere(); }
   if(ptsObj) ptsObj.scale.y=EX;
+  if(window.measReady) drawMeasure();
   renderer.shadowMap.needsUpdate=true;
 }
 applyEx();
+
+// Medición: recorrido por clics sobre el terreno; largo plano, largo real por el suelo, desnivel y punto más alto
+const measGroup=new THREE.Group(); scene.add(measGroup);
+const measPts=[]; let measuring=false;
+const measLineMat=new THREE.LineBasicMaterial({color:0xe0a91b,linewidth:2});
+const measDotGeo=new THREE.SphereGeometry(0.55,16,12), measDotMat=new THREE.MeshBasicMaterial({color:0xe0a91b}), measDotMatA=new THREE.MeshBasicMaterial({color:0xe5533d});
+const measEl=document.getElementById('measure');
+function measPath(){ // recorrido densificado a 0,5 m siguiendo el suelo
+  if(measPts.length<2) return [];
+  const out=[]; for(let i=0;i<measPts.length-1;i++){ const a=measPts[i],b=measPts[i+1], n=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/0.5));
+    for(let k=0;k<n;k++){ const x=a.x+(b.x-a.x)*k/n, y=a.y+(b.y-a.y)*k/n, h=hAt(x,y); out.push({x,y,h:isNaN(h)?a.h:h}); } }
+  const l=measPts[measPts.length-1]; out.push({x:l.x,y:l.y,h:l.h}); return out; }
+function drawMeasure(){
+  while(measGroup.children.length) measGroup.remove(measGroup.children[0]);
+  measPts.forEach((p,i)=>{ const d=new THREE.Mesh(measDotGeo,i===0?measDotMatA:measDotMat); d.position.set(p.x,p.h*EX+0.4,-p.y); d.renderOrder=6; measGroup.add(d); });
+  const path=measPath();
+  if(path.length>1){ const arr=new Float32Array(path.length*3); path.forEach((p,i)=>{arr[i*3]=p.x;arr[i*3+1]=p.h*EX+0.35;arr[i*3+2]=-p.y;});
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(arr,3)); measGroup.add(new THREE.Line(g,measLineMat)); }
+  // etiquetas por tramo
+  for(let i=0;i<measPts.length-1;i++){ const a=measPts[i],b=measPts[i+1]; const sp=textSprite(fmt(Math.hypot(b.x-a.x,b.y-a.y),1)+' m'); sp.position.set((a.x+b.x)/2,Math.max(a.h,b.h)*EX+1.6,-(a.y+b.y)/2); measGroup.add(sp); }
+  // lectura
+  if(measPts.length===0){ measEl.textContent='Toca el terreno en el punto de partida y luego en cada punto del recorrido.'; return; }
+  if(measPts.length===1){ measEl.innerHTML='Punto de partida a <b>'+fmt(measPts[0].h)+' m</b> de altura ('+(measPts[0].h<D.water?'en el río':'+'+fmt(measPts[0].h-RIO)+' m sobre el río')+'). Toca el siguiente punto.'; return; }
+  let plano=0, real=0, hmax=-1e9, hmin=1e9; for(let i=0;i<path.length-1;i++){ const a=path[i],b=path[i+1]; const d=Math.hypot(b.x-a.x,b.y-a.y); plano+=d; real+=Math.hypot(d,b.h-a.h); }
+  path.forEach(p=>{ hmax=Math.max(hmax,p.h); hmin=Math.min(hmin,p.h); });
+  const a=measPts[0], z=measPts[measPts.length-1], des=z.h-a.h;
+  measEl.innerHTML='Largo en planta <b>'+fmt(plano)+' m</b> · siguiendo el suelo <b>'+fmt(real)+' m</b><br>'+
+    'Desnivel de partida a llegada <b>'+(des>=0?'+':'−')+fmt(Math.abs(des))+' m</b> ('+(des>=0?'sube':'baja')+')<br>'+
+    'Punto más alto del recorrido <b>+'+fmt(hmax-a.h)+' m</b> sobre la partida · altura de partida '+fmt(a.h)+' m'+(a.h<D.water?' (río)':''); }
+function setMeasuring(on){ measuring=on; view.classList.toggle('measuring',on); measEl.hidden=!on&&measPts.length===0; if(on) drawMeasure(); }
+window.measReady=true;
+toggle(document.getElementById('bm'),setMeasuring);
+document.getElementById('bmclr').addEventListener('click',()=>{ measPts.length=0; drawMeasure(); if(!measuring) measEl.hidden=true; });
+let pdown=null;
+renderer.domElement.addEventListener('pointerdown',ev=>{ pdown=[ev.clientX,ev.clientY]; });
+renderer.domElement.addEventListener('pointerup',ev=>{ if(!measuring||!pdown) return; const moved=Math.hypot(ev.clientX-pdown[0],ev.clientY-pdown[1]); pdown=null; if(moved>6) return;
+  const r=renderer.domElement.getBoundingClientRect(); m.x=((ev.clientX-r.left)/r.width)*2-1; m.y=-((ev.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(m,camera); const hit=ray.intersectObject(mesh)[0]; if(!hit) return; const x=hit.point.x, y=-hit.point.z, h=hAt(x,y); if(isNaN(h)) return;
+  measPts.push({x,y,h}); drawMeasure(); });
 
 // Cámara: mirando desde el sureste hacia la casa, con el río en primer plano
 function resetView(){ const t=new THREE.Vector3(0,(31)*EX,0); controls.target.copy(t); camera.position.set(118,t.y+100,118); controls.update(); }
