@@ -3,14 +3,14 @@
   {
    "t": "estanque",
    "name": "Estanque 1",
-   "x": 35.78,
-   "y": 8.86
+   "x": 25.5,
+   "y": 16.0
   },
   {
    "t": "control",
    "name": "Control de válvulas 1",
-   "x": 32.78,
-   "y": 9.86
+   "x": 22.5,
+   "y": 15.0
   }
  ],
  "zones": [
