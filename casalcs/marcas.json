@@ -11,6 +11,76 @@
    "name": "Control de válvulas 1",
    "x": 22.5,
    "y": 15.0
+  },
+  {
+   "t": "regador",
+   "name": "Regador 1",
+   "x": 13.22,
+   "y": 6.39,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 2",
+   "x": 3.21,
+   "y": -8.93,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 3",
+   "x": -10.79,
+   "y": 5.68,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 4",
+   "x": -22.64,
+   "y": -10.28,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 5",
+   "x": -10.68,
+   "y": -17.73,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 6",
+   "x": -32.28,
+   "y": 2.22,
+   "r": 6
+  },
+  {
+   "t": "regador",
+   "name": "Regador 7",
+   "x": -1.79,
+   "y": 10.53,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 8",
+   "x": 19.32,
+   "y": 21.21,
+   "r": 6
+  },
+  {
+   "t": "regador",
+   "name": "Regador 9",
+   "x": -30.61,
+   "y": -5.3,
+   "r": 10
+  },
+  {
+   "t": "regador",
+   "name": "Regador 10",
+   "x": -10.1,
+   "y": -4.51,
+   "r": 10
   }
  ],
  "zones": [

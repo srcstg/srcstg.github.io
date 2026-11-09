@@ -184,11 +184,11 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
   <div class="btns" id="zonebtns" hidden><button id="zoneclr">Borrar zonas</button></div>
   <p class="grp">Riego del pasto</p>
   <div class="row2"><label for="rr">Radio de los regadores (m)</label><input type="number" id="rr" min="3" max="25" step="0.5" value="10"></div>
-  <div class="row2"><label for="rturno">Regadores que riegan a la vez</label><input type="number" id="rturno" min="1" max="60" step="1" value="4"></div>
+  <div class="row2"><label for="rturno">Regadores que riegan a la vez</label><input type="number" id="rturno" min="1" max="60" step="1" value="6"></div>
   <div class="row2"><label for="rfill">Horas para llenar el estanque</label><input type="number" id="rfill" min="1" max="24" step="1" value="4"></div>
   <div class="row2"><label for="rdiam">Diámetro mínimo del tubo</label><select id="rdiam"><option value="25">25 mm</option><option value="32" selected>32 mm</option><option value="40">40 mm</option><option value="50">50 mm</option><option value="63">63 mm</option></select></div>
-  <div class="btns"><button id="rprop">Proponer regadores para el pasto</button><button id="rred">Armar red de tubos</button></div>
-  <p class="hint">Los regadores se ponen dentro del lote y riegan solo hacia el pasto: en los bordes giran medio círculo o un cuarto, y nunca mojan la casa. La bomba del estanque manda el agua al control de válvulas; de ahí sale un tubo por sector, en paralelo por un corredor al lado del pasto, sin que ningún tubo se cruce. Marca un «Control de válvulas» para ubicar la estación; si no, se supone junto al estanque.</p>
+  <div class="btns"><button id="rprop">Proponer regadores para el pasto</button></div>
+  <p class="hint">Los regadores se ponen primero por el borde del pasto regando hacia adentro, para dejar el centro libre, y al centro solo los que hagan falta para cerrar huecos; giran medio círculo o un cuarto en los bordes y nunca mojan la casa. La bomba del estanque manda el agua al control de válvulas; de ahí sale un tubo por sector, en paralelo por un corredor al lado del pasto, sin que ningún tubo se cruce. Marca un «Control de válvulas» para ubicar la estación; si no, se supone junto al estanque. La red se arma sola con los regadores que haya, y se rehace cada vez que mueves, agregas o quitas uno. A cada regador le puedes fijar el radio y el caudal en litros por minuto en su ficha; si dejas el caudal vacío, se estima por el radio y el giro.</p>
   <div class="riego" id="riego">—</div>
   <p class="grp">Compartir</p>
   <p class="hint" id="pubhint" hidden>Tienes cambios que solo se ven en este equipo. Para que los vean todos, descarga el archivo y publícalo en el sitio.</p>
@@ -540,9 +540,9 @@ const pinsEl=document.getElementById('pins'), pinHint=document.getElementById('p
 const poleGeo=new THREE.CylinderGeometry(0.12,0.12,1,8), headGeo=new THREE.SphereGeometry(0.7,16,12);
 function loadPins(){ try{ const h=location.hash.match(/[#&]m=([^&]+)/); if(h){ pins=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){}
   try{ const v=localStorage.getItem('casalcs-marcas'); if(v) pins=JSON.parse(v); }catch(e){} }
-function savePins(){ try{ localStorage.setItem('casalcs-marcas',JSON.stringify(pins)); }catch(e){} if(window.riegoReady&&pipes.length) armarRed(); if(window.pubReady) pubStatus(); }
+function savePins(){ try{ localStorage.setItem('casalcs-marcas',JSON.stringify(pins)); }catch(e){} if(window.riegoReady) autoRed(); if(window.pubReady) pubStatus(); }
 const b64u=v=>btoa(unescape(encodeURIComponent(JSON.stringify(v))));
-function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); if(window.riegoReady&&pipes.length) parts.push('p='+b64u(pipes)); u.hash=parts.join('&'); return u.href; }
+function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); u.hash=parts.join('&'); return u.href; }
 function drawPins(){
   while(pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; if(p.t==='regador'&&window.riegoReady&&!sectorVisible(p)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
@@ -556,8 +556,9 @@ function drawPins(){
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y), dw=distWater(p.x,p.y), T=PIN_TYPES[p.t]||PIN_TYPES.otro;
     const li=document.createElement('li');
     li.innerHTML='<span class="num" style="background:'+T.c+'">'+(i+1)+'</span><input value="" aria-label="Nombre de la marca"><button class="del" aria-label="Quitar marca" title="Quitar marca">×</button>'+
-      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m · gira '+Math.round(arcOf(p)[1])+'°':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
+      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m · caudal <input type="number" class="cau" min="1" max="300" step="0.5" aria-label="Caudal del regador en litros por minuto"> L/min · gira '+Math.round(arcOf(p)[1])+'°':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
     const rad=li.querySelector('.rad'); if(rad){ rad.value=p.r||+document.getElementById('rr').value||10; rad.addEventListener('change',()=>{ p.r=+rad.value||10; savePins(); drawPins(); }); }
+    const cau=li.querySelector('.cau'); if(cau){ cau.value=p.q>0?p.q:''; cau.placeholder=window.riegoReady?Math.round(qDe(p)*1000/60):''; cau.title='Vacío = se estima por el radio y el giro'; cau.addEventListener('change',()=>{ const v=+cau.value; if(v>0) p.q=v; else delete p.q; savePins(); drawPins(); }); }
     const inp=li.querySelector('input'); inp.value=p.name; inp.addEventListener('change',()=>{ p.name=inp.value.trim()||T.n; savePins(); drawPins(); });
     li.querySelector('.del').addEventListener('click',()=>{ pins.splice(i,1); savePins(); drawPins(); });
     pinsEl.appendChild(li); });
@@ -694,23 +695,26 @@ function coverage(){ const cells=grassCells(), regs=pins.filter(p=>p.t==='regado
 function mojaCasa(p){ const R=radOf(p); for(let y=p.y-R;y<=p.y+R;y+=0.5) for(let x=p.x-R;x<=p.x+R;x+=0.5) if(wets(p,x,y)&&inBldg(x,y,0)) return true; return false; }
 function proponerRegadores(){
   const R=+rrEl.value||10, polys=grassPolys(), cells=grassCells();
-  pins=pins.filter(p=>!(p.t==='regador'&&p.auto));
+  pins=pins.filter(p=>p.t!=='regador');
   // candidatos: vértices, puntos sobre los bordes cada 0,8 R y una grilla interior; todos dentro del lote
   const cand=[]; const okPos=(x,y)=>inPoly(x,y,LOTE)&&!inBldg(x,y,1.0);
   polys.forEach(P=>{ for(let i=0;i<P.length;i++){ const a=P[i], b=P[(i+1)%P.length], L=Math.hypot(b[0]-a[0],b[1]-a[1]), n=Math.max(1,Math.round(L/(0.5*R)));
-      for(let k=0;k<n;k++){ const x=a[0]+(b[0]-a[0])*k/n, y=a[1]+(b[1]-a[1])*k/n; if(okPos(x,y)) cand.push([x,y]); } }
-    const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); let row=0; for(let y=Math.min(...ys);y<=Math.max(...ys);y+=R*0.7*0.866,row++) for(let x=Math.min(...xs)+(row%2?R*0.35:0);x<=Math.max(...xs);x+=R*0.7) if(inPoly(x,y,P)&&distPoly(x,y,P)>0.3*R&&okPos(x,y)) cand.push([x,y]); });
-  const cs=[]; cand.forEach(([x,y])=>[R,Math.round(R*0.6*2)/2].forEach(r=>{ const p={t:'regador',x,y,r}; const arc=arcFor(x,y,r); if(!arc||mojaCasa(p)) return; p.cells=cells.map((c,i)=>wets(p,c[0],c[1])?i:-1).filter(i=>i>=0); if(p.cells.length) cs.push(p); }));
+      for(let k=0;k<n;k++){ const x=a[0]+(b[0]-a[0])*k/n, y=a[1]+(b[1]-a[1])*k/n; if(okPos(x,y)) cand.push([x,y,1]); } }
+    const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); let row=0; for(let y=Math.min(...ys);y<=Math.max(...ys);y+=R*0.7*0.866,row++) for(let x=Math.min(...xs)+(row%2?R*0.35:0);x<=Math.max(...xs);x+=R*0.7) if(inPoly(x,y,P)&&distPoly(x,y,P)>0.3*R&&okPos(x,y)) cand.push([x,y,0]); });
+  const cs=[]; cand.forEach(([x,y,edge])=>[R,Math.round(R*0.6*2)/2].forEach(r=>{ const p={t:'regador',x,y,r,edge}; const arc=arcFor(x,y,r); if(!arc||mojaCasa(p)) return; p.cells=cells.map((c,i)=>wets(p,c[0],c[1])?i:-1).filter(i=>i>=0); if(p.cells.length) cs.push(p); }));
   const covered=new Uint8Array(cells.length); let total=0; const chosen=[];
-  while(true){ let best=null, gain=0; for(const p of cs){ if(p.used) continue; let g=0; for(const i of p.cells) if(!covered[i]) g++; if(g>gain){ gain=g; best=p; } }
-    if(!best||gain<Math.max(4,Math.PI*R*R*0.015)||total>=cells.length*0.995) break; best.used=true; chosen.push(best); for(const i of best.cells){ if(!covered[i]){ covered[i]=1; total++; } } }
+  const sep=p=>chosen.every(q=>Math.hypot(q.x-p.x,q.y-p.y)>=0.7*Math.max(p.r,q.r)); // no apretar regadores
+  const pasada=(edge,meta)=>{ while(true){ let best=null, gain=0; for(const p of cs){ if(p.used||!!p.edge!==edge||!sep(p)) continue; let g=0; for(const i of p.cells) if(!covered[i]) g++; if(g>gain){ gain=g; best=p; } }
+    if(!best||gain<Math.max(4,Math.PI*R*R*0.015)||total>=cells.length*meta) break; best.used=true; chosen.push(best); for(const i of best.cells){ if(!covered[i]){ covered[i]=1; total++; } } } };
+  pasada(true,0.995); // primero por el borde del pasto, regando hacia adentro
+  pasada(false,0.95); // al centro solo lo justo para cerrar los huecos grandes
   // poda: fuera los que no aportan
   for(let i=chosen.length-1;i>=0;i--){ const others=chosen.filter((_,j)=>j!==i); const cov=new Uint8Array(cells.length); let t=0; others.forEach(p=>p.cells.forEach(k=>{ if(!cov[k]){cov[k]=1;t++;} })); if(t>=total) chosen.splice(i,1); }
-  chosen.forEach((p,i)=>pins.push({t:'regador',name:'Regador '+(i+1),x:+p.x.toFixed(2),y:+p.y.toFixed(2),r:p.r,auto:true}));
+  chosen.forEach((p,i)=>pins.push({t:'regador',name:'Regador '+(i+1),x:+p.x.toFixed(2),y:+p.y.toFixed(2),r:p.r}));
   savePins(); drawPins(); }
-document.getElementById('rprop').addEventListener('click',()=>{ if(!pins.some(p=>p.t==='regador'&&p.auto)||confirm('¿Reemplazo la propuesta anterior de regadores? Los que pusiste a mano se conservan.')) proponerRegadores(); });
+document.getElementById('rprop').addEventListener('click',()=>{ const n=pins.filter(p=>p.t==='regador').length; if(!n||confirm('¿Reemplazo los '+n+' regadores actuales por una propuesta nueva?')) proponerRegadores(); });
 function hazen(L,Q,Dmm){ const D=Dmm/1000, Cc=150; return 10.67*L*Math.pow(Q,1.852)/(Math.pow(Cc,1.852)*Math.pow(D,4.87)); } // m, Q en m³/s
-const qDe=p=>0.009*radOf(p)*radOf(p)*arcOf(p)[1]/360; // m³/h a ~2,5 bar, boquilla proporcional al arco
+const qDe=p=>p.q>0?p.q*60/1000:0.009*radOf(p)*radOf(p)*arcOf(p)[1]/360; // m³/h: caudal fijado a mano (L/min) o, si no, ~2,5 bar con boquilla proporcional al arco
 // Red de tubos: la bomba del estanque manda al control de válvulas; de ahí un tubo por sector, en paralelo por un corredor al costado del pasto; ningún tubo se cruza
 let pipes=[]; const pipeGroup=new THREE.Group(); scene.add(pipeGroup);
 const PIPE_COLORS=['#f97316','#a855f7','#06b6d4','#ec4899','#84cc16','#eab308','#f43f5e','#3b82f6'], MATRIZ_COLOR='#f1f5f9', VALV_LOSS=2; // m de pérdida en electroválvula de 1" + filtro
@@ -719,8 +723,6 @@ const ctlPin=()=>pins.find(p=>p.t==='control');
 let sectorSel=0; // 0 = todos
 const sectorOf=p=>{ const pp=pipes.find(q=>q.k>0&&(q.regs||[]).some(r=>Math.abs(r[0]-p.x)<0.05&&Math.abs(r[1]-p.y)<0.05)); return pp?pp.k:0; };
 const sectorVisible=p=>!sectorSel||!pipes.length||sectorOf(p)===sectorSel;
-function loadPipes(){ try{ const h=location.hash.match(/[#&]p=([^&]+)/); if(h){ pipes=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){} try{ const v=localStorage.getItem('casalcs-tubos'); if(v) pipes=JSON.parse(v); }catch(e){} if(!Array.isArray(pipes)||(pipes.length&&!(pipes[0].segs&&pipes[0].ctl))) pipes=[]; }
-function savePipes(){ try{ localStorage.setItem('casalcs-tubos',JSON.stringify(pipes)); }catch(e){} }
 function armarRed(){
   const regs=pins.filter(p=>p.t==='regador'), est=pins.find(p=>p.t==='estanque')||pins.find(p=>p.t==='bomba'), ctl=ctlPin()||est; pipes=[];
   if(est&&regs.length){
@@ -737,27 +739,43 @@ function armarRed(){
         const k=Math.ceil(side.length/per), base=Math.floor(side.length/k), extra=side.length%k; let i0=0;
         for(let g=0;g<k;g++){ const grp=side.slice(i0,i0+base+(g<extra?1:0)); i0+=grp.length; const t=grp.reduce((a,r)=>a+tOf(r),0)/grp.length; T.push({grp,t,sig,Q:grp.reduce((a,r)=>a+qDe(r),0),dir:t>=tC?1:-1,d:Math.abs(t-tC)}); } });
       [1,-1].forEach(sig=>[1,-1].forEach(dir=>{ T.filter(x=>x.sig===sig&&x.dir===dir).sort((a,b)=>b.d-a.d).forEach((x,i)=>{ x.off=sc+sig*0.4*(i+1); }); }));
-      T.sort((a,b)=>a.d-b.d).forEach((x,i)=>{ x.k=i+1; x.A=at(tC,x.off); x.B=at(x.t,x.off); });
+      T.sort((a,b)=>a.d-b.d).forEach((x,i)=>{ x.k=i+1; x.A=at(tC,x.off); const tf=x.grp.map(tOf), tF=x.dir>0?Math.max(...tf):Math.min(...tf); x.B=at(Math.abs(tF-tC)>x.d?tF:x.t,x.off); });
       return {sc,T,ok:T.every(x=>libre(ctl,x.A)&&libre(x.A,x.B))}; };
     // candidatos: fuera del pasto por el lado del control, fuera por el otro lado, y si no cabe, por dentro del pasto desde el lado del control
     const lado=sC>=(sMin+sMax)/2?1:-1, marg=1.5+0.4*Math.ceil(n/per), cands=[lado>0?sMax+marg:sMin-marg, lado>0?sMin-marg:sMax+marg];
     for(let v=0;v<=1.001;v+=0.1) cands.push(lado>0?sMax-(sMax-sMin)*v:sMin+(sMax-sMin)*v);
-    let P=null; for(const sc of cands){ const q=plan(sc); if(q.ok){ P=q; break; } } const mal=!P; if(!P) P=plan(cands[0]);
-    const turnos=P.T, Qmax=Math.max(...turnos.map(T=>T.Q)), r2=v=>+v.toFixed(2), seg=(a,b,D)=>[r2(a.x),r2(a.y),r2(b.x),r2(b.y),D];
-    // bomba (estanque) → control de válvulas
-    const d0=dist(est,ctl), D0=diamFor(Qmax,Dmin), L0=+(d0*1.1).toFixed(1);
-    pipes.push({k:0,segs:d0>0.3?[seg(est,ctl,D0)]:[],L:d0>0.3?L0:0,D:D0,byD:d0>0.3?{[D0]:L0}:{},ctl:[r2(ctl.x),r2(ctl.y)],mal});
-    turnos.forEach(T=>{ const A=T.A, B=T.B, Dg=diamFor(T.Q,Dmin), Lc=(dist(ctl,A)+dist(A,B))*1.1, Ls={}; Ls[Dg]=+Lc.toFixed(1);
-      const edges=[]; if(dist(ctl,A)>0.3) edges.push(seg(ctl,A,Dg)); if(dist(A,B)>0.3) edges.push(seg(A,B,Dg));
-      const hf0=(d0>0.3?hazen(d0*1.1,T.Q/3600,D0):0)+VALV_LOSS+hazen(Lc,T.Q/3600,Dg); let Ltot=Lc, worst=null;
-      // ramal del sector: árbol de largo mínimo desde el final del tubo hacia sus regadores
-      const nodes=[B].concat(T.grp), m=nodes.length, inT=[true].concat(Array(m-1).fill(false)), parent=Array(m).fill(-1), ord=[];
-      for(let it=1;it<m;it++){ let bi=-1,bj=-1,bd=1e9; for(let i=0;i<m;i++) if(inT[i]) for(let j=1;j<m;j++) if(!inT[j]){ const d=dist(nodes[i],nodes[j]); if(d<bd){bd=d;bi=i;bj=j;} } inT[bj]=true; parent[bj]=bi; ord.push(bj); }
-      const down=nodes.map((q,j)=>j?qDe(q):0); ord.slice().reverse().forEach(j=>{ if(parent[j]>0) down[parent[j]]+=down[j]; });
-      const hf=Array(m).fill(hf0); ord.forEach(j=>{ const i=parent[j], L=dist(nodes[i],nodes[j]), D=diamFor(down[j],Dmin); hf[j]=hf[i]+hazen(L*1.1,down[j]/3600,D); Ltot+=L*1.1; Ls[D]=+((Ls[D]||0)+L*1.1).toFixed(1);
-        edges.push(seg(nodes[i],nodes[j],D)); const dz=hz(nodes[j].x,nodes[j].y)-hE, need=dz+25+hf[j]; if(!worst||need>worst.need) worst={need,hf:hf[j],dz,far:[nodes[j].x,nodes[j].y]}; });
-      pipes.push({k:T.k,n:T.grp.length,regs:T.grp.map(r=>[r.x,r.y]),Q:+T.Q.toFixed(2),tee:[r2(B.x),r2(B.y)],Lc:+Lc.toFixed(1),L:+Ltot.toFixed(1),D:Dg,byD:Ls,hf:+worst.hf.toFixed(1),dz:+worst.dz.toFixed(1),need:+worst.need.toFixed(1),far:[r2(worst.far[0]),r2(worst.far[1])],segs:edges}); }); }
-  savePipes(); drawPipes(); riegoResumen(); if(window.pubReady) pubStatus(); }
+    const r2=v=>+v.toFixed(2), seg=(a,b,D)=>[r2(a.x),r2(a.y),r2(b.x),r2(b.y),D], d0=dist(est,ctl);
+    // ¿el tramo pasa por una construcción?
+    const pasa=(a,b)=>{ const L=dist(a,b), m=Math.ceil(L/0.5)||1; for(let i=0;i<=m;i++){ if(inBldg(a.x+(b.x-a.x)*i/m,a.y+(b.y-a.y)*i/m,0.8)) return true; } return false; };
+    // arma la red completa para un corredor dado
+    const build=(P,mal)=>{ const out=[], turnos=P.T, Qmax=Math.max(...turnos.map(T=>T.Q)), D0=diamFor(Qmax,Dmin), L0=+(d0*1.1).toFixed(1);
+    out.push({k:0,segs:d0>0.3?[seg(est,ctl,D0)]:[],L:d0>0.3?L0:0,D:D0,byD:d0>0.3?{[D0]:L0}:{},ctl:[r2(ctl.x),r2(ctl.y)],mal});
+    turnos.forEach(T=>{ const A=T.A, B=T.B, Dg=diamFor(T.Q,Dmin), Ls={}; const poly=[ctl]; if(dist(ctl,A)>0.3) poly.push(A); if(dist(poly[poly.length-1],B)>0.3) poly.push(B);
+      // punto más cercano del tubo del sector (y su posición a lo largo de él) para cada regador
+      const foot=q=>{ let best=null, acc=0; for(let i=0;i+1<poly.length;i++){ const a=poly[i], b=poly[i+1], L=dist(a,b), u=L?Math.max(0,Math.min(1,((q.x-a.x)*(b.x-a.x)+(q.y-a.y)*(b.y-a.y))/(L*L))):0, pt={x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u}, d=dist(pt,q); if(!best||d<best.d) best={pt,d,s:acc+u*L}; acc+=L; } return best; };
+      // ramal: árbol de largo mínimo donde cada regador se cuelga del tubo del sector donde pasa, o de otro regador; nunca por encima de una construcción
+      const grp=T.grp, m=grp.length, inT=Array(m).fill(false), par=Array(m).fill(-1), att=Array(m).fill(null), ord=[]; let casa=false;
+      for(let it=0;it<m;it++){ let bj=-1,bi=-1,bd=1e9,bf=null,ok=false;
+        for(let pass=0;pass<2&&bj<0;pass++){ for(let j=0;j<m;j++){ if(inT[j]) continue; const f=foot(grp[j]); if((pass||!pasa(f.pt,grp[j]))&&f.d<bd){ bd=f.d; bj=j; bi=-1; bf=f; }
+            for(let i=0;i<m;i++) if(inT[i]){ const d=dist(grp[i],grp[j]); if((pass||!pasa(grp[i],grp[j]))&&d<bd){ bd=d; bj=j; bi=i; bf=null; } } } if(bj>=0&&pass) casa=true; }
+        inT[bj]=true; par[bj]=bi; att[bj]=bf; ord.push(bj); }
+      // caudal aguas abajo de cada regador y por cada punto de conexión al tubo
+      const down=grp.map(qDe); ord.slice().reverse().forEach(j=>{ if(par[j]>=0) down[par[j]]+=down[j]; });
+      const taps=ord.filter(j=>par[j]<0).map(j=>({s:att[j].s,q:down[j]})).sort((a,b)=>a.s-b.s); const sEnd=Math.max(...taps.map(t=>t.s));
+      // tubo del sector recortado hasta la última conexión; roce tramo a tramo con el caudal que va quedando
+      const hfTubo=s0=>{ let h=0, prev=0, q=T.Q; for(const t of taps){ if(t.s>=s0) break; h+=hazen((t.s-prev)*1.1,q/3600,Dg); prev=t.s; q-=t.q; } return h+hazen(Math.max(0,s0-prev)*1.1,Math.max(q,0.01)/3600,Dg); };
+      const edges=[]; let acc=0, Lc=0; for(let i=0;i+1<poly.length&&acc<sEnd-0.01;i++){ const a=poly[i], b=poly[i+1], L=dist(a,b), u=Math.min(1,(sEnd-acc)/L), e={x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u}; edges.push(seg(a,e,Dg)); Lc+=dist(a,e)*1.1; acc+=L; }
+      Ls[Dg]=+Lc.toFixed(1); let Ltot=Lc, worst=null; const hf0=(d0>0.3?hazen(d0*1.1,T.Q/3600,D0):0)+VALV_LOSS, hf=Array(m).fill(0);
+      ord.forEach(j=>{ const from=par[j]>=0?grp[par[j]]:att[j].pt, base=par[j]>=0?hf[par[j]]:hf0+hfTubo(att[j].s), L=dist(from,grp[j]), D=diamFor(down[j],Dmin); hf[j]=base+hazen(L*1.1,down[j]/3600,D); Ltot+=L*1.1; Ls[D]=+((Ls[D]||0)+L*1.1).toFixed(1);
+        edges.push(seg(from,grp[j],D)); const dz=hz(grp[j].x,grp[j].y)-hE, need=dz+25+hf[j]; if(!worst||need>worst.need) worst={need,hf:hf[j],dz,far:[grp[j].x,grp[j].y]}; });
+      const nTubo=edges.filter(e=>e[4]===Dg).length; const end=(()=>{ let acc=0; for(let i=0;i+1<poly.length;i++){ const a=poly[i], b=poly[i+1], L=dist(a,b); if(acc+L>=sEnd-0.01){ const u=L?(sEnd-acc)/L:0; return {x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u}; } acc+=L; } return B; })();
+      out.push({k:T.k,n:m,regs:grp.map(r=>[r.x,r.y]),Q:+T.Q.toFixed(2),tee:[r2(end.x),r2(end.y)],Lc:+Lc.toFixed(1),L:+Ltot.toFixed(1),D:Dg,byD:Ls,hf:+worst.hf.toFixed(1),dz:+worst.dz.toFixed(1),need:+worst.need.toFixed(1),far:[r2(worst.far[0]),r2(worst.far[1])],casa,segs:edges}); });
+    return out; };
+    // de todos los corredores que caben, el que usa menos tubo en total
+    let best=null; cands.forEach(sc=>{ const q=plan(sc); if(!q.ok) return; const o=build(q,false), L=o.reduce((x,pp)=>x+pp.L,0); if(!best||L<best.L-0.01) best={L,o}; });
+    pipes=best?best.o:build(plan(cands[0]),true); }
+  drawPipes(); riegoResumen(); }
+function autoRed(){ if(pins.some(p=>p.t==='regador')&&pins.some(p=>p.t==='estanque'||p.t==='bomba')) armarRed(); else { pipes=[]; drawPipes(); riegoResumen(); } }
 function drawPipes(){ while(pipeGroup.children.length) pipeGroup.remove(pipeGroup.children[0]);
   const yAt=(x,y,up)=>{ const h=hAt(x,y); return (isNaN(h)?CMED:h)*EX+up; };
   if(sectorSel&&!pipes.some(pp=>pp.k===sectorSel)) sectorSel=0;
@@ -765,7 +783,6 @@ function drawPipes(){ while(pipeGroup.children.length) pipeGroup.remove(pipeGrou
     pp.segs.forEach(e=>pipeGroup.add(drawLineObj([[e[0],e[1]],[e[2],e[3]]],col,pp.k===0?0.26:0.14)));
     if(pp.k===0) return;
     const sp=textSprite('Sector '+pp.k+' · Ø'+pp.D+' mm'); sp.position.set(pp.tee[0],yAt(pp.tee[0],pp.tee[1],2.6),-pp.tee[1]); pipeGroup.add(sp); }); }
-document.getElementById('rred').addEventListener('click',()=>{ if(!pins.some(p=>p.t==='estanque'||p.t==='bomba')){ alert('Marca primero un estanque (o una bomba) desde donde salen los tubos.'); return; } if(!pins.some(p=>p.t==='regador')){ alert('Pon regadores primero, a mano o con «Proponer regadores».'); return; } armarRed(); });
 const EFF=0.45, HPS=[0.5,0.75,1,1.5,2,3,4,5.5,7.5]; // rendimiento motobomba y potencias comerciales
 const hpTxt=h=>String(h).replace('.',',');
 function potencia(Q,H){ const kW=Q/3600*9.81*H/EFF, hp=kW/0.746; return {kW,hp,hpc:HPS.find(h=>h>=hp*1.1)||Math.ceil(hp)}; } // Q m³/h, H m
@@ -795,28 +812,28 @@ function riegoResumen(){
     const nomb=pp=>(pp.regs||[]).map(r=>{ const i=pins.findIndex(q=>q.t==='regador'&&Math.abs(q.x-r[0])<0.05&&Math.abs(q.y-r[1])<0.05); return i<0?'?':(i+1); }).join(', ');
     html+='<h3>Sectores de riego</h3>Ver en el terreno: <div class="sect"><button data-s="0"'+(sectorSel?'':' class="on"')+'>Todos</button>'+sect.map(pp=>'<button data-s="'+pp.k+'"'+(sectorSel===pp.k?' class="on"':'')+'><span class="dot" style="background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span>Sector '+pp.k+' · '+pp.n+(pp.n===1?' regador':' regadores')+'</button>').join('')+'</div>'+
       sect.map(pp=>'<span class="dot" style="display:inline-block;width:.8em;height:.8em;border-radius:50%;background:'+PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]+'"></span> Sector '+pp.k+': <b>'+pp.n+(pp.n===1?' regador':' regadores')+'</b> (marcas '+nomb(pp)+') · '+fmt(pp.Q,1)+' m³/h · '+Math.round(5/mmh*60)+' min para 5 mm').join('<br>');
-    html+='<h3>Red de tubos</h3>'+sect.map(pp=>'Sector '+pp.k+': '+pp.n+' regadores, '+fmt(pp.Q,1)+' m³/h · '+fmt(pp.Lc,0)+' m de Ø'+pp.D+' mm desde el control y el resto en ramal · total <b>'+fmt(pp.L,0)+' m</b> ('+desc(pp.byD)+') · roce '+fmt(pp.hf,1)+' m · regador crítico '+sg(pp.dz)+' m').join('<br>');
+    html+='<h3>Red de tubos</h3>'+sect.map(pp=>'Sector '+pp.k+': '+pp.n+' regadores, '+fmt(pp.Q,1)+' m³/h · '+fmt(pp.Lc,0)+' m de Ø'+pp.D+' mm desde el control y el resto en ramal · total <b>'+fmt(pp.L,0)+' m</b> ('+desc(pp.byD)+') · roce '+fmt(pp.hf,1)+' m · regador crítico '+sg(pp.dz)+' m'+(pp.casa?' <span class="warn">— un tramo no pudo evitar una construcción</span>':'')).join('<br>');
     html+='<h3>Lista de compra</h3>Tubo: '+Object.keys(porD).sort((a,b)=>a-b).map(d=>'<b>'+fmt(porD[d],0)+' m</b> de Ø'+d+' mm').join(' · ')+'<br>'+sect.length+' electroválvulas de 1" · programador WiFi de '+est8+' estaciones · relé de bomba · filtro de malla · estanque de '+fmt(Vest,1)+' m³ · bomba de riego de '+hpTxt(P.hpc)+' HP'+(lle?' · bomba de llenado de '+hpTxt(lle.P.hpc)+' HP'+(lle.dz>6?' (sumergible o de orilla)':''):'')+' · '+regs.length+' regadores'; }
-  else if(regs.length&&est) html+='<h3>Red de tubos</h3>Usa «Armar red de tubos» para trazar el tubo de la bomba al control, un tubo por sector y sus ramales, y calcular diámetros, roce y las bombas.';
+  else if(regs.length&&!est) html+='<h3>Red de tubos</h3>Marca un <b>estanque</b>: la red de tubos se arma sola con los regadores que haya.';
   html+='<p class="hint">Estimaciones para dimensionar: boquillas a 2,5 bar, 10 % extra de tubo por curvas, roce con polietileno, velocidad ≤ 1,5 m/s, 2 m de pérdida en válvula y filtro, rendimiento de motobomba 45 %. Confirma con la ficha del regador y la curva de la bomba.</p>';
   riegoEl.innerHTML=html; }
 riegoEl.addEventListener('click',e=>{ const b=e.target.closest('button[data-s]'); if(!b) return; sectorSel=+b.dataset.s||0; drawPins(); });
-[rrEl,rturnoEl,rdiamEl,rfillEl].forEach(el=>el.addEventListener('change',()=>{ if(pipes.length) armarRed(); drawPins(); }));
-loadPipes(); window.riegoReady=true;
+[rrEl,rturnoEl,rdiamEl,rfillEl].forEach(el=>el.addEventListener('change',()=>{ autoRed(); drawPins(); }));
+window.riegoReady=true; autoRed(); drawPins();
 
 // Estado publicado para todos: marcas.json en el sitio. Lo local manda si difiere; se puede descargar para publicar o descartar.
-let published={pins:[],zones:[],lines:[],pipes:[]};
+let published={pins:[],zones:[],lines:[]};
 const pubHint=document.getElementById('pubhint'), pubReset=document.getElementById('pubreset');
-const stateJSON=()=>JSON.stringify({pins,zones,lines,pipes});
-function pubStatus(){ const same=stateJSON()===JSON.stringify({pins:published.pins||[],zones:published.zones||[],lines:published.lines||[],pipes:published.pipes||[]}); pubHint.hidden=same; pubReset.hidden=same;
-  if(same){ try{ localStorage.removeItem('casalcs-marcas'); localStorage.removeItem('casalcs-zonas'); localStorage.removeItem('casalcs-lineas'); localStorage.removeItem('casalcs-tubos'); }catch(e){} } }
-fetch('marcas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; published={pins:j.pins||[],zones:j.zones||[],lines:j.lines||[],pipes:j.pipes||[]};
-  const hasHash=/[#&](m|z|l|p)=/.test(location.hash); let hasLocal=false; try{ hasLocal=!!(localStorage.getItem('casalcs-marcas')||localStorage.getItem('casalcs-zonas')||localStorage.getItem('casalcs-lineas')||localStorage.getItem('casalcs-tubos')); }catch(e){}
-  if(!hasHash&&!hasLocal){ pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); pipes=published.pipes.slice(); drawLines(); drawPins(); drawZones(); }
+const stateJSON=()=>JSON.stringify({pins,zones,lines});
+function pubStatus(){ const same=stateJSON()===JSON.stringify({pins:published.pins||[],zones:published.zones||[],lines:published.lines||[]}); pubHint.hidden=same; pubReset.hidden=same;
+  if(same){ try{ localStorage.removeItem('casalcs-marcas'); localStorage.removeItem('casalcs-zonas'); localStorage.removeItem('casalcs-lineas'); }catch(e){} } }
+fetch('marcas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; published={pins:j.pins||[],zones:j.zones||[],lines:j.lines||[]};
+  const hasHash=/[#&](m|z|l)=/.test(location.hash); let hasLocal=false; try{ hasLocal=!!(localStorage.getItem('casalcs-marcas')||localStorage.getItem('casalcs-zonas')||localStorage.getItem('casalcs-lineas')); }catch(e){}
+  if(!hasHash&&!hasLocal){ pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); drawLines(); drawZones(); autoRed(); drawPins(); }
   pubStatus(); }).catch(()=>{});
-document.getElementById('pubdl').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({pins,zones,lines,pipes},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='marcas.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); });
+document.getElementById('pubdl').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({pins,zones,lines},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='marcas.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); });
 window.pubReady=true;
-pubReset.addEventListener('click',()=>{ if(!confirm('¿Descartar tus cambios locales y volver a lo publicado?')) return; pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); pipes=published.pipes.slice(); lineDraft=[]; history.replaceState(null,'',location.pathname); drawLines(); drawPins(); drawZones(); pubStatus(); });
+pubReset.addEventListener('click',()=>{ if(!confirm('¿Descartar tus cambios locales y volver a lo publicado?')) return; pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); lineDraft=[]; history.replaceState(null,'',location.pathname); drawLines(); drawZones(); autoRed(); drawPins(); pubStatus(); });
 
 // Cámara: mirando desde el sureste hacia la casa, con el río en primer plano
 function resetView(){ const t=new THREE.Vector3(0,(31)*EX,0); controls.target.copy(t); camera.position.set(118,t.y+100,118); controls.update(); }
