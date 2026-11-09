@@ -145,6 +145,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
       <option value="rec">Recolector de agua</option>
       <option value="bomba">Bomba</option>
       <option value="estanque">Estanque</option>
+      <option value="control">Control de válvulas</option>
       <option value="toma">Toma de agua</option>
       <option value="regador">Regador</option>
       <option value="llave">Llave o salida</option>
@@ -179,8 +180,10 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
   <p class="grp">Riego del pasto</p>
   <div class="row2"><label for="rr">Radio de los regadores (m)</label><input type="number" id="rr" min="3" max="25" step="0.5" value="10"></div>
   <div class="row2"><label for="rturno">Regadores que riegan a la vez</label><input type="number" id="rturno" min="1" max="60" step="1" value="4"></div>
-  <div class="row2"><label for="rdiam">Diámetro del tubo</label><select id="rdiam"><option value="25">25 mm</option><option value="32" selected>32 mm</option><option value="40">40 mm</option><option value="50">50 mm</option><option value="63">63 mm</option></select></div>
-  <div class="btns"><button id="rprop">Proponer regadores para el pasto</button></div>
+  <div class="row2"><label for="rfill">Horas para llenar el estanque</label><input type="number" id="rfill" min="1" max="24" step="1" value="4"></div>
+  <div class="row2"><label for="rdiam">Diámetro mínimo del tubo</label><select id="rdiam"><option value="25">25 mm</option><option value="32" selected>32 mm</option><option value="40">40 mm</option><option value="50">50 mm</option><option value="63">63 mm</option></select></div>
+  <div class="btns"><button id="rprop">Proponer regadores para el pasto</button><button id="rred">Armar red de tubos</button></div>
+  <p class="hint">Los regadores se ponen dentro del lote y riegan solo hacia el pasto: en los bordes giran medio círculo o un cuarto, y nunca mojan la casa. La bomba del estanque manda el agua al control de válvulas; de ahí sale un tubo por sector, en paralelo por un corredor al lado del pasto, sin que ningún tubo se cruce. Marca un «Control de válvulas» para ubicar la estación; si no, se supone junto al estanque.</p>
   <div class="riego" id="riego">—</div>
   <p class="grp">Compartir</p>
   <p class="hint" id="pubhint" hidden>Tienes cambios que solo se ven en este equipo. Para que los vean todos, descarga el archivo y publícalo en el sitio.</p>
@@ -217,7 +220,7 @@ select{font:inherit;font-size:1rem;color:var(--ink);background:var(--panel);bord
     <p class="note">La casa, el container y la casa del vecino (fuera del lote, al noreste) se recortaron de la nube de puntos del mismo vuelo: los techos son la superficie LiDAR real en celdas de 0,5 m, el container es una caja de 6 × 2,4 m a la cota medida, y los muros bajan hasta el suelo. Los árboles son la superficie superior del follaje según la nube (celdas de 1 m, desde 2,5 m de alto), sin troncos ni copas individuales; el color va de oliva (bajo) a verde claro (alto). Las sombras salen del relieve, las construcciones y las copas.</p>
     <p class="note">La capa de puntos es la nube LiDAR del vuelo recortada al lote más 5 m de margen y adelgazada con densidad variable: un punto por cubo de 0,2 m en el suelo, el pasto y las construcciones, y de 0,6 m en el follaje (≈ 419 mil puntos, 4,6 MB que se cargan al prenderla). Dentro de la ortofoto cada punto lleva su color real; fuera, gris en el suelo y verde según la altura. Combínala con Edificios, Árboles y Terreno como quieras.</p>
     <p class="note">Las marcas y zonas que ven todos se leen del archivo marcas.json del sitio. Los cambios que hagas quedan primero solo en tu equipo; con «Descargar marcas.json para publicar» obtienes el archivo que hay que subir al sitio para que todos lo vean.</p>
-    <p class="note">El riego se calcula sobre las zonas de tipo «Pasto» que dibujes (si no hay ninguna, sobre el corte). Cada regador riega un círculo de su radio; el caudal, la lluvia equivalente y las alturas de bomba son estimaciones para orientar la compra, no un cálculo de ingeniería.</p>
+    <p class="note">El riego se calcula sobre las zonas de tipo «Pasto» que dibujes (si no hay ninguna, sobre el corte). Cada regador riega hacia el pasto: círculo completo si está rodeado de pasto, medio o cuarto en los bordes, sin mojar la casa. La red de tubos va de la bomba del estanque al control de válvulas (colector de superficie con electroválvulas y programador WiFi); de ahí sale un tubo por sector, en paralelo por un corredor al costado del pasto, y cada sector se reparte con un árbol de largo mínimo, de modo que ningún tubo se cruza; las potencias de las bombas suponen un rendimiento de 45 %; el caudal, la lluvia, los diámetros y las alturas de bomba son estimaciones para orientar la compra, no un cálculo de ingeniería.</p>
     <p class="note">La foto es la ortofoto incluida en el plano PDF. El nivel del río es el del día del vuelo; en verano será menor.</p>
   </details>
 </section>
@@ -525,29 +528,30 @@ renderer.domElement.addEventListener('pointerup',ev=>{ if((!measuring&&!pinning&
   measPts.push({x,y,h}); drawMeasure(); });
 
 // Ubicar elementos: marcas con nombre sobre el terreno, guardadas en este navegador y compartibles por enlace
-const PIN_TYPES={rec:{n:'Recolector de agua',c:'#4fb6e3'},bomba:{n:'Bomba',c:'#e5533d'},estanque:{n:'Estanque',c:'#3f8f5f'},toma:{n:'Toma de agua',c:'#2b6cb0'},regador:{n:'Regador',c:'#22c55e'},llave:{n:'Llave o salida',c:'#e0a91b'},otro:{n:'Elemento',c:'#b8b8b8'}};
+const PIN_TYPES={rec:{n:'Recolector de agua',c:'#4fb6e3'},bomba:{n:'Bomba',c:'#e5533d'},estanque:{n:'Estanque',c:'#3f8f5f'},control:{n:'Control de válvulas',c:'#f59e0b'},toma:{n:'Toma de agua',c:'#2b6cb0'},regador:{n:'Regador',c:'#22c55e'},llave:{n:'Llave o salida',c:'#e0a91b'},otro:{n:'Elemento',c:'#b8b8b8'}};
 const pinGroup=new THREE.Group(); scene.add(pinGroup);
 let pins=[], pinning=false;
 const pinsEl=document.getElementById('pins'), pinHint=document.getElementById('pinhint'), pinBtns=document.getElementById('pinbtns'), pinType=document.getElementById('pintype');
 const poleGeo=new THREE.CylinderGeometry(0.12,0.12,1,8), headGeo=new THREE.SphereGeometry(0.7,16,12);
 function loadPins(){ try{ const h=location.hash.match(/[#&]m=([^&]+)/); if(h){ pins=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){}
   try{ const v=localStorage.getItem('casalcs-marcas'); if(v) pins=JSON.parse(v); }catch(e){} }
-function savePins(){ try{ localStorage.setItem('casalcs-marcas',JSON.stringify(pins)); }catch(e){} if(window.pubReady) pubStatus(); }
+function savePins(){ try{ localStorage.setItem('casalcs-marcas',JSON.stringify(pins)); }catch(e){} if(window.riegoReady&&pipes.length) armarRed(); if(window.pubReady) pubStatus(); }
 const b64u=v=>btoa(unescape(encodeURIComponent(JSON.stringify(v))));
-function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); u.hash=parts.join('&'); return u.href; }
+function pinLink(){ const u=new URL(location.href); const parts=[]; if(pins.length) parts.push('m='+b64u(pins)); if(window.zonesReady&&zones.length) parts.push('z='+b64u(zones)); if(window.linesReady&&lines.length) parts.push('l='+b64u(lines)); if(window.riegoReady&&pipes.length) parts.push('p='+b64u(pipes)); u.hash=parts.join('&'); return u.href; }
 function drawPins(){
   while(pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y); if(isNaN(h)) return; const col=new THREE.Color((PIN_TYPES[p.t]||PIN_TYPES.otro).c), y=h*EX;
     const pole=new THREE.Mesh(poleGeo,new THREE.MeshBasicMaterial({color:col})); pole.scale.y=3; pole.position.set(p.x,y+1.5,-p.y); pinGroup.add(pole);
     const head=new THREE.Mesh(headGeo,new THREE.MeshBasicMaterial({color:col})); head.position.set(p.x,y+3.2,-p.y); pinGroup.add(head);
     const sp=textSprite((i+1)+' · '+p.name); sp.position.set(p.x,y+4.8,-p.y); pinGroup.add(sp);
-    if(p.t==='regador'&&window.riegoReady){ const r=p.r||+document.getElementById('rr').value||10, circ=[]; for(let k=0;k<36;k++){ const a=k/36*2*Math.PI; circ.push([p.x+r*Math.cos(a),p.y+r*Math.sin(a)]); } const {g}=zoneMesh(circ,col,0.18); pinGroup.add(g); } });
+    if(p.t==='regador'&&window.riegoReady){ const {g}=zoneMesh(sectorPoly(p),col,0.18); pinGroup.add(g); } });
+  if(window.riegoReady) drawPipes();
   if(window.riegoReady) riegoResumen();
   pinsEl.innerHTML='';
   pins.forEach((p,i)=>{ const h=hAt(p.x,p.y), dw=distWater(p.x,p.y), T=PIN_TYPES[p.t]||PIN_TYPES.otro;
     const li=document.createElement('li');
     li.innerHTML='<span class="num" style="background:'+T.c+'">'+(i+1)+'</span><input value="" aria-label="Nombre de la marca"><button class="del" aria-label="Quitar marca" title="Quitar marca">×</button>'+
-      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
+      '<span class="det">'+T.n+(p.t==='regador'?' · radio <input type="number" class="rad" min="3" max="25" step="0.5" aria-label="Radio del regador en metros"> m · gira '+Math.round(arcOf(p)[1])+'°':'')+' · '+(isNaN(h)?'':fmt(h)+' m, '+(h<D.water?'en el río':'+'+fmt(h-RIO)+' m sobre el río'))+(isNaN(dw)?'':' · a '+dw+' m del agua')+'</span>';
     const rad=li.querySelector('.rad'); if(rad){ rad.value=p.r||+document.getElementById('rr').value||10; rad.addEventListener('change',()=>{ p.r=+rad.value||10; savePins(); drawPins(); }); }
     const inp=li.querySelector('input'); inp.value=p.name; inp.addEventListener('change',()=>{ p.name=inp.value.trim()||T.n; savePins(); drawPins(); });
     li.querySelector('.del').addEventListener('click',()=>{ pins.splice(i,1); savePins(); drawPins(); });
@@ -558,7 +562,7 @@ function setPinning(on){ pinning=on; view.classList.toggle('pinning',on); pinHin
   if(on&&measuring){ document.getElementById('bm').setAttribute('aria-pressed','false'); setMeasuring(false); }
   if(on&&window.zonesReady&&zoning){ document.getElementById('bzone').setAttribute('aria-pressed','false'); setZoning(false); } }
 toggle(document.getElementById('bpin'),setPinning);
-document.getElementById('pinclr').addEventListener('click',()=>{ const n=pins.length+(window.linesReady?lines.length:0); if(n&&!confirm('¿Borrar las '+n+' marcas y recorridos?')) return; pins=[]; savePins(); if(window.linesReady){ lines=[]; lineDraft=[]; saveLines(); drawLines(); } history.replaceState(null,'',location.pathname); drawPins(); });
+document.getElementById('pinclr').addEventListener('click',()=>{ const n=pins.length+(window.linesReady?lines.length:0); if(n&&!confirm('¿Borrar las '+n+' marcas y recorridos?')) return; pins=[]; if(window.riegoReady){ pipes=[]; savePipes(); drawPipes(); } savePins(); if(window.linesReady){ lines=[]; lineDraft=[]; saveLines(); drawLines(); } history.replaceState(null,'',location.pathname); drawPins(); });
 document.getElementById('pinshare').addEventListener('click',ev=>{ const link=pinLink(); history.replaceState(null,'',link);
   const done=()=>{ ev.target.textContent='Enlace copiado'; setTimeout(()=>ev.target.textContent='Copiar enlace con marcas y zonas',2000); };
   if(navigator.clipboard) navigator.clipboard.writeText(link).then(done,()=>prompt('Copia este enlace:',link)); else prompt('Copia este enlace:',link); });
@@ -660,65 +664,146 @@ document.getElementById('blundo').addEventListener('click',()=>{ lineDraft.pop()
 pinType.addEventListener('change',()=>{ if(!pinType.value.startsWith('L:')&&lineDraft.length){ lineDraft=[]; } drawLines(); });
 loadLines(); window.linesReady=true;
 
-// Riego: cobertura del pasto, propuesta de regadores y resumen hidráulico (estimaciones)
-const riegoEl=document.getElementById('riego'), rrEl=document.getElementById('rr'), rturnoEl=document.getElementById('rturno'), rdiamEl=document.getElementById('rdiam');
+// Riego: regadores sectoriales, cobertura del pasto, propuesta automática, red de tubos por turnos y resumen hidráulico (estimaciones)
+const riegoEl=document.getElementById('riego'), rrEl=document.getElementById('rr'), rturnoEl=document.getElementById('rturno'), rdiamEl=document.getElementById('rdiam'), rfillEl=document.getElementById('rfill');
+const DIAMS=[25,32,40,50,63];
 function grassPolys(){ const z=zones.filter(z=>z.t==='pasto').map(z=>z.pts); return z.length?z:[C]; }
 function grassCells(){ const cells=[]; grassPolys().forEach(P=>{ const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); for(let y=Math.floor(Math.min(...ys));y<=Math.ceil(Math.max(...ys));y++) for(let x=Math.floor(Math.min(...xs));x<=Math.ceil(Math.max(...xs));x++) if(inPoly(x+0.5,y+0.5,P)) cells.push([x+0.5,y+0.5]); }); return cells; }
+const inGrass=(x,y)=>grassPolys().some(P=>inPoly(x,y,P));
+function inBldg(x,y,m){ return bldgs.some(e=>{ const b=e.b, t=b.a*Math.PI/180, u=(x-b.cx)*Math.cos(t)+(y-b.cy)*Math.sin(t), v=-(x-b.cx)*Math.sin(t)+(y-b.cy)*Math.cos(t);
+  let u0,u1,v0,v1; if(b.w){ u0=-b.w/2;u1=b.w/2;v0=-b.l/2;v1=b.l/2; } else { u0=b.u0;u1=b.u0+(b.nu-1)*b.s;v0=b.v0;v1=b.v0+(b.nv-1)*b.s; } return u>=u0-m&&u<=u1+m&&v>=v0-m&&v<=v1+m; }); }
+// arco de riego: el mayor tramo de direcciones que, a 0,6 R del regador, cae en pasto (360 si está rodeado de pasto)
+function arcFor(x,y,R){ const n=36, ins=[]; for(let k=0;k<n;k++){ const a=k*2*Math.PI/n; ins.push(inGrass(x+0.6*R*Math.cos(a),y+0.6*R*Math.sin(a))); }
+  if(ins.every(v=>v)) return [0,360]; if(!ins.some(v=>v)) return null;
+  let best=[0,0], start=-1; for(let k=0;k<2*n;k++){ const v=ins[k%n]; if(v&&start<0) start=k; if(!v&&start>=0){ if(k-start>best[1]) best=[start%n,k-start]; start=-1; } }
+  if(start>=0&&2*n-start>best[1]) best=[start%n,Math.min(2*n-start,n)];
+  return [((best[0]*10-5)+360)%360, Math.min(360,best[1]*10+10)]; }
+const radOf=p=>p.r||+rrEl.value||10;
+function arcOf(p){ return arcFor(p.x,p.y,radOf(p))||[0,360]; }
+function inArc(dx,dy,arc){ if(arc[1]>=360) return true; const ang=((Math.atan2(dy,dx)*180/Math.PI)-arc[0]+720)%360; return ang<=arc[1]; }
+function wets(p,x,y){ const R=radOf(p); return Math.hypot(x-p.x,y-p.y)<=R&&inArc(x-p.x,y-p.y,arcOf(p)); }
+function sectorPoly(p){ const R=radOf(p), arc=arcOf(p), pts=[]; if(arc[1]<360) pts.push([p.x,p.y]); const n=Math.max(6,Math.round(arc[1]/10));
+  for(let k=0;k<=n;k++){ const a=(arc[0]+arc[1]*k/n)*Math.PI/180; pts.push([p.x+R*Math.cos(a),p.y+R*Math.sin(a)]); } if(arc[1]>=360) pts.pop(); return pts; }
 function coverage(){ const cells=grassCells(), regs=pins.filter(p=>p.t==='regador'); let cov=0;
-  for(const c of cells){ for(const r of regs){ const R=r.r||+rrEl.value||10; if(Math.hypot(c[0]-r.x,c[1]-r.y)<=R){ cov++; break; } } }
-  return {area:cells.length, covered:cov, cells}; }
+  for(const c of cells){ if(regs.some(r=>wets(r,c[0],c[1]))) cov++; } return {area:cells.length, covered:cov}; }
+function mojaCasa(p){ const R=radOf(p); for(let y=p.y-R;y<=p.y+R;y+=0.5) for(let x=p.x-R;x<=p.x+R;x+=0.5) if(wets(p,x,y)&&inBldg(x,y,0)) return true; return false; }
 function proponerRegadores(){
-  const R=+rrEl.value||10, step=R*0.95, polys=grassPolys(); let added=0;
-  pins=pins.filter(p=>!(p.t==='regador'&&p.auto)); // reemplaza la propuesta anterior, conserva los puestos a mano
-  const cells=grassCells(); const covered=c=>pins.some(r=>r.t==='regador'&&Math.hypot(c[0]-r.x,c[1]-r.y)<=(r.r||R));
-  polys.forEach(P=>{ const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); const X0=Math.min(...xs)-R*0.3, X1=Math.max(...xs)+R*0.3, Y0=Math.min(...ys)-R*0.3, Y1=Math.max(...ys)+R*0.3; let row=0;
-    for(let y=Y0;y<=Y1;y+=step*0.866,row++) for(let x=X0+(row%2?step/2:0);x<=X1;x+=step){ if(!inPoly(x,y,P)&&distPoly(x,y,P)>R*0.3) continue;
-      // solo si aporta celdas nuevas de pasto
-      let gain=0; for(const c of cells){ if(Math.hypot(c[0]-x,c[1]-y)<=R&&!covered(c)) gain++; } if(gain<Math.PI*R*R*0.08) continue;
-      pins.push({t:'regador',name:'Regador '+(pins.filter(p=>p.t==='regador').length+1),x:+x.toFixed(2),y:+y.toFixed(2),r:R,auto:true}); added++; } });
-  // poda: quita los que al sacarlos no bajan la cobertura
-  for(let i=pins.length-1;i>=0;i--){ const p=pins[i]; if(!(p.t==='regador'&&p.auto)) continue; const before=coverage().covered; pins.splice(i,1); if(coverage().covered<before) pins.splice(i,0,p); }
-  let k=1; pins.forEach(p=>{ if(p.t==='regador'&&p.auto) p.name='Regador '+(k++); });
+  const R=+rrEl.value||10, polys=grassPolys(), cells=grassCells();
+  pins=pins.filter(p=>!(p.t==='regador'&&p.auto));
+  // candidatos: vértices, puntos sobre los bordes cada 0,8 R y una grilla interior; todos dentro del lote
+  const cand=[]; const okPos=(x,y)=>inPoly(x,y,LOTE)&&!inBldg(x,y,1.0);
+  polys.forEach(P=>{ for(let i=0;i<P.length;i++){ const a=P[i], b=P[(i+1)%P.length], L=Math.hypot(b[0]-a[0],b[1]-a[1]), n=Math.max(1,Math.round(L/(0.5*R)));
+      for(let k=0;k<n;k++){ const x=a[0]+(b[0]-a[0])*k/n, y=a[1]+(b[1]-a[1])*k/n; if(okPos(x,y)) cand.push([x,y]); } }
+    const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); let row=0; for(let y=Math.min(...ys);y<=Math.max(...ys);y+=R*0.7*0.866,row++) for(let x=Math.min(...xs)+(row%2?R*0.35:0);x<=Math.max(...xs);x+=R*0.7) if(inPoly(x,y,P)&&distPoly(x,y,P)>0.3*R&&okPos(x,y)) cand.push([x,y]); });
+  const cs=[]; cand.forEach(([x,y])=>[R,Math.round(R*0.6*2)/2].forEach(r=>{ const p={t:'regador',x,y,r}; const arc=arcFor(x,y,r); if(!arc||mojaCasa(p)) return; p.cells=cells.map((c,i)=>wets(p,c[0],c[1])?i:-1).filter(i=>i>=0); if(p.cells.length) cs.push(p); }));
+  const covered=new Uint8Array(cells.length); let total=0; const chosen=[];
+  while(true){ let best=null, gain=0; for(const p of cs){ if(p.used) continue; let g=0; for(const i of p.cells) if(!covered[i]) g++; if(g>gain){ gain=g; best=p; } }
+    if(!best||gain<Math.max(4,Math.PI*R*R*0.015)||total>=cells.length*0.995) break; best.used=true; chosen.push(best); for(const i of best.cells){ if(!covered[i]){ covered[i]=1; total++; } } }
+  // poda: fuera los que no aportan
+  for(let i=chosen.length-1;i>=0;i--){ const others=chosen.filter((_,j)=>j!==i); const cov=new Uint8Array(cells.length); let t=0; others.forEach(p=>p.cells.forEach(k=>{ if(!cov[k]){cov[k]=1;t++;} })); if(t>=total) chosen.splice(i,1); }
+  chosen.forEach((p,i)=>pins.push({t:'regador',name:'Regador '+(i+1),x:+p.x.toFixed(2),y:+p.y.toFixed(2),r:p.r,auto:true}));
   savePins(); drawPins(); }
 document.getElementById('rprop').addEventListener('click',()=>{ if(!pins.some(p=>p.t==='regador'&&p.auto)||confirm('¿Reemplazo la propuesta anterior de regadores? Los que pusiste a mano se conservan.')) proponerRegadores(); });
-function hazen(L,Q,Dmm){ const D=Dmm/1000, C=150; return 10.67*L*Math.pow(Q,1.852)/(Math.pow(C,1.852)*Math.pow(D,4.87)); } // m, Q en m³/s
+function hazen(L,Q,Dmm){ const D=Dmm/1000, Cc=150; return 10.67*L*Math.pow(Q,1.852)/(Math.pow(Cc,1.852)*Math.pow(D,4.87)); } // m, Q en m³/s
+const qDe=p=>0.009*radOf(p)*radOf(p)*arcOf(p)[1]/360; // m³/h a ~2,5 bar, boquilla proporcional al arco
+// Red de tubos: la bomba del estanque manda al control de válvulas; de ahí un tubo por sector, en paralelo por un corredor al costado del pasto; ningún tubo se cruza
+let pipes=[]; const pipeGroup=new THREE.Group(); scene.add(pipeGroup);
+const PIPE_COLORS=['#f97316','#a855f7','#06b6d4','#ec4899','#84cc16','#eab308','#f43f5e','#3b82f6'], MATRIZ_COLOR='#f1f5f9', VALV_LOSS=2; // m de pérdida en electroválvula de 1" + filtro
+const diamFor=(Q,Dmin)=>Math.max(Dmin, DIAMS.find(d=>Q/3600/(Math.PI*(d/1000)*(d/1000)/4)<=1.5)||63); // Q en m³/h, velocidad ≤ 1,5 m/s
+const ctlPin=()=>pins.find(p=>p.t==='control');
+function loadPipes(){ try{ const h=location.hash.match(/[#&]p=([^&]+)/); if(h){ pipes=JSON.parse(decodeURIComponent(escape(atob(h[1])))); return; } }catch(e){} try{ const v=localStorage.getItem('casalcs-tubos'); if(v) pipes=JSON.parse(v); }catch(e){} if(!Array.isArray(pipes)||(pipes.length&&!(pipes[0].segs&&pipes[0].ctl))) pipes=[]; }
+function savePipes(){ try{ localStorage.setItem('casalcs-tubos',JSON.stringify(pipes)); }catch(e){} }
+function armarRed(){
+  const regs=pins.filter(p=>p.t==='regador'), est=pins.find(p=>p.t==='estanque')||pins.find(p=>p.t==='bomba'), ctl=ctlPin()||est; pipes=[];
+  if(est&&regs.length){
+    const per=Math.max(1,+rturnoEl.value||1), n=regs.length, Dmin=+rdiamEl.value||25, hE=hAt(est.x,est.y), hz=(x,y)=>{ const h=hAt(x,y); return isNaN(h)?hE:h; };
+    // eje principal del pasto; el corredor de tubos va paralelo a él
+    const cx=regs.reduce((a,r)=>a+r.x,0)/n, cy=regs.reduce((a,r)=>a+r.y,0)/n; let sxx=0,sxy=0,syy=0; regs.forEach(r=>{ sxx+=(r.x-cx)*(r.x-cx); sxy+=(r.x-cx)*(r.y-cy); syy+=(r.y-cy)*(r.y-cy); });
+    const th=0.5*Math.atan2(2*sxy,sxx-syy), ux=Math.cos(th), uy=Math.sin(th);
+    const tOf=q=>(q.x-cx)*ux+(q.y-cy)*uy, sOf=q=>-(q.x-cx)*uy+(q.y-cy)*ux, at=(t,s)=>({x:cx+ux*t-uy*s,y:cy+uy*t+ux*s}), dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+    const ts=regs.map(tOf), ss=regs.map(sOf), tmin=Math.min(...ts), tmax=Math.max(...ts), sMin=Math.min(...ss), sMax=Math.max(...ss), sC=sOf(ctl), tC=Math.max(tmin,Math.min(tmax,tOf(ctl)));
+    const libre=(a,b)=>{ const L=dist(a,b), m=Math.ceil(L/1)||1; for(let i=0;i<=m;i++){ const x=a.x+(b.x-a.x)*i/m, y=a.y+(b.y-a.y)*i/m; if(!inPoly(x,y,LOTE)||inBldg(x,y,0.5)) return false; } return true; };
+    // para una línea de corredor s: sectores por lado (los regadores de cada lado, en tramos consecutivos a lo largo del eje) y tubos apilados hacia sus regadores,
+    // el sector más lejano pegado a la línea y el más cercano más afuera: así el ramal de un sector nunca cruza el tubo de otro
+    const plan=sc=>{ const T=[]; [1,-1].forEach(sig=>{ const side=regs.filter(r=>sig*(sOf(r)-sc)>=0&&(sig>0||sOf(r)-sc<0)).sort((a,b)=>tOf(a)-tOf(b)); if(!side.length) return;
+        const k=Math.ceil(side.length/per), base=Math.floor(side.length/k), extra=side.length%k; let i0=0;
+        for(let g=0;g<k;g++){ const grp=side.slice(i0,i0+base+(g<extra?1:0)); i0+=grp.length; const t=grp.reduce((a,r)=>a+tOf(r),0)/grp.length; T.push({grp,t,sig,Q:grp.reduce((a,r)=>a+qDe(r),0),dir:t>=tC?1:-1,d:Math.abs(t-tC)}); } });
+      [1,-1].forEach(sig=>[1,-1].forEach(dir=>{ T.filter(x=>x.sig===sig&&x.dir===dir).sort((a,b)=>b.d-a.d).forEach((x,i)=>{ x.off=sc+sig*0.4*(i+1); }); }));
+      T.sort((a,b)=>a.d-b.d).forEach((x,i)=>{ x.k=i+1; x.A=at(tC,x.off); x.B=at(x.t,x.off); });
+      return {sc,T,ok:T.every(x=>libre(ctl,x.A)&&libre(x.A,x.B))}; };
+    // candidatos: fuera del pasto por el lado del control, fuera por el otro lado, y si no cabe, por dentro del pasto desde el lado del control
+    const lado=sC>=(sMin+sMax)/2?1:-1, marg=1.5+0.4*Math.ceil(n/per), cands=[lado>0?sMax+marg:sMin-marg, lado>0?sMin-marg:sMax+marg];
+    for(let v=0;v<=1.001;v+=0.1) cands.push(lado>0?sMax-(sMax-sMin)*v:sMin+(sMax-sMin)*v);
+    let P=null; for(const sc of cands){ const q=plan(sc); if(q.ok){ P=q; break; } } const mal=!P; if(!P) P=plan(cands[0]);
+    const turnos=P.T, Qmax=Math.max(...turnos.map(T=>T.Q)), r2=v=>+v.toFixed(2), seg=(a,b,D)=>[r2(a.x),r2(a.y),r2(b.x),r2(b.y),D];
+    // bomba (estanque) → control de válvulas
+    const d0=dist(est,ctl), D0=diamFor(Qmax,Dmin), L0=+(d0*1.1).toFixed(1);
+    pipes.push({k:0,segs:d0>0.3?[seg(est,ctl,D0)]:[],L:d0>0.3?L0:0,D:D0,byD:d0>0.3?{[D0]:L0}:{},ctl:[r2(ctl.x),r2(ctl.y)],mal});
+    turnos.forEach(T=>{ const A=T.A, B=T.B, Dg=diamFor(T.Q,Dmin), Lc=(dist(ctl,A)+dist(A,B))*1.1, Ls={}; Ls[Dg]=+Lc.toFixed(1);
+      const edges=[]; if(dist(ctl,A)>0.3) edges.push(seg(ctl,A,Dg)); if(dist(A,B)>0.3) edges.push(seg(A,B,Dg));
+      const hf0=(d0>0.3?hazen(d0*1.1,T.Q/3600,D0):0)+VALV_LOSS+hazen(Lc,T.Q/3600,Dg); let Ltot=Lc, worst=null;
+      // ramal del sector: árbol de largo mínimo desde el final del tubo hacia sus regadores
+      const nodes=[B].concat(T.grp), m=nodes.length, inT=[true].concat(Array(m-1).fill(false)), parent=Array(m).fill(-1), ord=[];
+      for(let it=1;it<m;it++){ let bi=-1,bj=-1,bd=1e9; for(let i=0;i<m;i++) if(inT[i]) for(let j=1;j<m;j++) if(!inT[j]){ const d=dist(nodes[i],nodes[j]); if(d<bd){bd=d;bi=i;bj=j;} } inT[bj]=true; parent[bj]=bi; ord.push(bj); }
+      const down=nodes.map((q,j)=>j?qDe(q):0); ord.slice().reverse().forEach(j=>{ if(parent[j]>0) down[parent[j]]+=down[j]; });
+      const hf=Array(m).fill(hf0); ord.forEach(j=>{ const i=parent[j], L=dist(nodes[i],nodes[j]), D=diamFor(down[j],Dmin); hf[j]=hf[i]+hazen(L*1.1,down[j]/3600,D); Ltot+=L*1.1; Ls[D]=+((Ls[D]||0)+L*1.1).toFixed(1);
+        edges.push(seg(nodes[i],nodes[j],D)); const dz=hz(nodes[j].x,nodes[j].y)-hE, need=dz+25+hf[j]; if(!worst||need>worst.need) worst={need,hf:hf[j],dz,far:[nodes[j].x,nodes[j].y]}; });
+      pipes.push({k:T.k,n:T.grp.length,Q:+T.Q.toFixed(2),tee:[r2(B.x),r2(B.y)],Lc:+Lc.toFixed(1),L:+Ltot.toFixed(1),D:Dg,byD:Ls,hf:+worst.hf.toFixed(1),dz:+worst.dz.toFixed(1),need:+worst.need.toFixed(1),far:[r2(worst.far[0]),r2(worst.far[1])],segs:edges}); }); }
+  savePipes(); drawPipes(); riegoResumen(); if(window.pubReady) pubStatus(); }
+function drawPipes(){ while(pipeGroup.children.length) pipeGroup.remove(pipeGroup.children[0]);
+  const yAt=(x,y,up)=>{ const h=hAt(x,y); return (isNaN(h)?CMED:h)*EX+up; };
+  pipes.forEach(pp=>{ const col=new THREE.Color(pp.k===0?MATRIZ_COLOR:PIPE_COLORS[(pp.k-1)%PIPE_COLORS.length]);
+    pp.segs.forEach(e=>pipeGroup.add(drawLineObj([[e[0],e[1]],[e[2],e[3]]],col,pp.k===0?0.26:0.14)));
+    if(pp.k===0) return;
+    const sp=textSprite('Sector '+pp.k+' · Ø'+pp.D+' mm'); sp.position.set(pp.tee[0],yAt(pp.tee[0],pp.tee[1],2.6),-pp.tee[1]); pipeGroup.add(sp); }); }
+document.getElementById('rred').addEventListener('click',()=>{ if(!pins.some(p=>p.t==='estanque'||p.t==='bomba')){ alert('Marca primero un estanque (o una bomba) desde donde salen los tubos.'); return; } if(!pins.some(p=>p.t==='regador')){ alert('Pon regadores primero, a mano o con «Proponer regadores».'); return; } armarRed(); });
+const EFF=0.45, HPS=[0.5,0.75,1,1.5,2,3,4,5.5,7.5]; // rendimiento motobomba y potencias comerciales
+const hpTxt=h=>String(h).replace('.',',');
+function potencia(Q,H){ const kW=Q/3600*9.81*H/EFF, hp=kW/0.746; return {kW,hp,hpc:HPS.find(h=>h>=hp*1.1)||Math.ceil(hp)}; } // Q m³/h, H m
 function riegoResumen(){
-  const cv=coverage(), regs=pins.filter(p=>p.t==='regador'), R=+rrEl.value||10, turno=Math.max(1,Math.min(regs.length||1,+rturnoEl.value||1)), D=+rdiamEl.value||32;
-  const qReg=0.009*R*R; // m³/h por regador a ~2,5 bar (estimación)
-  const toma=pins.find(p=>p.t==='toma')||pins.find(p=>p.t==='rec'), est=pins.find(p=>p.t==='estanque');
-  const hOf=p=>p?hAt(p.x,p.y):NaN;
-  const tubos=lines.filter(l=>l.t==='tubo'||l.t==='manguera'); let Ltub=0; tubos.forEach(l=>{ Ltub+=lineStats(l.pts).real; });
+  const cv=coverage(), regs=pins.filter(p=>p.t==='regador'), R=+rrEl.value||10, turno=Math.max(1,Math.min(regs.length||1,+rturnoEl.value||1)), Dmin=+rdiamEl.value||32, horas=Math.max(1,+rfillEl.value||4);
+  const toma=pins.find(p=>p.t==='toma')||pins.find(p=>p.t==='rec'), est=pins.find(p=>p.t==='estanque'), ctl=ctlPin(); const hOf=p=>p?hAt(p.x,p.y):NaN, sg=v=>(v>=0?'+':'−')+fmt(Math.abs(v),1);
+  const qTot=regs.reduce((s,r)=>s+qDe(r),0), full=regs.filter(r=>arcOf(r)[1]>=360).length, half=regs.filter(r=>{const a=arcOf(r)[1]; return a<360&&a>=135;}).length, quarter=regs.length-full-half;
+  const mmh=regs.length?qDe({x:0,y:0,r:R})*1000/(Math.PI*R*R):0.009*R*R*1000/(Math.PI*R*R); // lluvia de un regador completo (los sectoriales llevan boquilla proporcional)
+  const V=cv.area*5/1000, Vest=Math.ceil(V*1.2*2)/2;
   let html='<h3>Pasto</h3>'+fmt(cv.area,0)+' m² · regado por los regadores: <b>'+(cv.area?Math.round(100*cv.covered/cv.area):0)+' %</b>'+(cv.covered<cv.area*0.95&&regs.length?' <span class="warn">(quedan '+fmt(cv.area-cv.covered,0)+' m² sin regar)</span>':'')+
-    '<br>Agua para 5 mm al día: <b>'+fmt(cv.area*5/1000,1)+' m³</b> diarios ('+fmt(cv.area*5,0)+' litros)';
-  html+='<h3>Regadores</h3>'+(regs.length?'<b>'+regs.length+'</b> regadores · caudal estimado '+fmt(qReg,2)+' m³/h cada uno · '+turno+' a la vez: <b>'+fmt(qReg*turno,1)+' m³/h</b> ('+Math.round(qReg*turno*1000/60)+' L/min)'+
-    '<br>Lluvia equivalente ≈ '+fmt(qReg*1000/(Math.PI*R*R),1)+' mm/h · para 5 mm: <b>'+Math.round(5/(qReg*1000/(Math.PI*R*R))*60)+' min</b> por turno · '+Math.ceil(regs.length/turno)+' turnos':'Pon regadores a mano o usa «Proponer regadores para el pasto».');
-  html+='<h3>Bombas</h3>';
-  if(toma&&est){ const hT=hOf(toma), hE=hOf(est), Qd=cv.area*5/1000, Qb=Math.max(Qd/4,1); const L1=Math.hypot(est.x-toma.x,est.y-toma.y)*1.15; const hf1=hazen(L1,Qb/3600,D);
-    html+='De «'+toma.name+'» a «'+est.name+'»: sube <b>'+fmt(hE-hT)+' m</b> en ≈ '+fmt(L1,0)+' m de tubo. Para llenar el día de riego ('+fmt(Qd,1)+' m³) en 4 h: '+fmt(Qb,1)+' m³/h → altura de bomba ≈ <b>'+fmt(hE-hT+hf1+3,0)+' m</b> (incluye roce y 3 m de margen).<br>'; }
-  else html+='Marca una <b>toma de agua</b> en el río y un <b>estanque</b> para calcular la bomba de llenado.<br>';
-  if(est&&regs.length){ const hE=hOf(est); let hmax=-1e9, dmax=0; regs.forEach(r=>{ const h=hOf(r); if(!isNaN(h)) hmax=Math.max(hmax,h); dmax=Math.max(dmax,Math.hypot(r.x-est.x,r.y-est.y)); });
-    const L2=Ltub>0?Ltub:dmax*1.3, Q2=qReg*turno/3600, hf2=hazen(L2,Q2,D);
-    html+='De «'+est.name+'» a los regadores: el más alto está <b>'+(hmax>=hE?'+':'−')+fmt(Math.abs(hmax-hE))+' m</b> respecto al estanque · tubo '+(Ltub>0?'trazado ':'estimado ')+fmt(L2,0)+' m de '+D+' mm → roce ≈ '+fmt(hf2,1)+' m'+(hf2>8?' <span class="warn">(mucho roce: usa un tubo más grueso o menos regadores a la vez)</span>':'')+
-      '<br>Altura de bomba para regar ≈ <b>'+fmt(Math.max(0,hmax-hE)+25+hf2+2,0)+' m</b> a '+fmt(qReg*turno,1)+' m³/h (25 m de presión en el regador, roce y 2 m de margen).'; }
-  else if(regs.length) html+='Marca un <b>estanque</b> para calcular la bomba de riego.';
-  html+='<p class="hint">Estimaciones para dimensionar: caudal según radio a 2,5 bar, roce con tubo de polietileno. Confirma con la ficha del regador y la curva de la bomba.</p>';
+    '<br>Agua para 5 mm al día: <b>'+fmt(V,1)+' m³</b> diarios ('+fmt(cv.area*5,0)+' litros)';
+  html+='<h3>Regadores</h3>'+(regs.length?'<b>'+regs.length+'</b> regadores: '+full+' de círculo completo, '+half+' de medio, '+quarter+' de cuarto · caudal total '+fmt(qTot,1)+' m³/h'+
+    '<br>Lluvia ≈ '+fmt(mmh,1)+' mm/h · para 5 mm: <b>'+Math.round(5/mmh*60)+' min</b> por sector · '+Math.ceil(regs.length/turno)+' sectores de hasta '+turno+' regadores':'Pon regadores a mano o usa «Proponer regadores para el pasto».');
+  html+='<h3>Estanque</h3>'+(est?'«'+est.name+'» a '+fmt(hOf(est))+' m de altura, '+sg(hOf(est)-RIO)+' m sobre el río. ':'Marca un <b>estanque</b>. ')+'Un día de riego son '+fmt(V,1)+' m³: conviene un estanque de al menos <b>'+fmt(Vest,1)+' m³</b> (un día más 20 %).';
+  // bomba de llenado
+  let lle=null; html+='<h3>Bomba de llenado (río → estanque)</h3>';
+  if(toma&&est){ const hT=hOf(toma), hE=hOf(est), dz=hE-hT, Qb=Math.max(V/horas,0.5), L1=Math.hypot(est.x-toma.x,est.y-toma.y)*1.15, hf1=hazen(L1,Qb/3600,Dmin), H=dz+hf1+3; lle={P:potencia(Qb,H),Qb,H,dz};
+    const casa=bldgs.find(e=>e.b.n==='Casa'), dc=casa?Math.max(0,Math.hypot(toma.x-casa.b.cx,toma.y-casa.b.cy)-8)*1.2:NaN;
+    html+='De «'+toma.name+'» a «'+est.name+'»: sube <b>'+fmt(dz)+' m</b> en ≈ '+fmt(L1,0)+' m de tubo Ø'+Dmin+' mm. Llenar '+fmt(V,1)+' m³ en '+horas+' h pide <b>'+fmt(Qb,1)+' m³/h</b> ('+Math.round(Qb*1000/60)+' L/min) a <b>'+fmt(H,0)+' m</b> de altura (desnivel, '+fmt(hf1,1)+' m de roce y 3 m de margen): motor de ≈ '+fmt(lle.P.kW,2)+' kW, comprar de <b>'+hpTxt(lle.P.hpc)+' HP</b>.'+
+      (dz>6?'<br><span class="warn">Esta bomba tiene que ir abajo, en el río (sumergible o en la orilla): desde arriba no se puede aspirar '+fmt(dz,0)+' m, el límite práctico son 6 m.</span>':'<br>Puede ir arriba junto al estanque, aspirando desde el río (desnivel menor a 6 m).')+
+      (isNaN(dc)?'':'<br>Necesita electricidad en el río: ≈ <b>'+fmt(dc,0)+' m de cable</b> desde la casa, o un panel solar en la orilla. Puedes dibujar el recorrido real con «Cable eléctrico».'); }
+  else html+='Marca una <b>toma de agua</b> en el río'+(est?'':' y un estanque')+' para calcular esta bomba.';
+  if(pipes.length){ const mat=pipes.find(pp=>pp.k===0), sect=pipes.filter(pp=>pp.k>0), porD={}; pipes.forEach(pp=>Object.keys(pp.byD||{}).forEach(d=>{ porD[d]=(porD[d]||0)+pp.byD[d]; }));
+    const desc=o=>Object.keys(o).sort((a,b)=>a-b).map(d=>fmt(o[d],0)+' m de Ø'+d).join(' + ')+' mm', peor=sect.reduce((m,pp)=>pp.need>m.need?pp:m,sect[0]), Qmax=Math.max(...sect.map(pp=>pp.Q)), H=peor.need+2, P=potencia(Qmax,H), est8=sect.length<=4?4:sect.length<=6?6:sect.length<=8?8:12;
+    html+='<h3>Bomba de riego (estanque → regadores)</h3>Impulsa <b>'+fmt(Qmax,1)+' m³/h</b> ('+Math.round(Qmax*1000/60)+' L/min) a <b>'+fmt(H,0)+' m</b> de altura (sector '+peor.k+': 25 m en el regador, '+fmt(peor.hf,1)+' m de roce con válvula y filtro, '+sg(peor.dz)+' m de desnivel y 2 m de margen): motor de ≈ '+fmt(P.kW,2)+' kW, comprar de <b>'+hpTxt(P.hpc)+' HP</b>. La enciende el programador con un relé cuando abre un sector.';
+    html+='<h3>Control de válvulas</h3>'+(ctl?'En «'+ctl.name+'», a '+fmt(mat.L,0)+' m de tubo Ø'+mat.D+' mm de la bomba. ':'No has marcado un «Control de válvulas»: se supone junto al estanque. ')+'Colector de superficie con <b>'+sect.length+' electroválvulas de 1"</b> (una por sector), filtro de malla, y un <b>programador WiFi de '+est8+' estaciones</b> que se maneja desde el celular (por ejemplo Rain Bird con WiFi u Orbit B-hyve), con relé de partida para la bomba de riego.'+(mat.mal?' <span class="warn">Ningún corredor de tubos cabe en el lote sin pasar por una construcción: mueve el control o los regadores.</span>':'');
+    html+='<h3>Red de tubos</h3>'+sect.map(pp=>'Sector '+pp.k+': '+pp.n+' regadores, '+fmt(pp.Q,1)+' m³/h · '+fmt(pp.Lc,0)+' m de Ø'+pp.D+' mm desde el control y el resto en ramal · total <b>'+fmt(pp.L,0)+' m</b> ('+desc(pp.byD)+') · roce '+fmt(pp.hf,1)+' m · regador crítico '+sg(pp.dz)+' m').join('<br>');
+    html+='<h3>Lista de compra</h3>Tubo: '+Object.keys(porD).sort((a,b)=>a-b).map(d=>'<b>'+fmt(porD[d],0)+' m</b> de Ø'+d+' mm').join(' · ')+'<br>'+sect.length+' electroválvulas de 1" · programador WiFi de '+est8+' estaciones · relé de bomba · filtro de malla · estanque de '+fmt(Vest,1)+' m³ · bomba de riego de '+hpTxt(P.hpc)+' HP'+(lle?' · bomba de llenado de '+hpTxt(lle.P.hpc)+' HP'+(lle.dz>6?' (sumergible o de orilla)':''):'')+' · '+regs.length+' regadores'; }
+  else if(regs.length&&est) html+='<h3>Red de tubos</h3>Usa «Armar red de tubos» para trazar el tubo de la bomba al control, un tubo por sector y sus ramales, y calcular diámetros, roce y las bombas.';
+  html+='<p class="hint">Estimaciones para dimensionar: boquillas a 2,5 bar, 10 % extra de tubo por curvas, roce con polietileno, velocidad ≤ 1,5 m/s, 2 m de pérdida en válvula y filtro, rendimiento de motobomba 45 %. Confirma con la ficha del regador y la curva de la bomba.</p>';
   riegoEl.innerHTML=html; }
-[rrEl,rturnoEl,rdiamEl].forEach(el=>el.addEventListener('change',()=>{ drawPins(); }));
-window.riegoReady=true;
+[rrEl,rturnoEl,rdiamEl,rfillEl].forEach(el=>el.addEventListener('change',()=>{ if(pipes.length) armarRed(); drawPins(); }));
+loadPipes(); window.riegoReady=true;
 
 // Estado publicado para todos: marcas.json en el sitio. Lo local manda si difiere; se puede descargar para publicar o descartar.
-let published={pins:[],zones:[],lines:[]};
+let published={pins:[],zones:[],lines:[],pipes:[]};
 const pubHint=document.getElementById('pubhint'), pubReset=document.getElementById('pubreset');
-const stateJSON=()=>JSON.stringify({pins,zones,lines});
-function pubStatus(){ const same=stateJSON()===JSON.stringify({pins:published.pins||[],zones:published.zones||[],lines:published.lines||[]}); pubHint.hidden=same; pubReset.hidden=same;
-  if(same){ try{ localStorage.removeItem('casalcs-marcas'); localStorage.removeItem('casalcs-zonas'); localStorage.removeItem('casalcs-lineas'); }catch(e){} } }
-fetch('marcas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; published={pins:j.pins||[],zones:j.zones||[],lines:j.lines||[]};
-  const hasHash=/[#&](m|z|l)=/.test(location.hash); let hasLocal=false; try{ hasLocal=!!(localStorage.getItem('casalcs-marcas')||localStorage.getItem('casalcs-zonas')||localStorage.getItem('casalcs-lineas')); }catch(e){}
-  if(!hasHash&&!hasLocal){ pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); drawLines(); drawPins(); drawZones(); }
+const stateJSON=()=>JSON.stringify({pins,zones,lines,pipes});
+function pubStatus(){ const same=stateJSON()===JSON.stringify({pins:published.pins||[],zones:published.zones||[],lines:published.lines||[],pipes:published.pipes||[]}); pubHint.hidden=same; pubReset.hidden=same;
+  if(same){ try{ localStorage.removeItem('casalcs-marcas'); localStorage.removeItem('casalcs-zonas'); localStorage.removeItem('casalcs-lineas'); localStorage.removeItem('casalcs-tubos'); }catch(e){} } }
+fetch('marcas.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; published={pins:j.pins||[],zones:j.zones||[],lines:j.lines||[],pipes:j.pipes||[]};
+  const hasHash=/[#&](m|z|l|p)=/.test(location.hash); let hasLocal=false; try{ hasLocal=!!(localStorage.getItem('casalcs-marcas')||localStorage.getItem('casalcs-zonas')||localStorage.getItem('casalcs-lineas')||localStorage.getItem('casalcs-tubos')); }catch(e){}
+  if(!hasHash&&!hasLocal){ pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); pipes=published.pipes.slice(); drawLines(); drawPins(); drawZones(); }
   pubStatus(); }).catch(()=>{});
-document.getElementById('pubdl').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({pins,zones,lines},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='marcas.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); });
+document.getElementById('pubdl').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({pins,zones,lines,pipes},null,1)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='marcas.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); });
 window.pubReady=true;
-pubReset.addEventListener('click',()=>{ if(!confirm('¿Descartar tus cambios locales y volver a lo publicado?')) return; pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); lineDraft=[]; history.replaceState(null,'',location.pathname); drawLines(); drawPins(); drawZones(); pubStatus(); });
+pubReset.addEventListener('click',()=>{ if(!confirm('¿Descartar tus cambios locales y volver a lo publicado?')) return; pins=published.pins.slice(); zones=published.zones.slice(); lines=published.lines.slice(); pipes=published.pipes.slice(); lineDraft=[]; history.replaceState(null,'',location.pathname); drawLines(); drawPins(); drawZones(); pubStatus(); });
 
 // Cámara: mirando desde el sureste hacia la casa, con el río en primer plano
 function resetView(){ const t=new THREE.Vector3(0,(31)*EX,0); controls.target.copy(t); camera.position.set(118,t.y+100,118); controls.update(); }
